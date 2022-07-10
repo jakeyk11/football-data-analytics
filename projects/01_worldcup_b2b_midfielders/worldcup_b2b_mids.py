@@ -1,14 +1,21 @@
-#%% Analysis of Box to Box Midfielders in the 2018 World Cup
+# %% Analysis of Box to Box Midfielders in the 2018 World Cup
 #    
 # Inputs:   Single dataframe of all World Cup events as .pbz2 compressed pickle
 #           Single dataframe of all World Cup lineups as .pbz2 compressed pickle
 #  
 # Outputs:  Top 12 midfielders by progressive passes per. 90, including pass-maps.
-#           Top 12 midfielders by area of offensive and defensive action convex hulls.
+#           Scatter plot of % passes played under pressure vs. pressure pass success %, including all midfielders.
+#           Top 12 midfielders by pressures applied per. 100 opposition passes, including pressure heat-maps.
+#           Scatter plot of recoveries per 100 opp. passes vs. tackles + interceptions per 100 opp. passes.
+#           Top 12 midfielders by sum of areas of offensive and defensive action convex hulls
+#           Top 12 midfielders by area of offensive action convex hull
+#           Top 12 midfielders by area of defensive action convex hull
+#           Dataframe of ball winning, creativity, mobility, and overall scores for each midfielder.
+#           Radar plot of chosen midfielder.
 #
-# Notes: Insert Notes
+# Notes: None
 
-#%% Imports
+# %% Imports
 
 import os
 import sys
@@ -28,7 +35,7 @@ from PIL import Image
 import requests
 from io import BytesIO
 
-#%% Add custom tools to path
+# %% Add custom tools to path
 
 root_folder = os.path.abspath(os.path.dirname((os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 sys.path.append(root_folder)
@@ -36,7 +43,7 @@ sys.path.append(root_folder)
 import analysis_tools.statsbomb_data_engineering as sde
 import analysis_tools.statsbomb_custom_events as sce
 
-#%% Read in data
+# %% Read in data
 
 # Statsbomb data
 events = bz2.BZ2File('../../data_directory/statsbomb_data/fifa-world-cup-2018-eventdata.pbz2', 'rb')
@@ -47,7 +54,7 @@ lineups = pickle.load(lineups)
 # Misc data
 dist_covered = pd.read_excel('../../data_directory/misc_data/worldcup_2010_to_2018_distcovered.xlsx',sheet_name='2018 Mids')
 
-#%% Pre-process data
+# %% Pre-process data
 
 # Add cumulative minutes information
 events, lineups = sde.cumulative_match_mins(events, lineups)
@@ -58,7 +65,7 @@ events, lineups = sde.add_player_nickname(events, lineups)
 # Add number of opposition passes while each player is on the pitch, for each match
 lineups = sde.events_while_playing(events, lineups, event_name='Pass', event_team='opposition')
 
-#%% Add custom event types that require time-based and complete event information, using analysis_tools package
+# %% Add custom event types that require time-based and complete event information, using analysis_tools package
 
 # Pre-assists
 events = sce.pre_assist(events)
@@ -66,11 +73,11 @@ events = sce.pre_assist(events)
 # xg assisted
 events = sce.xg_assisted(events)
 
-#%% Create player information dataframe
+# %% Create player information dataframe
 
 playerinfo_df = sde.create_player_list(lineups, additional_cols=['mins_played', 'opp_pass'])
 
-#%% Filter dataframe
+# %% Filter dataframe
 
 # Specify box to box positions
 midfielder_pos = ['Left Center Midfield','Center Midfield','Right Center Midfield',
@@ -83,10 +90,11 @@ minimum_mins = 180
 playerinfo_df = playerinfo_df[(playerinfo_df['mins_played'] >= minimum_mins) & 
                             (playerinfo_df['player_name'].isin(events[events['position'].isin(midfielder_pos)]['player']))]
 
-# Filter events dataframe based on players remaining in player information dataframe, and only include events whilst players played in midfield
+# Filter events dataframe based on players remaining in player information dataframe, and only include events whilst
+# players played in midfield
 midfielder_events = events[(events['player'].isin(playerinfo_df['player_name'])) & (events['position'].isin(midfielder_pos))]
 
-#%% Add custom event types that do not require time-based event information
+# %% Add custom event types that do not require time-based event information
 
 # Passes into the box
 midfielder_events.loc[:,'pass_into_box'] = midfielder_events.apply(sce.pass_into_box, axis=1)
@@ -94,7 +102,7 @@ midfielder_events.loc[:,'pass_into_box'] = midfielder_events.apply(sce.pass_into
 # Progressive passes
 midfielder_events.loc[:,'progressive_pass'] = midfielder_events.apply(sce.progressive_pass, axis=1)
 
-#%% Aggregate event information and add to player information dataframe
+# %% Aggregate event information and add to player information dataframe
 
 # Passes
 passes = midfielder_events[midfielder_events['type']=='Pass']
@@ -126,7 +134,7 @@ playerinfo_df = sde.group_player_events(recoveries, playerinfo_df, primary_event
 # Distance covered / 90
 playerinfo_df = playerinfo_df.merge(dist_covered, left_on='player_name', right_on ='Midfielders', how = 'outer').drop('Midfielders',axis=1)
 
-#%% Normalise information and calculate additional metrics
+# %% Normalise information and calculate additional metrics
 
 # Per 90 minutes
 for normalised_col in ['progressive_pass', 'pass_into_box', 'pass_goal_assist', 'pre_assist', 'passes', 'successful_passes', 'xg_assisted', 'shot_statsbomb_xg']:
@@ -142,17 +150,17 @@ playerinfo_df['pass_under_pressure_%'] = round(100*(playerinfo_df['under_pressur
 playerinfo_df['pressure_pass_success_%'] = round(100*(playerinfo_df['under_pressure_y']/playerinfo_df['under_pressure_x']), 0)
 playerinfo_df['xGC_90'] = playerinfo_df['shot_statsbomb_xg_90'] + playerinfo_df['xg_assisted_90'] 
 
-#%% Filter players out who have made a low number of passes, and create list of player in analysis
+# %% Filter players out who have made a low number of passes, and create list of player in analysis
 
 playerinfo_df = playerinfo_df[playerinfo_df['passes_90']>=20]
 players_considered = set(playerinfo_df['player_nickname'])
 
-#%% Defensive and offensive actions
+# %% Defensive and offensive actions
 
 defensive_actions_df = sde.find_defensive_actions(midfielder_events)
 offensive_actions_df = sde.find_offensive_actions(midfielder_events)
 
-#%% Create convex hulls of defensive and offensive actions
+# %% Create convex hulls of defensive and offensive actions
 
 # Initialise dataframes
 defensive_hull_df = pd.DataFrame()
@@ -181,7 +189,7 @@ hull_df['hull_area_tot'] = hull_df['hull_area_def'] + hull_df['hull_area_off']
 # Add to relevant columns to player information
 playerinfo_df = playerinfo_df.merge(hull_df[['hull_area_%_def','hull_area_%_off','hull_area_tot']], left_on='player_name', right_index=True, how='left')
 
-#%% Score creativity
+# %% Score creativity
 
 playerscore_df = pd.DataFrame()
 playerscore_df[['player_name','player_nickname']] = playerinfo_df[['player_name','player_nickname']]
@@ -190,21 +198,21 @@ scaler = MinMaxScaler()
 playerscore_df[['progressive_pass_90','xGC_90','pressure_pass_success_%','xg_assisted_90','shot_statsbomb_xg_90','successful_passes_%']] = scaler.fit_transform(playerinfo_df[['progressive_pass_90','xGC_90','pressure_pass_success_%','xg_assisted_90','shot_statsbomb_xg_90','successful_passes_%']])
 playerscore_df['creativity'] = playerscore_df[['progressive_pass_90','xGC_90','pressure_pass_success_%']].sum(axis=1)/3
 
-#%% Score ball winning
+# %% Score ball winning
 
 playerscore_df[['pressures_100pass','tackles_100pass','interceptions_100pass','recoveries_100pass']] = scaler.fit_transform(playerinfo_df[['pressures_100pass','tackles_100pass','interceptions_100pass','recoveries_100pass']])
 playerscore_df['ball_winning'] = playerscore_df[['pressures_100pass','tackles_100pass','interceptions_100pass','recoveries_100pass']].sum(axis=1)/4
 
-#%% Score mobility
+# %% Score mobility
 
 playerscore_df[['Distance','hull_area_%_off','hull_area_%_def']] = scaler.fit_transform(playerinfo_df[['Distance','hull_area_%_off','hull_area_%_def']])
 playerscore_df['mobility'] = playerscore_df[['Distance','hull_area_%_off','hull_area_%_def']].sum(axis=1)/3
 
-#%% Score overall
+# %% Score overall
 
 playerscore_df['total'] = ((4/9)*playerscore_df['creativity'] + (2/9)*playerscore_df['ball_winning'] + (3/9)*playerscore_df['mobility'])
 
-#%% Plot 1, plot top 12 midfielders by number of progressive passes per 90 minutes.
+# %% Plot 1, plot top 12 midfielders by number of progressive passes per 90 minutes.
 
 competition = 'FIFA World Cup'
 year = 2018
@@ -283,7 +291,7 @@ ax.imshow(img)
 plt.tight_layout()
 plt.show()
 
-#%% Plot 2, plot pressure pass success vs. % pressure passes for all midfielders
+# %% Plot 2, plot pressure pass success vs. % pressure passes for all midfielders
 
 # Set-up scatter plot
 fig, ax = plt.subplots(figsize=(14,9))
@@ -341,7 +349,7 @@ ax.imshow(img)
 plt.tight_layout(rect=[0.05, 0.04, 0.93, 0.875])
 plt.show()
 
-#%% Plot 3, plot top 12 midfielders by number of pressures per 100 opposition passes.
+# %% Plot 3, plot top 12 midfielders by number of pressures per 100 opposition passes.
 
 pressures_df = midfielder_events[midfielder_events['type']=='Pressure']
 
@@ -407,7 +415,7 @@ ax.imshow(img)
 plt.tight_layout()
 plt.show()
 
-#%% Plot 4, plot recoveries per 100 opposition passes vs. tackles and interceptions per 100 opposition passes
+#% % Plot 4, plot recoveries per 100 opposition passes vs. tackles and interceptions per 100 opposition passes
 
 # Set-up scatter plot
 fig, ax = plt.subplots(figsize=(14,9))
@@ -465,7 +473,7 @@ ax.imshow(img)
 plt.tight_layout(rect=[0.05, 0.04, 0.93, 0.875])
 plt.show()
 
-#%% Plot 5, plot top 12 midfielders by combined convex hull area
+# %% Plot 5, plot top 12 midfielders by combined convex hull area
 
 hull_df.sort_values('hull_area_tot', inplace = True, ascending = False)
 
@@ -523,7 +531,7 @@ ax.imshow(img)
 plt.tight_layout()
 plt.show()
 
-#%% Plot 6, plot top 12 midfielders by defensive convex hull area
+# %% Plot 6, plot top 12 midfielders by defensive convex hull area
 
 hull_df.sort_values('hull_area_def', inplace = True, ascending = False)
 
@@ -576,7 +584,7 @@ ax.imshow(img)
 plt.tight_layout()
 plt.show()
 
-#%% Plot 7, plot top 12 midfielders by offensive convex hull area
+# %% Plot 7, plot top 12 midfielders by offensive convex hull area
 
 hull_df.sort_values('hull_area_off', inplace = True, ascending = False)
 
@@ -629,7 +637,7 @@ ax.imshow(img)
 plt.tight_layout()
 plt.show()
 
-#%% Plot 8, polar bar plot
+# %% Plot 8, polar bar plot
 
 # Choose player    
 player = 'Toni Kroos'

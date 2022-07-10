@@ -191,9 +191,10 @@ def create_convex_hull(events, name='default', include_percent=100):
     hull that better represents the most common event locations. The function returns a dataframe of convex hull
     information, including hull points, area and perimeter.
 
-    Args: events (pandas.DataFrame): statsbomb-style dataframe of event data. Events can be from multiple matches.
-    name (string): identifier for convex hull, used as the dataframe index.
-    include_percent (float, optional): percentage of event locations to include in convex hull. Event locations that
+    Args:
+        events (pandas.DataFrame): statsbomb-style dataframe of event data. Events can be from multiple matches.
+        name (string): identifier for convex hull, used as the dataframe index.
+        include_percent (float, optional): percentage of event locations to include in convex hull. Event locations that
                                        are furthest from the mean location are removed first. Defaults to 100%.
 
     Returns:
