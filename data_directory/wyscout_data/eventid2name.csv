@@ -1,0 +1,37 @@
+event,subevent,event_label,subevent_label
+1,10,Duel,Air duel
+1,11,Duel,Ground attacking duel
+1,12,Duel,Ground defending duel
+1,13,Duel,Ground loose ball duel
+2,20,Foul,Foul
+2,21,Foul,Hand foul
+2,22,Foul,Late card foul
+2,23,Foul,Out of game foul
+2,24,Foul,Protest
+2,25,Foul,Simulation
+2,26,Foul,Time lost foul
+2,27,Foul,Violent Foul
+3,30,Free Kick,Corner
+3,31,Free Kick,Free Kick
+3,32,Free Kick,Free kick cross
+3,33,Free Kick,Free kick shot
+3,34,Free Kick,Goal kick
+3,35,Free Kick,Penalty
+3,36,Free Kick,Throw in
+4,40,Goalkeeper leaving line,Goalkeeper leaving line
+5,50,Interruption,Ball out of the field
+5,51,Interruption,Whistle
+6,60,Offside,Offside
+7,70,Others on the ball,Acceleration
+7,71,Others on the ball,Clearance
+7,72,Others on the ball,Touch
+8,80,Pass,Cross
+8,81,Pass,Hand pass
+8,82,Pass,Head pass
+8,83,Pass,High pass
+8,84,Pass,Launch
+8,85,Pass,Simple pass
+8,86,Pass,Smart pass
+9,90,Save attempt,Reflexes
+9,91,Save attempt,Save attempt
+10,100,Shot,Shot
