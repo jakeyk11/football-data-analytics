@@ -24,7 +24,7 @@ import bz2
 country_code = 'GB'
 
 # Input league number (for example Premier League = 1, Championship = 2, League One = 3, etc.)
-league_num = '2'
+league_num = '1'
 
 # Input year that season started
 year = '2021'
