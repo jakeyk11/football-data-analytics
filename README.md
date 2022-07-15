@@ -17,7 +17,8 @@ In general, each project follows a number of logical steps:
 ## Projects
 
 Project table of contents: <br>
-&nbsp; &nbsp; [01 - World Cup 2018 Box to Box Midfielder Analysis](#01---world-cup-2018-box-to-box-midfielder-analysis)
+&nbsp; &nbsp; [01 - World Cup 2018 Box to Box Midfielder Analysis](#01---world-cup-2018-box-to-box-midfielder-analysis) <br>
+&nbsp; &nbsp; [02 - Transfermarkt Web-Scrape and Analyse](#02---transfermarkt-web-scrape-and-analyse)
 
 ### 01 - World Cup 2018 Box to Box Midfielder Analysis
 
@@ -32,4 +33,14 @@ Project table of contents: <br>
   <img width="30%" src="./projects/01_worldcup_b2b_midfielders/top_12_pressers.png"> &nbsp &nbsp
   <img width="30%" src="./projects/01_worldcup_b2b_midfielders/top_12_action_distribution.png"> &nbsp &nbsp
   <img width="19.25%" src="./projects/01_worldcup_b2b_midfielders/player_radar_example.png">
+</p>
+
+### 02 - Transfermarkt Web-Scrape and Analyse
+
+**Summary:** Scrape team and player market value information from transfermarkt.co.uk. This work includes the development of a "scouting tool" that highlights players from a given league that have a favourable combination of Age and Goal Contribution per £m market value. The work also explores the use of statistical models to predict market value based on player performance, as well as identifies teams that under and over-performed (league position) based on squad value.
+
+<p align="center">
+  <img width="27.5%" src="./projects/02_transfermarkt_scrape_and_analyse/GB2_player_value_regression.png"> &nbsp &nbsp
+  <img width="27.5%" src="./projects/02_transfermarkt_scrape_and_analyse/GB2_player_scouting.png"> &nbsp &nbsp
+  <img width="27.5%" src="./projects/02_transfermarkt_scrape_and_analyse/GB2_value_league_table.png">
 </p>
