@@ -139,7 +139,7 @@ primary = "red"
 # %% Use Case 1: Scouting tool - assessing cost per goal contribution against age
 
 # Find players belonging to relegated teams and players with expiring contracts
-rel_fwds = successforward_df[successforward_df['Team_Position'] >= 22]
+rel_fwds = successforward_df[successforward_df['Team_Position'] >= 18]
 low_contract = successforward_df[successforward_df['Contract_End_YY'] <= 2022]
 
 # Set-up scatter plot showing Goal_Contributions vs. Market_Value
@@ -162,7 +162,7 @@ if player_tags:
     for player in successforward_df['Name'].values:
         xpos = successforward_df[successforward_df['Name'] == player]['Age']
         ypos = successforward_df[successforward_df['Name'] == player]['GC_per_mGBP']
-        if ypos.values[0]/xpos.values[0] >= 0.3: 
+        if ypos.values[0]/xpos.values[0] >= 0.025: 
             if (player in rel_fwds['Name'].values) or (player in low_contract['Name'].values):
                 colour = text_color
             else:
@@ -348,7 +348,7 @@ ax.barh(teaminfo_df["Team_Pos_Str"], teaminfo_df["Tot_Market_Val"], color=my_cma
 
 # Create title
 title_text = f"{league} {filename.split('_')[2].replace('.pbz2', '')}"
-subtitle_text = "League Table (exc. Points Deductions) including Squad Values"
+subtitle_text = "League Table, including Squad Values"
 subsubtitle_text = "Coloured by <Value Under-performance> / <Value Over-performance>"
 fig.text(0.15, 0.95, title_text, fontweight="bold", fontsize=16, color='w')
 fig.text(0.15, 0.92, subtitle_text, fontweight="regular", fontsize=14, color='w')

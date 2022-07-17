@@ -177,7 +177,7 @@ cbar = fig.colorbar(pos2, ax=ax['pitch'][1], location="bottom",  fraction = 0.04
 cbar.ax.set_ylabel('xG', loc="bottom", color = "white", fontweight="bold", rotation=0, labelpad=20)
 
 # Footer text
-fig.text(0.255, 0.09, "Created by Jake Kolliari / @jakeyk11. Data provided by Wyscout.com",
+fig.text(0.255, 0.09, "Created by Jake Kolliari. Data provided by Wyscout.com",
          fontstyle="italic", ha="center", fontsize=9, color="white")  
 
 # Format and show
