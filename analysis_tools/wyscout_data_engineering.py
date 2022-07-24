@@ -2,7 +2,7 @@
 
 Functions
 ---------
-format_wyscout_data(tournament='Italy', folder=)
+format_wyscout_data(tournament='England', data_folder="../../data_directory/wyscout_data")
     Load Wyscout json files with matches, events, players and competitions."""
 
 import bz2
