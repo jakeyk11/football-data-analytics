@@ -1,4 +1,4 @@
-# Football-Data
+# Football Data Analytics
 This repository contains a collection of tools, scripts and projects that focus on analysis and visualisation of football data.
 
 ## Folders / Workflow
@@ -18,21 +18,22 @@ In general, each project follows a number of logical steps:
 
 Project table of contents: <br>
 &nbsp; &nbsp; [01 - World Cup 2018 Box to Box Midfielder Analysis](#01---world-cup-2018-box-to-box-midfielder-analysis) <br>
-&nbsp; &nbsp; [02 - Transfermarkt Web-Scrape and Analyse](#02---transfermarkt-web-scrape-and-analyse)
+&nbsp; &nbsp; [02 - Transfermarkt Web-Scrape and Analyse](#02---transfermarkt-web-scrape-and-analyse) <br>
+&nbsp; &nbsp; [03 - Expected Goals Modeling](#03---expected-goals-modeling)
 
 ### 01 - World Cup 2018 Box to Box Midfielder Analysis
 
 **Summary**: Use Statsbomb data to define the most effective box to box midfielders at the 2018 World Cup. Throughout the work a number of custom metrics are used to score central midfielders in ball winning, ball retention & creativity, and mobility. A good box to box midfielder is defined as a central midfielder that excels in each of these areas. Of key interest in this work is the use of convex hulls as a proxy for player mobility / distance covered. The work also includes the development of a number of appealing visuals, as shown below.
 
 <p align="center">
-  <img width="30%" src="./projects/01_worldcup_b2b_midfielders/top_12_progressive_passers.png"> &nbsp &nbsp
-  <img width="30%" src="./projects/01_worldcup_b2b_midfielders/ball_winning_and_recovery.png"> &nbsp &nbsp
-  <img width="30%" src="./projects/01_worldcup_b2b_midfielders/passing_under_pressure.png">
+  <img width="29%" src="./projects/01_worldcup_b2b_midfielders/top_12_progressive_passers.png"> &nbsp &nbsp
+  <img width="29%" src="./projects/01_worldcup_b2b_midfielders/ball_winning_and_recovery.png"> &nbsp &nbsp
+  <img width="29%" src="./projects/01_worldcup_b2b_midfielders/passing_under_pressure.png">
 </p>
 <p align="center">
-  <img width="30%" src="./projects/01_worldcup_b2b_midfielders/top_12_pressers.png"> &nbsp &nbsp
-  <img width="30%" src="./projects/01_worldcup_b2b_midfielders/top_12_action_distribution.png"> &nbsp &nbsp
-  <img width="19.25%" src="./projects/01_worldcup_b2b_midfielders/player_radar_example.png">
+  <img width="29%" src="./projects/01_worldcup_b2b_midfielders/top_12_pressers.png"> &nbsp &nbsp
+  <img width="29%" src="./projects/01_worldcup_b2b_midfielders/top_12_action_distribution.png"> &nbsp &nbsp
+  <img width="18.65%" src="./projects/01_worldcup_b2b_midfielders/player_radar_example.png">
 </p>
 
 ### 02 - Transfermarkt Web-Scrape and Analyse
@@ -43,4 +44,18 @@ Project table of contents: <br>
   <img width="27.5%" src="./projects/02_transfermarkt_scrape_and_analyse/GB2_player_value_regression.png"> &nbsp &nbsp
   <img width="27.5%" src="./projects/02_transfermarkt_scrape_and_analyse/GB2_player_scouting.png"> &nbsp &nbsp
   <img width="27.5%" src="./projects/02_transfermarkt_scrape_and_analyse/GB2_value_league_table.png">
+</p>
+
+### 03 - Expected Goals Modeling
+
+**Summary:** Implementation and testing of basic expected goals probabilistic models. This work includes development and comparison of a logistic regression expected goals model and a neural network expected goals model, each trained off over 40000 shots taken across Europe's 'big five' leagues during the 2017/2018 season. The models are used to calculated expected goals for specific players, clubs and leagues over a specified time period.
+
+<p align="center">
+  <img width="35%" src="./projects/03_xg_model/xg_log_regression_model.png"> &nbsp &nbsp
+  <img width="35%" src="./projects/03_xg_model/xg_neural_network.png"> &nbsp &nbsp
+</p>
+<p align="center">
+  <img width="27.5%" src="./projects/03_xg_model/example_plot_1.png"> &nbsp &nbsp
+  <img width="27.5%" src="./projects/03_xg_model/example_plot_2.png"> &nbsp &nbsp
+  <img width="27.5%" src="./projects/03_xg_model/example_plot_3.png"> &nbsp &nbsp
 </p>
