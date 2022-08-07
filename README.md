@@ -19,7 +19,7 @@ In general, each project follows a number of logical steps:
 Project table of contents: <br>
 &nbsp; &nbsp; [01 - World Cup 2018 Box to Box Midfielder Analysis](#01---world-cup-2018-box-to-box-midfielder-analysis) <br>
 &nbsp; &nbsp; [02 - Transfermarkt Web-Scrape and Analyse](#02---transfermarkt-web-scrape-and-analyse) <br>
-&nbsp; &nbsp; [03 - Expected Goals Modeling](#03---expected-goals-modeling)
+&nbsp; &nbsp; [03 - Expected Goals Modeling](#03---expected-goals-modeling) <br>
 &nbsp; &nbsp; [04 - Automated Match Reporting](#04---automated-match-reporting)
 
 
