@@ -65,7 +65,7 @@ Project table of contents: <br>
 
 ### 04 - Automated Match Reporting
 
-**Summary:** Development of automated scripts to produce match reports immediately after a match has concluded. This work includes collection and processing of public-domain match event data, and the production of multiple visuals that together constitute an informative and appealing match reports. Visuals currently include shot maps, with expected goals race charts, pass maps, and defensive zones to be added.
+**Summary:** Development of automated scripts to produce match reports immediately after a match has concluded. This work includes collection and processing of public-domain match event data, and the production of multiple visuals that together constitute informative and appealing match reports. Visuals currently include shot maps, with expected goals race charts, pass maps, and defensive zones to be added.
 
 <p align="center">
   <img width="43%" src="./projects/04_match_reports/shot_reports/EPL-2022-08-06-Tottenham-Southampton.png"> &nbsp &nbsp
