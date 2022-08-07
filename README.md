@@ -20,6 +20,8 @@ Project table of contents: <br>
 &nbsp; &nbsp; [01 - World Cup 2018 Box to Box Midfielder Analysis](#01---world-cup-2018-box-to-box-midfielder-analysis) <br>
 &nbsp; &nbsp; [02 - Transfermarkt Web-Scrape and Analyse](#02---transfermarkt-web-scrape-and-analyse) <br>
 &nbsp; &nbsp; [03 - Expected Goals Modeling](#03---expected-goals-modeling)
+&nbsp; &nbsp; [04 - Automated Match Reporting](#04---automated-match-reporting)
+
 
 ### 01 - World Cup 2018 Box to Box Midfielder Analysis
 
@@ -58,4 +60,14 @@ Project table of contents: <br>
   <img width="27.5%" src="./projects/03_xg_model/example_plot_1.png"> &nbsp &nbsp
   <img width="27.5%" src="./projects/03_xg_model/example_plot_2.png"> &nbsp &nbsp
   <img width="27.5%" src="./projects/03_xg_model/example_plot_3.png"> &nbsp &nbsp
+</p>
+
+
+### 04 - Automated Match Reporting
+
+**Summary:** Development of automated scripts to produce match reports immediately after a match has concluded. This work includes collection and processing of public-domain match event data, and the production of multiple visuals that together constitute an informative and appealing match reports. Visuals currently include shot maps, with expected goals race charts, pass maps, and defensive zones to be added.
+
+<p align="center">
+  <img width="43%" src="./projects/04_match_reports/shot_reports/EPL-2022-08-06-Tottenham-Southampton.png"> &nbsp &nbsp
+  <img width="43%" src="./projects/04_match_reports/shot_reports/EPL-2022-08-07-Manchester%20United-Brighton.png"> &nbsp &nbsp
 </p>
