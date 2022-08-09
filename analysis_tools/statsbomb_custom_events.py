@@ -19,7 +19,6 @@ create_convex_hull(events, name='default', include_percent=100)
 """
 
 import numpy as np
-import pandas
 import pandas as pd
 from scipy.spatial import ConvexHull
 
