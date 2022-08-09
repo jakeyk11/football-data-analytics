@@ -220,15 +220,15 @@ def create_convex_hull(events, name='default', include_percent=100):
 
     # Build list of hull points and a convex hull dataframe
     hull_pts = list(zip(reduced_hull_data['x_position'], reduced_hull_data['y_position']))
-    hull_df.loc[name, 'hull_x'] = list(hull_data['x_position'].values)
-    hull_df.loc[name, 'hull_reduced_x'] = list(reduced_hull_data['x_position'].values)
-    hull_df.loc[name, 'hull_y'] = list(hull_data['y_position'].values)
-    hull_df.loc[name, 'hull_reduced_y'] = list(reduced_hull_data['y_position'].values)
+    hull_df.at[name, 'hull_x'] = list(hull_data['x_position'].values)
+    hull_df.at[name, 'hull_reduced_x'] = list(reduced_hull_data['x_position'].values)
+    hull_df.at[name, 'hull_y'] = list(hull_data['y_position'].values)
+    hull_df.at[name, 'hull_reduced_y'] = list(reduced_hull_data['y_position'].values)
 
     # Calculate and store convex hull area and perimeter
-    hull_df.loc[name, 'hull_area'] = ConvexHull(hull_pts).volume
-    hull_df.loc[name, 'hull_perimeter'] = ConvexHull(hull_pts).area
-    hull_df.loc[name, 'hull_area_%'] = 100 * hull_df.loc[name, 'hull_area'] / (120 * 80)
+    hull_df.at[name, 'hull_area'] = ConvexHull(hull_pts).volume
+    hull_df.at[name, 'hull_perimeter'] = ConvexHull(hull_pts).area
+    hull_df.at[name, 'hull_area_%'] = 100 * hull_df.loc[name, 'hull_area'] / (120 * 80)
 
     return hull_df
 

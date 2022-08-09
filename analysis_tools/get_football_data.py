@@ -2,10 +2,14 @@
 
 Functions
 ---------
-cumulative_match_mins(events, lineups=None)
+get_statsbomb_data(competition, start_year, save_to_file=False, folderpath=None):
+    Import match event and lineup data from Statsbomb for an entire competition.
+
+get_transfermarkt_data(country_code, division_number, start_year, all_comps=False, save_to_file=False, folderpath=None)
     Scrape player information from transfermarkt for an entire league & season.
 """
 
+from statsbombpy import sb
 import numpy as np
 import pandas as pd
 import requests
@@ -14,10 +18,71 @@ import pickle
 import bz2
 
 
+def get_statsbomb_data(competition, start_year, save_to_file=False, folderpath=None):
+    """Import match event and lineup data from Statsbomb for an entire competition.
+
+    Function to import match event and lineup information from Statsbomb for all matches within a specified competition.
+    Event output is formatted as a single dataframe union of all events across all matches. Lineup output is formatted
+    as a single dataframe of lineups for each match within the competition.
+
+    Args:
+        competition (string): Competition name, using Statsbomb convention
+        start_year (string): Year in which season/competition started, input in YYYY format.
+        save_to_file (bool, optional): Selection of whether to save data to pbz2 file.
+        folderpath (string, optional):  Path of folder to save data in. Can be a relative file path. None by default.
+
+    Returns:
+        pandas.DataFrame: dataframe of match event information
+        pandas.DataFrame: dataframe of lineup information
+        """
+
+    # Initialise output dataframe
+    events = pd.DataFrame()
+    lineups = pd.DataFrame()
+
+    # Get Statsbomb comps and find IDs of user-selected competition
+    comps = sb.competitions()
+    comp_id = comps[(comps['competition_name'] == competition) &
+                    (comps['season_name'] == start_year)][['competition_id', 'season_id']].values[0]
+
+    # Use competition IDs to get all match IDs
+    matches = sb.matches(competition_id=comp_id[0], season_id=comp_id[1])
+
+    # Use match IDs to build single dataframes of competition events and lineups
+    for _, match in matches.iterrows():
+
+        # Sort match events by time in match
+        match_events = sb.events(match_id=match['match_id']).sort_values(['period', 'timestamp'], axis=0)
+
+        # Build a dataframe of lineups
+        lineup = sb.lineups(match_id=match['match_id'])
+        t1_lineup = list(lineup.values())[0].assign(team_name=list(lineup.keys())[0])
+        t2_lineup = list(lineup.values())[1].assign(team_name=list(lineup.keys())[1])
+        lineup = pd.concat([t1_lineup, t2_lineup]).reset_index(drop=True).assign(match_id=match['match_id'])
+
+        # Build up dataframe of all events and all lineup information.
+        events = pd.concat([events, match_events])
+        lineups = pd.concat([lineups, lineup])
+
+    # Reset index
+    events.reset_index(inplace=True, drop=True)
+    lineups.reset_index(inplace=True, drop=True)
+
+    # Store data if user chooses to
+    comp_string = competition.replace(" ", "-").lower()
+    if save_to_file:
+        with bz2.BZ2File(f"{folderpath}/{comp_string}-{start_year}-eventdata.pbz2", "wb") as f:
+            pickle.dump(events, f)
+        with bz2.BZ2File(f"{folderpath}/{comp_string}-{start_year}-lineupdata.pbz2", "wb") as f:
+            pickle.dump(lineups, f)
+
+    return events, lineups
+
+
 def get_transfermarkt_data(country_code, division_number, start_year, all_comps=False, save_to_file=False, folderpath=None):
     """Scrape player information from transfermarkt for an entire league & season.
 
-    Function to scrape player information from transfermarkt.co.uk for all player within a specified league,
+    Function to scrape player information from transfermarkt.co.uk for all players within a specified league,
     for a specified season. Player information includes general information (name, age, team, etc.), performance
     information (goals, assists, yellows, etc.), contract information and value information.
 

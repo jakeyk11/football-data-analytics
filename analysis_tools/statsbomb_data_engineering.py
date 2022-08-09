@@ -82,7 +82,7 @@ def cumulative_match_mins(events, lineups=None):
 
         # Calculate total game time and rebuild events dataframe
         total_mins = match_events['cumulative_mins'].max()
-        events_out = events_out.append(match_events)
+        events_out = pd.concat([events_out, match_events])
 
         # Obtain corresponding match lineups, if lineups is passed as an input.
         if lineups is not None:
@@ -97,7 +97,7 @@ def cumulative_match_mins(events, lineups=None):
             lineup[['time_on', 'time_off', 'mins_played']] = lineup.apply(time_played, axis=1, result_type="expand",
                                                                           match_minutes=total_mins)
             # Rebuild lineups dataframe
-            lineups_out = lineups_out.append(lineup)
+            lineups_out = pd.concat([lineups_out, lineup])
 
         else:
             lineups_out = pd.DataFrame()
@@ -154,7 +154,7 @@ def events_while_playing(events, lineups, event_name='Pass', event_team='opposit
                 lineup.loc[idx, col_name] = event_count
 
         # Rebuild lineups dataframe
-        lineups_out = lineups_out.append(lineup)
+        lineups_out = pd.concat([lineups_out, lineup])
 
     return lineups_out
 
