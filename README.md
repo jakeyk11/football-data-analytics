@@ -2,17 +2,21 @@
 This repository contains a collection of tools, scripts and projects that focus on analysis and visualisation of football data.
 
 ## Folders / Workflow
-- **data_directory**: Collection of raw football data used for projects. Also contains any template scripts used to import raw data from various football data APIs, websites or data services.
-- **analysis_tools**: Python package containing modules that support football data pre-processing, manipulation and visualisation.
+- **data_directory**: Collection of raw football data used for projects.
+- **analysis_tools**: Python package containing modules that support football data import, pre-processing, manipulation and visualisation.
 - **projects**: Series of personal projects, as previewed below, that cover various elements of football data analytics.
 
+Also contains any template scripts used to import raw data from various football data APIs, websites or data services.
+
 In general, each project follows a number of logical steps:
-1. Within data_directory, use template data import scripts to save data in compressed BZ2 format.
-2. Create new script(s), referred to here as the main script(s), in the project folder and import required analysis_tools modules.
-3. Within main script, import required compressed BZ2 data as pandas dataframe.
-4. Pre-processes and format data using relevant data_engineering module, within analysis_tools.
-5. Syntehsise additional information using relevant custom_events module, within analysis_tools.
-6. After completing further project work, create visualisations using relevant data_vis module, within analysis_tools.
+1. Create a folder within the Projects area to store files associated with the project.
+2. Use analysis_tools package > get_football_data module to import raw data from football data API, website or data service:
+    * If imported dataset is large, save to data_directory area in compressed BZ2 format and create a new script for analysis.
+    * If imported dataset is small, data import and analysis can be completed in the same script (without saving data).
+3. Within data analysis script, referred to here as the main script, import required analysis_tools modules.
+4. Pre-processes and format data using relevant data_engineering module within analysis_tools package.
+5. Syntehsise additional information using relevant custom_events module within analysis_tools package.
+6. Create visualisations using relevant data_vis module within analysis_tools package.
 
 ## Projects
 
