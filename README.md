@@ -72,6 +72,10 @@ Project table of contents: <br>
 **Summary:** Development of automated scripts to produce match reports immediately after a match has concluded. This work includes collection and processing of public-domain match event data, and the production of multiple visuals that together constitute informative and appealing match reports. Visuals currently include shot maps, with expected goals race charts, pass maps, and defensive zones to be added.
 
 <p align="center">
-  <img width="43%" src="./projects/04_match_reports/shot_reports/EPL-2022-08-06-Tottenham-Southampton.png"> &nbsp &nbsp
-  <img width="43%" src="./projects/04_match_reports/shot_reports/EPL-2022-08-07-Manchester%20United-Brighton.png"> &nbsp &nbsp
+  <img width="40%" src="./projects/04_match_reports/shot_reports/EPL-2022-08-06-Tottenham-Southampton.png"> &nbsp &nbsp
+  <img width="40%" src="./projects/04_match_reports/shot_reports/EPL-2022-08-07-Manchester%20United-Brighton.png"> &nbsp &nbsp
+</p>
+<p align="center">
+  <img width="23.5%" src="./projects/04_match_reports/pass_reports/EPL-1640700-Manchester United-Liverpool-passhulls.png"> &nbsp &nbsp
+  <img width="27.8%" src="./projects/04_match_reports/pass_reports/EPL-1640709-Liverpool-Bournemouth-passreport_Liverpool.png"> &nbsp &nbsp
 </p>
