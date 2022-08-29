@@ -13,10 +13,10 @@ In general, each project follows a number of logical steps:
 2. Use analysis_tools package > get_football_data module to import raw data from football data API, website or data service:
     * If imported dataset is large, save to data_directory area in compressed BZ2 format and create a new script for analysis.
     * If imported dataset is small, data import and analysis can be completed in the same script (without saving data).
-3. Within data analysis script, referred to here as the main script, import required analysis_tools modules.
-4. Pre-processes and format data using relevant data_engineering module within analysis_tools package.
-5. Syntehsise additional information using relevant custom_events module within analysis_tools package.
-6. Create visualisations using relevant data_vis module within analysis_tools package.
+3. Within data analysis script import required modules from analysis_tools package.
+4. Pre-processes and format data using data_engineering modules within analysis_tools package.
+5. Synthesise additional information using custom_events and pitch_zones modules within analysis_tools package.
+6. Create visualisations using data_vis modules within analysis_tools package.
 
 ## Projects
 
