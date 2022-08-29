@@ -5,6 +5,9 @@ Functions
 get_statsbomb_data(competition, start_year, save_to_file=False, folderpath=None):
     Import match event and lineup data from Statsbomb for an entire competition.
 
+get_whoscored_data(match_id, save_to_file=False, folderpath=None):
+    Scrape match event and player data from WhoScored match centre for a given match.
+
 get_transfermarkt_data(country_code, division_number, start_year, all_comps=False, save_to_file=False, folderpath=None)
     Scrape player information from transfermarkt for an entire league & season.
 """
@@ -16,6 +19,15 @@ import requests
 import bs4
 import pickle
 import bz2
+import re
+from selenium import webdriver
+import json
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 
 def get_statsbomb_data(competition, start_year, save_to_file=False, folderpath=None):
@@ -77,6 +89,111 @@ def get_statsbomb_data(competition, start_year, save_to_file=False, folderpath=N
             pickle.dump(lineups, f)
 
     return events, lineups
+
+
+def get_whoscored_data(match_id, get_mappings = False, proxy_ip=None, proxy_port=None, save_to_file=False, folderpath=None):
+    """Scrape match event data and player data from WhoScored match centre for a given match.
+
+    Function to scrape match event and player information from whoscored.com match centre for a single match, based on
+    user specification of WhoScored match id (which can be found within the WhoScored match URL). The user may wish to
+    scrape WhoScored under a proxy connection - options can be found at https://sslproxies.org/.
+
+    Args:
+        match_id (string): Match id, using who-scored convention (found within the WhoScored match URL)
+        get_mappings (bool, optional):
+        proxy_ip (string, optional): IP address of proxy server used to establish site connection (None by default)
+        proxy_port (string, optional): Port number of proxy server used to establish site connection (None by default)
+        save_to_file (bool, optional): Selection of whether to save data to pbz2 file.
+        folderpath (string, optional):  Path of folder to save data in. Can be a relative file path. None by default.
+
+    Returns:
+        pandas.DataFrame: dataframe of match event information
+        pandas.DataFrame: dataframe of player information
+        tuple: contains mapping dicionaries
+    """
+
+    # Build WhoScored web url
+    website_url = f"https://www.whoscored.com/Matches/{match_id}/Live/"
+
+    # Establish driver options
+    driver_options = Options()
+    driver_options.add_argument("disable-infobars")
+    driver_options.add_argument("--disable-extensions")
+
+    if proxy_ip is not None and proxy_port is not None:
+        driver_options.add_argument(f"--proxy-server={proxy_ip}:{proxy_port}")
+
+    # Set-up driver and open match page
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=driver_options)
+    driver.get(website_url)
+
+    # Read html and close driver after short wait
+    page_html = driver.page_source
+    WebDriverWait(driver, 15)
+    driver.close()
+
+    # Extract embedded json from match centre page using regular expression.
+    regex_pattern = r'(?<=require\.config\.params\["args"\].=.)[\s\S]*?;'
+    match_data_txt = re.findall(regex_pattern, page_html)[0]
+
+    # Add quotations to text for json parser
+    match_data_txt = match_data_txt.replace('matchId', '"matchId"')
+    match_data_txt = match_data_txt.replace('matchCentreData', '"matchCentreData"')
+    match_data_txt = match_data_txt.replace('matchCentreEventTypeJson', '"matchCentreEventTypeJson"')
+    match_data_txt = match_data_txt.replace('formationIdNameMappings', '"formationIdNameMappings"')
+    match_data_txt = match_data_txt.replace('};', '}')
+
+    # Parse json
+    match_data_json = json.loads(match_data_txt)
+
+    # If user chooses to, obtain mappings between event types and identifers & formations and identifier
+    if get_mappings:
+        event_types = match_data_json["matchCentreEventTypeJson"]
+        formation_mapping = match_data_json["formationIdNameMappings"]
+    else:
+        event_types = None
+        formation_mapping = None
+
+    # Create team and event dictionaries
+    events_dict = match_data_json["matchCentreData"]["events"]
+    teams_dict = {match_data_json["matchCentreData"]['home']['teamId']: match_data_json["matchCentreData"]['home']['name'],
+                  match_data_json["matchCentreData"]['away']['teamId']: match_data_json["matchCentreData"]['away']['name']}
+
+    # Create players dataframe
+    players_home_df = pd.DataFrame(match_data_json["matchCentreData"]['home']['players'])
+    players_home_df["teamId"] = match_data_json["matchCentreData"]['home']['teamId']
+    players_home_df['team'] = [x for x in teams_dict.values()][0]
+    players_away_df = pd.DataFrame(match_data_json["matchCentreData"]['away']['players'])
+    players_away_df["teamId"] = match_data_json["matchCentreData"]['away']['teamId']
+    players_away_df['team'] = [x for x in teams_dict.values()][1]
+    players_df = pd.concat([players_home_df, players_away_df])
+    players_df['match_id'] = int(match_id)
+
+    # Create events dataframe and replace identifier with event name
+    events_df = pd.DataFrame(events_dict)
+    events_df['match_id'] = int(match_id)
+    events_df['eventType'] = events_df.apply(lambda row: row['type']['displayName'], axis=1)
+    events_df['outcomeType'] = events_df.apply(lambda row: row['outcomeType']['displayName'], axis=1)
+    events_df['period'] = events_df.apply(lambda row: row['period']['value'], axis=1)
+
+    # Set index
+    events_df.set_index('id', inplace=True)
+    players_df.set_index('playerId', inplace=True)
+
+    # Save to file if user chooses to
+    if save_to_file:
+        with bz2.BZ2File(f"{folderpath}/match-{match_id}-eventdata.pbz2", "wb") as f:
+            pickle.dump(events_df, f)
+        with bz2.BZ2File(f"{folderpath}/match-{match_id}-playerdata.pbz2", "wb") as f:
+            pickle.dump(players_df, f)
+
+        if get_mappings:
+            with bz2.BZ2File(f"{folderpath}/event-types.pbz2", "wb") as f:
+                pickle.dump(event_types, f)
+            with bz2.BZ2File(f"{folderpath}/formation-mapping.pbz2", "wb") as f:
+                pickle.dump(formation_mapping, f)
+
+    return events_df, players_df, tuple([event_types, formation_mapping])
 
 
 def get_transfermarkt_data(country_code, division_number, start_year, all_comps=False, save_to_file=False, folderpath=None):

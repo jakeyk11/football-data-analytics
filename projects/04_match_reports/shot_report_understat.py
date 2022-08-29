@@ -13,15 +13,14 @@
 from understatapi import UnderstatClient
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from mplsoccer.pitch import VerticalPitch
-from PIL import Image
-import requests
-from io import BytesIO
 import os
 import sys
+from PIL import Image
 
-PITCH_WIDTH_Y = 80
-PITCH_LENGTH_X = 120
+PITCH_WIDTH_Y = 100
+PITCH_LENGTH_X = 100
 
 # %% Add custom tools to path
 
@@ -46,8 +45,8 @@ year = '2022'
 league = 'EPL'
 
 # Select team codes
-home_team = 'Fulham'
-away_team = 'Liverpool'
+home_team = 'Liverpool'
+away_team = 'Bournemouth'
 
 # Team name to print
 home_team_print = None
@@ -55,8 +54,8 @@ away_team_print = None
 
 # %% Logos and printed names
 
-home_logo, home_logo_scale = lab.get_team_badge(home_team)
-away_logo, away_logo_scale = lab.get_team_badge(away_team)
+home_logo, _ = lab.get_team_badge_and_colour(home_team)
+away_logo, _ = lab.get_team_badge_and_colour(away_team)
 
 if home_team_print is None:
     home_team_print = home_team
@@ -98,7 +97,7 @@ for idx, shot in shots_df.iterrows():
     if len(shot['player'].split(' ')) == 1:
         shots_df.loc[idx, 'player_initials'] = shot['player'].split(' ')[0][0:2]
     else:
-        shots_df.loc[idx, 'player_initials'] = shot['player'].split(' ')[0][0] + shot['player'].split(' ')[1][0]
+        shots_df.loc[idx, 'player_initials'] = shot['player'].split(' ')[0][0].upper() + shot['player'].split(' ')[1][0].upper()
 
 # %% Calculate shot stats
 
@@ -147,8 +146,12 @@ else:
 
 # %% Plot shots
 
+# Overwrite rcparams
+mpl.rcParams['xtick.color'] = 'w'
+mpl.rcParams['ytick.color'] = 'w'
+
 # Plot pitch
-pitch = VerticalPitch(half=True, pitch_color='#313332', line_color='white', linewidth=1, stripe=False)
+pitch = VerticalPitch(half=True, pitch_color='#313332', line_color='white', linewidth=1, pitch_type = 'opta', stripe=False)
 fig, ax = pitch.grid(nrows=1, ncols=2, title_height=0.03, grid_height=0.51, endnote_height=0, axis=False)
 fig.set_size_inches(12, 7)
 fig.set_facecolor('#313332')
@@ -156,14 +159,14 @@ fig.set_facecolor('#313332')
 # Determine pitch axis limits
 min_x = PITCH_LENGTH_X * shots_df['X'].min()
 min_y = PITCH_WIDTH_Y * min(shots_df['Y'].min(), shots_df['Y'].max())
-plot_xlim = 75
-plot_ylim = 10
+plot_xlim = PITCH_LENGTH_X * 0.625
+plot_ylim = PITCH_WIDTH_Y * 1/12
 
 # Apply pitch axis limits
 ax['pitch'][0].set_xlim((plot_ylim, PITCH_WIDTH_Y - plot_ylim))
-ax['pitch'][0].set_ylim((plot_xlim, 120))
+ax['pitch'][0].set_ylim((plot_xlim, PITCH_LENGTH_X))
 ax['pitch'][1].set_xlim((plot_ylim, PITCH_WIDTH_Y - plot_ylim))
-ax['pitch'][1].set_ylim((plot_xlim, 120))
+ax['pitch'][1].set_ylim((plot_xlim, PITCH_LENGTH_X))
 
 # Show pitch borders
 for axis in ['left', 'right', 'bottom']:
@@ -228,6 +231,7 @@ for _, shot in shots_df.iterrows():
         zorder = 1
         if shot['xG'] >= 0.6:
             edgecolors = 'crimson'
+            lw = 2
     elif shot['result'] in ['SavedShot', 'ShotOnPost']:
         lw = 1.5
         alpha = 1
@@ -291,7 +295,7 @@ fig.text(0.904, 0.27, away_low_xg_goal, fontweight="regular", fontsize=10, color
 fig.text(0.904, 0.24, away_high_xg_miss, fontweight="regular", fontsize=10, color='w')
 
 # Add colorbar
-cb_ax = fig.add_axes([0.57, 0.132, 0.35, 0.03])
+cb_ax = fig.add_axes([0.57, 0.152, 0.35, 0.03])
 cbar = fig.colorbar(p1, cax=cb_ax, orientation='horizontal')
 cbar.outline.set_edgecolor('w')
 cbar.set_label(" xG", loc="left", color='w', fontweight='bold', labelpad=-28.5)
@@ -337,24 +341,24 @@ fig.text(0.5, 0.835, subtitle_text, ha='center', fontweight="bold", fontsize=18,
 fig.text(0.5, 0.79, subsubtitle_text, ha='center', fontweight="regular", fontsize=14, color='w')
 
 # Add home team Logo
-ax = fig.add_axes([0.168 + (1 - home_logo_scale) / 14, 0.76 + (1 - home_logo_scale) / 14, 0.18 * home_logo_scale,
-                   0.18 * home_logo_scale])
+ax = fig.add_axes([0.175, 0.783, 0.15, 0.15])
 ax.axis("off")
-response = requests.get(home_logo)
-img = Image.open(BytesIO(response.content))
-ax.imshow(img)
+ax.imshow(home_logo)
 
 # Add away team Logo
-ax = fig.add_axes([0.654 + (1 - away_logo_scale) / 14, 0.76 + (1 - away_logo_scale) / 14, 0.18 * away_logo_scale,
-                   0.18 * away_logo_scale])
+ax = fig.add_axes([0.665, 0.783, 0.15, 0.15])
 ax.axis("off")
-response = requests.get(away_logo)
-img = Image.open(BytesIO(response.content))
-ax.imshow(img)
+ax.imshow(away_logo)
 
 # Footer text
-fig.text(0.5, 0.02, "Created by Jake Kolliari. Data provided by Understat.com",
+fig.text(0.5, 0.02, "Created by Jake Kolliari (@_JKDS_). Data provided by Understat.com",
          fontstyle="italic", ha="center", fontsize=9, color="white")
 
+# Add twitter logo
+ax = fig.add_axes([0.902, 0.01, 0.06, 0.06])
+ax.axis("off")
+badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
+ax.imshow(badge)
+
 # Save image
-# fig.savefig(f"shot_reports/{league}-{selected_match['datetime'][0][0:10]}-{home_team}-{away_team}", dpi=300)
+fig.savefig(f"shot_reports/{league}-{selected_match['datetime'][0][0:10]}-{home_team}-{away_team}", dpi=300)

@@ -196,8 +196,8 @@ def create_player_list(lineups, additional_cols=None):
     """ Create a list of players from statsbomb-style lineups dataframe
 
     Function to read a statsbomb-style lineups dataframe (single or multiple matches) and return a dataframe of
-    players that featured in squad. The function will also aggregate minutes played by each player if minutes_played
-    argument is set to True.
+    players that featured in squad. The function will also aggregate player information if columns are passed into the
+    additional_cols argument.
 
     Args:
         lineups (pandas.DataFrame): statsbomb-style dataframe of lineups, can be from multiple matches.
@@ -267,7 +267,7 @@ def group_player_events(events, player_data, group_type='count', event_types=Non
 def find_offensive_actions(events):
     """ Return dataframe of in-play offensive actions from event data.
 
-    Function to find all in-play offensive actions within a statsbomb-style events dataframe (single of multiple
+    Function to find all in-play offensive actions within a statsbomb-style events dataframe (single or multiple
     matches), and return as a new dataframe.
 
     Args:
@@ -303,7 +303,7 @@ def find_offensive_actions(events):
 def find_defensive_actions(events):
     """ Return dataframe of in-play defensive actions from event data.
 
-    Function to find all in-play defensive actions within a statsbomb-style events dataframe (single of multiple
+    Function to find all in-play defensive actions within a statsbomb-style events dataframe (single or multiple
     matches), and return as a new dataframe.
 
     Args:
@@ -313,7 +313,7 @@ def find_defensive_actions(events):
         pandas.DataFrame: statsbomb-style dataframe of defensive actions.
     """
 
-    # Define and filter offensive events
+    # Define and filter defensive events
     defensive_actions = ['Ball Recovery', 'Block', 'Clearance', 'Interception', 'Pressure', 'Duel', '50/50', 'Foul Won']
     defensive_action_df = events[events['type'].isin(defensive_actions)].reset_index(drop=True)
 

@@ -99,7 +99,7 @@ def pass_into_box(single_event, inplay=True):
 
     Args:
         single_event (pandas.Series): series corresponding to a single event (row) from statsbomb-style event dataframe.
-        inplay (bool): selection of whether to include 'in-play' events only (set to True).
+        inplay (bool, optional): selection of whether to include 'in-play' events only. True by default.
 
     Returns:
         bool: True = successful pass into the box, nan = not box pass, unsuccessful pass or not a pass.
