@@ -68,6 +68,7 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Everton', 'Everton FC']:
         url = "https://logos-world.net/wp-content/uploads/2020/06/Everton-Logo-700x394.png"
+        cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('RdPu')
 
     if team in ['Fulham', 'Fulham FC']:
         url = "https://sportslogohistory.com/wp-content/uploads/2020/11/fulham_fc_2001-pres.png"
@@ -75,8 +76,13 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['Huddersfield Town', 'Huddersfield Town FC', 'Huddersfield']:
         pass
 
+    if team in ['Hull', 'Hull City FC', 'Hull City']:
+        url = "https://upload.wikimedia.org/wikipedia/en/thumb/5/54/Hull_City_A.F.C._logo.svg/379px-Hull_City_A.F.C._logo.svg.png"
+        cmap = cm.get_cmap('Oranges') if hoa == 'home' else cm.get_cmap('gray')
+
     if team in ['Leeds', 'Leeds United', 'Leeds United FC', 'Leeds Utd']:
         url = "https://logos-world.net/wp-content/uploads/2020/06/Leeds-United-Logo-700x394.png"
+        cmap = cm.get_cmap('YlOrBr') if hoa == 'home' else cm.get_cmap('Blues')
 
     if team in ['Luton Town', 'Luton', 'Luton Town FC']:
         url = "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/301.png"
@@ -104,9 +110,14 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Newcastle United', 'Newcastle United FC', 'Newcastle', 'Newcastle Utd']:
         url = "https://logos-world.net/wp-content/uploads/2020/06/Newcastle-Logo-700x394.png"
+        cmap = cm.get_cmap('gray') if hoa == 'home' else cm.get_cmap('Blues')
 
     if team in ['Nottingham Forest', 'Nottingham Forest FC', 'Notts Forest']:
         url = "https://upload.wikimedia.org/wikipedia/commons/6/61/Nottingham_Forest_logo.png"
+
+    if team in ['Queens Park Rangers', 'Queens Park Rangers FC', 'QPR']:
+        url = "https://upload.wikimedia.org/wikipedia/en/thumb/3/31/Queens_Park_Rangers_crest.svg/316px-Queens_Park_Rangers_crest.svg.png"
+        cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('BuPu')
 
     if team in ['Southampton', 'Southampton FC']:
         url = "https://1000logos.net/wp-content/uploads/2018/07/Southampton-Logo-640x400.png"

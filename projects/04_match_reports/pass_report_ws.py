@@ -42,7 +42,7 @@ import analysis_tools.logos_and_badges as lab
 # %% User inputs
 
 # Input WhoScored match id
-match_id = '1640709'
+match_id = '1640722'
 
 # Select year
 year = '2022'
@@ -52,7 +52,7 @@ league = 'EPL'
 
 # Select team codes
 home_team = 'Liverpool'
-away_team = 'Bournemouth'
+away_team = 'Newcastle'
 
 # Team name to print
 home_team_print = None
@@ -537,6 +537,24 @@ ax22.set_title(f'Variation in start position of player passes\nCentral {central_
 ax23.set_title('\nHalf-space passes', color='w', fontsize = 10, fontweight = 'bold')
 ax24.set_title('Zone 14 passes', color='w', fontsize = 10, fontweight = 'bold')
 
+# Title border
+ax1 = fig1.add_axes([0, 0.84, 1, 0.16])
+ax1.set_facecolor('#212126')
+ax1.axes.xaxis.set_visible(False)
+ax1.axes.yaxis.set_visible(False)
+ax1.spines.right.set_visible(False)
+ax1.spines.top.set_visible(False)
+ax1.spines.bottom.set_visible(False)
+ax1.spines.left.set_visible(False)
+ax2 = fig2.add_axes([0, 0.84, 1, 0.16])
+ax2.set_facecolor('#212126')
+ax2.axes.xaxis.set_visible(False)
+ax2.axes.yaxis.set_visible(False)
+ax2.spines.right.set_visible(False)
+ax2.spines.top.set_visible(False)
+ax2.spines.bottom.set_visible(False)
+ax2.spines.left.set_visible(False)
+
 # Add pitch zones
 pz.add_pitch_zones(ax11, zone_type = zone_type)
 pz.add_pitch_zones(ax12, zone_type = zone_type)
@@ -584,12 +602,12 @@ for idx, team in enumerate(players_df['teamId'].unique()):
             else:
                 pitch.scatter(rank1_end_pos[0], rank1_end_pos[1], s=100, c=hex_color, zorder=rank1_count, ax=ax_to_plot)
 
-# Convex hull text
-ax1 = fig1.add_axes([0.022, 0.09, 0.28, 0.14])
+# Pass flow text
+ax1 = fig1.add_axes([0.018, 0.09, 0.28, 0.14])
 ax1.set_xlim(0, 1)
 ax1.set_ylim(0, 1)
 ax1.axis("off")
-ax2 = fig2.add_axes([0.022, 0.09, 0.28, 0.14])
+ax2 = fig2.add_axes([0.018, 0.09, 0.28, 0.14])
 ax2.set_xlim(0, 1)
 ax2.set_ylim(0, 1)
 ax2.axis("off")
@@ -613,14 +631,14 @@ for idx in np.arange(0,5):
     if len(away_short_name)>= 15:
         away_short_name = away_short_name[0:16] + '...'
         
-    ax1.text(0.4, 0.81-0.16*idx, f"{idx+1}.     {home_short_name}", color='w')
-    ax1.text(0.93, 0.81-0.16*idx, f"{int(home_player['suc_passes'])}", color='w')
-    ax2.text(0.4, 0.81-0.16*idx, f"{idx+1}.     {away_short_name}", color='w')
-    ax2.text(0.93, 0.81-0.16*idx, f"{int(away_player['suc_passes'])}", color='w')
+    ax1.text(0.4, 0.81-0.16*idx, f"{idx+1}.   {home_short_name}", color='w')
+    ax1.text(0.95, 0.81-0.16*idx, f"{int(home_player['suc_passes'])}", color='w')
+    ax2.text(0.4, 0.81-0.16*idx, f"{idx+1}.   {away_short_name}", color='w')
+    ax2.text(0.95, 0.81-0.16*idx, f"{int(away_player['suc_passes'])}", color='w')
 
-ax1.plot([0.36, 0.36], [0.15 ,0.94], lw=0.5, color='w')
+ax1.plot([0.35, 0.35], [0.15 ,0.92], lw=0.5, color='w')
 ax1.text(0.01, 0.52, "Top players\nby number of\nsuccessful\npasses", va = 'center', color='w', fontsize=9)
-ax2.plot([0.36, 0.36], [0.15 ,0.94], lw=0.5, color='w')
+ax2.plot([0.35, 0.35], [0.15 ,0.92], lw=0.5, color='w')
 ax2.text(0.01, 0.52, "Top players\nby number of\nsuccessful\npasses", va = 'center', color='w', fontsize=9)
 
 # Pass flow legends
@@ -635,22 +653,22 @@ legend_ax_2.axis("off")
 
 for idx, pass_count in enumerate(np.arange(1,16,2)):
     if idx%2 == 0:
-        ypos = 0.38
+        ypos = 0.3
     else:
-        ypos= 0.62
-    xpos = idx/1.4 + 1.5
+        ypos= 0.5
+    xpos = idx/1.8 + 2
     if idx<=2:
         text_color = '#313332'
     else:
         text_color = 'w'
     color_1 = cmaps[0](int(255*min(1,pass_count/15)))
-    legend_ax_1.scatter(xpos, ypos, marker='H', s=550, color=color_1, edgecolors=None)
-    legend_ax_1.text(xpos, ypos, pass_count, color=text_color, ha = "center", va = "center")
-    legend_ax_1.text(4, -0.2, "Pass Count", color=text_color, ha = "center", va = "center")
+    legend_ax_1.scatter(xpos, ypos, marker='H', s=350, color=color_1, edgecolor='w', lw=0.5)
+    legend_ax_1.text(xpos, ypos, pass_count, color=text_color, ha = "center", va = "center", fontsize = 9)
+    legend_ax_1.text(4, -0.2, "Pass Count", color=text_color, ha = "center", va = "center", fontsize = 9)
     color_2 = cmaps[1](int(255*min(1,pass_count/15)))
-    legend_ax_2.scatter(xpos, ypos, marker='H', s=550, color=color_2, edgecolors=None)
-    legend_ax_2.text(xpos, ypos, pass_count, color=text_color, ha = "center", va = "center")
-    legend_ax_2.text(4, -0.2, "Pass Count", color=text_color, ha = "center", va = "center")
+    legend_ax_2.scatter(xpos, ypos, marker='H', s=350, color=color_2, edgecolor='w', lw=0.5)
+    legend_ax_2.text(xpos, ypos, pass_count, color=text_color, ha = "center", va = "center", fontsize = 9)
+    legend_ax_2.text(4, -0.2, "Pass Count", color=text_color, ha = "center", va = "center", fontsize = 9)
 
 # Pass convex hulls
 cf_count = 0
@@ -724,11 +742,11 @@ for hull_idx, hull_row in offensive_hull_df.iterrows():
     last_idx = idx
 
 # Convex hull text
-ax1 = fig1.add_axes([0.36, 0.09, 0.28, 0.14])
+ax1 = fig1.add_axes([0.355, 0.09, 0.28, 0.14])
 ax1.set_xlim(0, 1)
 ax1.set_ylim(0, 1)
 ax1.axis("off")
-ax2 = fig2.add_axes([0.36, 0.09, 0.28, 0.14])
+ax2 = fig2.add_axes([0.355, 0.09, 0.28, 0.14])
 ax2.set_xlim(0, 1)
 ax2.set_ylim(0, 1)
 ax2.axis("off")
@@ -747,15 +765,15 @@ for idx in np.arange(0,5):
     if len(away_short_name)>= 15:
         away_short_name = away_short_name[0:16] + '...'
 
-    ax1.text(0.4, 0.81-0.16*idx, f"{idx+1}.     {home_short_name}", color='w')
-    ax1.text(0.85, 0.81-0.16*idx, f"{round(home_top_area.iloc[idx:idx+1]['hull_area_%'].values[0],1)}%", color='w')
-    ax2.text(0.4, 0.81-0.16*idx, f"{idx+1}.     {away_short_name}", color='w')
-    ax2.text(0.85, 0.81-0.16*idx, f"{round(away_top_area.iloc[idx:idx+1]['hull_area_%'].values[0],1)}%", color='w')
+    ax1.text(0.4, 0.81-0.16*idx, f"{idx+1}.   {home_short_name}", color='w')
+    ax1.text(0.91, 0.81-0.16*idx, f"{round(home_top_area.iloc[idx:idx+1]['hull_area_%'].values[0],1)}%", color='w')
+    ax2.text(0.4, 0.81-0.16*idx, f"{idx+1}.   {away_short_name}", color='w')
+    ax2.text(0.91, 0.81-0.16*idx, f"{round(away_top_area.iloc[idx:idx+1]['hull_area_%'].values[0],1)}%", color='w')
  
-ax1.plot([0.36, 0.36], [0.15 ,0.94], lw=0.5, color='w')
-ax1.text(0.01, 0.52, f"Top players by\narea of region\ncontaining\ncentral {central_pct}%\npasses(as % of\ntotal pitch area)", va = 'center', color='w', fontsize=9)
-ax2.plot([0.36, 0.36], [0.15 ,0.94], lw=0.5, color='w')
-ax2.text(0.01, 0.52, f"Top players by\narea of region\ncontaining\ncentral {central_pct}%\npasses(as % of\ntotal pitch area)", va = 'center', color='w', fontsize=9)
+ax1.plot([0.35, 0.35], [0.15 ,0.92], lw=0.5, color='w')
+ax1.text(0.01, 0.52, f"Top players\nby area\ncontaining\ncentral {central_pct}%\npasses (% tot.\npitch area)", va = 'center', color='w', fontsize=9)
+ax2.plot([0.35, 0.35], [0.15 ,0.92], lw=0.5, color='w')
+ax2.text(0.01, 0.52, f"Top players\nby area\ncontaining\ncentral {central_pct}%\npasses (% tot.\npitch area)", va = 'center', color='w', fontsize=9)
 
 # Zone 14 and half-space passes
 for idx, team in enumerate(players_df['teamId'].unique()):
@@ -840,23 +858,15 @@ for idx in np.arange(0,5):
     if len(away_short_name)>= 15:
         away_short_name = away_short_name[0:16] + '...'
                 
-    ax1.text(0.4, 0.81-0.16*idx, f"{idx+1}.    {home_short_name}", color='w')
-    ax1.text(0.91, 0.81-0.16*idx, f"{int(home_player['prog_passes'] if home_player['prog_passes'] == home_player['prog_passes'] else 0)}", color='w')
-    ax2.text(0.4, 0.81-0.16*idx, f"{idx+1}.    {away_short_name}", color='w')
-    ax2.text(0.91, 0.81-0.16*idx, f"{int(away_player['prog_passes'] if away_player['prog_passes'] == away_player['prog_passes'] else 0)}", color='w')
+    ax1.text(0.38, 0.81-0.16*idx, f"{idx+1}.   {home_short_name}", color='w')
+    ax1.text(0.9, 0.81-0.16*idx, f"{int(home_player['prog_passes'] if home_player['prog_passes'] == home_player['prog_passes'] else 0)}", color='w')
+    ax2.text(0.38, 0.81-0.16*idx, f"{idx+1}.   {away_short_name}", color='w')
+    ax2.text(0.9, 0.81-0.16*idx, f"{int(away_player['prog_passes'] if away_player['prog_passes'] == away_player['prog_passes'] else 0)}", color='w')
  
-ax1.plot([0.36, 0.36], [0.15 ,0.94], lw=0.5, color='w')
-ax1.text(0.05, 0.52, "Top players\nby number\nof progressive\npasses", va = 'center', color='w', fontsize=9)
-ax2.plot([0.36, 0.36], [0.15 ,0.94], lw=0.5, color='w')
-ax2.text(0.05, 0.52, "Top players\nby number\nof progressive\npasses", va = 'center', color='w', fontsize=9)
-
-# Add direction of play arrow
-ax = fig1.add_axes([0.3, 0.22, 0.06, 0.6])
-ax.set_xlim(0, 1)
-ax.set_ylim(0, 1)
-ax.axis("off")
-ax.arrow(0.65, 0.2, 0, 0.58, color="w", width=0.001, head_width = 0.1, head_length = 0.02)
-ax.text(0.495, 0.48, "Direction of play", ha="center", va="center", fontsize=10, color="w", fontweight="regular", rotation=90)
+ax1.plot([0.33, 0.33], [0.15 ,0.92], lw=0.5, color='w')
+ax1.text(0.05, 0.52, "Top players\nby # of\nprogressive\npasses", va = 'center', color='w', fontsize=9)
+ax2.plot([0.33, 0.33], [0.15 ,0.92], lw=0.5, color='w')
+ax2.text(0.05, 0.52, "Top players\nby # of\nprogressive\npasses", va = 'center', color='w', fontsize=9)
 
 # Title text
 title_text = f"{leagues['EPL']} - {year}/{int(year) + 1}"
@@ -864,19 +874,19 @@ subtitle_text = f"{home_team_print} {home_score}-{away_score} {away_team_print}"
 subsubtitle_text1 = f"{home_team_print} Pass Report"
 subsubtitle_text2 = f"{away_team_print} Pass Report"
 
-fig1.text(0.14, 0.94, title_text, fontweight="bold", fontsize=18, color='w')
-fig1.text(0.14, 0.905, subtitle_text, fontweight="bold", fontsize=16, color='w')
-fig1.text(0.14, 0.872, subsubtitle_text1, fontweight="regular", fontsize=13.5, color='w')
-fig2.text(0.14, 0.94, title_text, fontweight="bold", fontsize=18, color='w')
-fig2.text(0.14, 0.905, subtitle_text, fontweight="bold", fontsize=16, color='w')
-fig2.text(0.14, 0.872, subsubtitle_text2, fontweight="regular", fontsize=13.5, color='w')
+fig1.text(0.14, 0.943, title_text, fontweight="bold", fontsize=18, color='w')
+fig1.text(0.14, 0.908, subtitle_text, fontweight="bold", fontsize=16, color='w')
+fig1.text(0.14, 0.875, subsubtitle_text1, fontweight="bold", fontsize=13.5, color='w')
+fig2.text(0.14, 0.943, title_text, fontweight="bold", fontsize=18, color='w')
+fig2.text(0.14, 0.908, subtitle_text, fontweight="bold", fontsize=16, color='w')
+fig2.text(0.14, 0.875, subsubtitle_text2, fontweight="bold", fontsize=13.5, color='w')
 
 # Prog Pass text
-ax1 = fig1.add_axes([0.68, 0.85, 0.28, 0.13])
+ax1 = fig1.add_axes([0.68, 0.86, 0.28, 0.13])
 ax1.set_xlim(0, 1)
 ax1.set_ylim(0, 1)
 ax1.axis("off")
-ax2 = fig2.add_axes([0.68, 0.85, 0.28, 0.13])
+ax2 = fig2.add_axes([0.68, 0.86, 0.28, 0.13])
 ax2.set_xlim(0, 1)
 ax2.set_ylim(0, 1)
 ax2.axis("off")
@@ -896,64 +906,64 @@ a_long_ball_pct = round(100*protected_divide(playerinfo_df.groupby(by='team', ax
 a_through_ball_pct = round(100*protected_divide(playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['suc_through_balls'], playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['through_balls']), 1)
 
 # Overall stats
-ax1.text(0.56, 0.85, "Tot.     Suc.    Pct.", fontweight = "bold", color="white")
-ax1.text(0, 0.65, "All Passes:", fontsize=10, fontweight = "bold", color="white")
+ax1.text(0.56, 0.85, "Tot.     Suc.   %Acc", fontweight = "bold", color="white")
+ax1.text(0.04, 0.65, "All Passes:", fontsize=10, color="white")
 ax1.text(0.6, 0.65, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[home_team,:]['passes']), fontsize=10, color="white", ha = "center")
 ax1.text(0.775, 0.65, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[home_team,:]['suc_passes']), fontsize=10, color="white", ha = "center")
 ax1.text(0.95, 0.65, str(h_pass_pct) + "%", fontsize=10, color="white", ha = "center")
-ax1.text(0, 0.52, "Forward Passes:", fontsize=10, fontweight = "bold", color="white")
+ax1.text(0.04, 0.52, "Forward Passes:", fontsize=10,  color="white")
 ax1.text(0.6, 0.52, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[home_team,:]['fwd_passes']), fontsize=10, color="white", ha = "center")
 ax1.text(0.775, 0.52, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[home_team,:]['suc_fwd_passes']), fontsize=10, color="white", ha = "center")
 ax1.text(0.95, 0.52, str(h_fwd_pct) + "%", fontsize=10, color="white", ha = "center")
-ax1.text(0, 0.39, "Progressive Passes:", fontsize=10, fontweight = "bold", color="white")
+ax1.text(0.04, 0.39, "Progressive Passes:", fontsize=10,  color="white")
 ax1.text(0.6, 0.39, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[home_team,:]['prog_passes']), fontsize=10, color="white", ha = "center")
 ax1.text(0.775, 0.39, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[home_team,:]['suc_prog_passes']), fontsize=10, color="white", ha = "center")
 ax1.text(0.95, 0.39, str(h_prog_pct) + "%", fontsize=10, color="white", ha = "center")
-ax1.text(0, 0.26, "Crosses:", fontsize=10, fontweight = "bold", color="white")
+ax1.text(0.04, 0.26, "Crosses:", fontsize=10,  color="white")
 ax1.text(0.6, 0.26, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[home_team,:]['crosses']), fontsize=10, color="white", ha = "center")
 ax1.text(0.775, 0.26, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[home_team,:]['suc_crosses']), fontsize=10, color="white", ha = "center")
 ax1.text(0.95, 0.26, str(h_cross_pct) + "%", fontsize=10, color="white", ha = "center")
-ax1.text(0, 0.13, "Long Balls:", fontsize=10, fontweight = "bold", color="white")
+ax1.text(0.04, 0.13, "Long Balls:", fontsize=10,  color="white")
 ax1.text(0.6, 0.13, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[home_team,:]['long_balls']), fontsize=10, color="white", ha = "center")
 ax1.text(0.775, 0.13, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[home_team,:]['suc_long_balls']), fontsize=10, color="white", ha = "center")
 ax1.text(0.95, 0.13, str(h_long_ball_pct) + "%", fontsize=10, color="white", ha = "center")
-ax1.text(0, 0, "Through Balls:", fontsize=10, fontweight = "bold", color="white")
+ax1.text(0.04, 0, "Through Balls:", fontsize=10,  color="white")
 ax1.text(0.6, 0, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[home_team,:]['through_balls']), fontsize=10, color="white", ha = "center")
 ax1.text(0.775, 0, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[home_team,:]['suc_through_balls']), fontsize=10, color="white", ha = "center")
 ax1.text(0.95, 0, str(h_through_ball_pct) + "%", fontsize=10, color="white", ha = "center")
 ax1.plot([0.56, 1], [0.8, 0.8], color = "w", lw=1)
-ax2.text(0.56, 0.85, "Tot.     Suc.    Pct.", fontweight = "bold", color="white")
-ax2.text(0, 0.65, "All Passes:", fontsize=10, fontweight = "bold", color="white")
+ax2.text(0.56, 0.85, "Tot.     Suc.   %Acc.", fontweight = "bold", color="white")
+ax2.text(0.04, 0.65, "All Passes:", fontsize=10,  color="white")
 ax2.text(0.6, 0.65, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['passes']), fontsize=10, color="white", ha = "center")
 ax2.text(0.775, 0.65, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['suc_passes']), fontsize=10, color="white", ha = "center")
 ax2.text(0.95, 0.65, str(a_pass_pct) + "%", fontsize=10, color="white", ha = "center")
-ax2.text(0, 0.52, "Forward Passes:", fontsize=10, fontweight = "bold", color="white")
+ax2.text(0.04, 0.52, "Forward Passes:", fontsize=10,  color="white")
 ax2.text(0.6, 0.52, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['fwd_passes']), fontsize=10, color="white", ha = "center")
 ax2.text(0.775, 0.52, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['suc_fwd_passes']), fontsize=10, color="white", ha = "center")
 ax2.text(0.95, 0.52, str(a_fwd_pct) + "%", fontsize=10, color="white", ha = "center")
-ax2.text(0, 0.39, "Progressive Passes:", fontsize=10, fontweight = "bold", color="white")
+ax2.text(0.04, 0.39, "Progressive Passes:", fontsize=10,  color="white")
 ax2.text(0.6, 0.39, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['prog_passes']), fontsize=10, color="white", ha = "center")
 ax2.text(0.775, 0.39, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['suc_prog_passes']), fontsize=10, color="white", ha = "center")
 ax2.text(0.95, 0.39, str(a_prog_pct) + "%", fontsize=10, color="white", ha = "center")
-ax2.text(0, 0.26, "Crosses:", fontsize=10, fontweight = "bold", color="white")
+ax2.text(0.04, 0.26, "Crosses:", fontsize=10,  color="white")
 ax2.text(0.6, 0.26, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['crosses']), fontsize=10, color="white", ha = "center")
 ax2.text(0.775, 0.26, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['suc_crosses']), fontsize=10, color="white", ha = "center")
 ax2.text(0.95, 0.26, str(a_cross_pct) + "%", fontsize=10, color="white", ha = "center")
-ax2.text(0, 0.13, "Long Balls:", fontsize=10, fontweight = "bold", color="white")
+ax2.text(0.04, 0.13, "Long Balls:", fontsize=10,  color="white")
 ax2.text(0.6, 0.13, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['long_balls']), fontsize=10, color="white", ha = "center")
 ax2.text(0.775, 0.13, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['suc_long_balls']), fontsize=10, color="white", ha = "center")
 ax2.text(0.95, 0.13, str(a_long_ball_pct) + "%", fontsize=10, color="white", ha = "center")
-ax2.text(0, 0, "Through Balls:", fontsize=10, fontweight = "bold", color="white")
+ax2.text(0.04, 0, "Through Balls:", fontsize=10,  color="white")
 ax2.text(0.6, 0, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['through_balls']), fontsize=10, color="white", ha = "center")
 ax2.text(0.775, 0, int(playerinfo_df.groupby(by='team', axis=0).sum().loc[away_team,:]['suc_through_balls']), fontsize=10, color="white", ha = "center")
-#ax2.text(0.95, 0, str(a_through_ball_pct) + "%", fontsize=10, color="white", ha = "center")
+ax2.text(0.95, 0, str(a_through_ball_pct) + "%", fontsize=10, color="white", ha = "center")
 ax2.plot([0.56, 1], [0.8, 0.8], color = "w", lw=1)
 
 # Add Logos
-ax = fig1.add_axes([0.01, 0.855, 0.13, 0.13])
+ax = fig1.add_axes([0.01, 0.862, 0.12, 0.12])
 ax.axis("off")
 ax.imshow(home_logo)
-ax = fig2.add_axes([0.01, 0.855, 0.13, 0.13])
+ax = fig2.add_axes([0.01, 0.862, 0.12, 0.12])
 ax.axis("off")
 ax.imshow(away_logo)
 
