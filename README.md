@@ -138,9 +138,9 @@ Project table of contents: <br>
   <img width="35%" src="./data_directory/misc_data/images/xg_neural_network.png"> &nbsp &nbsp
 </p>
 <p align="center">
-  <img width="25%" src="./data_directory/misc_data/images/mo-salah-shotmap.png"> &nbsp &nbsp
-  <img width="25%" src="./data_directory/misc_data/images/liverpool-shotmap.png"> &nbsp &nbsp
-  <img width="25%" src="./data_directory/misc_data/images/bundesliga-shotmap.png"> &nbsp &nbsp
+  <img width="25%" src="./data_directory/misc_data/images/EPL-2017-Salah-Shotmap.png"> &nbsp &nbsp
+  <img width="25%" src="./data_directory/misc_data/images/EPL-2017-Liverpool-Shotmap.png"> &nbsp &nbsp
+  <img width="25%" src="./data_directory/misc_data/images/Bundesliga-2017-All-Shotmap.png"> &nbsp &nbsp
 </p>
 
 
@@ -154,9 +154,9 @@ Project table of contents: <br>
 </p>
 <p align="center">
   <img width="25%" src="./data_directory/misc_data/images/EPL-1640700-Manchester United-Liverpool-passhulls.png"> &nbsp &nbsp
-  <img width="29%" src="./data_directory/misc_data/images/EPL-1640709-Liverpool-Bournemouth-passreport_Liverpool.png"> &nbsp &nbsp
+  <img width="29.55%" src="./data_directory/misc_data/images/EPL-1640709-Liverpool-Bournemouth-passreport_Liverpool.png"> &nbsp &nbsp
 </p>
 
 ### 05 - Automated Competition Reporting
 
-**Summary:** Development of automated scripts to produce competition reports and multi-match player evaluations at any point throughout a competition. This work includes collection and processing of public-domain match event data, and the production of multiple visuals that generate novel and meaningful insight. Visuals currently include top progressive passers.
+**Summary:** Development of automated scripts to produce competition reports and multi-match player evaluations at any point throughout a competition. This work includes collection and processing of public-domain match event data, and the production of multiple visuals that generate novel and meaningful insight at a team and player level. Visuals currently include top progressive passers.
