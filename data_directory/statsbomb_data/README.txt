@@ -1,0 +1,1 @@
+Data collected from Statsbomb is not owned by the repository creator, and therefore will not be hosted within the repository.

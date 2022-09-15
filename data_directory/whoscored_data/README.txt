@@ -1,0 +1,1 @@
+Data collected from Whoscored is not owned by the repository creator, and therefore will not be hosted within the repository.
