@@ -15,7 +15,7 @@ import analysis_tools.get_football_data as gfd
 # %% User inputs
 
 # Input WhoScored match id
-match_id = '1640709'
+match_id = '1640718'
 
 # Obtain and save data using custom function
 events, players, mappings = gfd.get_whoscored_data(match_id, get_mappings=False, save_to_file=True, folderpath='../../data_directory/whoscored_data')

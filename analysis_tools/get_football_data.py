@@ -91,7 +91,7 @@ def get_statsbomb_data(competition, start_year, save_to_file=False, folderpath=N
     return events, lineups
 
 
-def get_whoscored_data(match_id, get_mappings = False, proxy_ip=None, proxy_port=None, save_to_file=False, folderpath=None):
+def get_whoscored_data(match_id, get_mappings = False, proxy_servers=None, save_to_file=False, folderpath=None):
     """Scrape match event data and player data from WhoScored match centre for a given match.
 
     Function to scrape match event and player information from whoscored.com match centre for a single match, based on
@@ -101,8 +101,7 @@ def get_whoscored_data(match_id, get_mappings = False, proxy_ip=None, proxy_port
     Args:
         match_id (string): Match id, using who-scored convention (found within the WhoScored match URL)
         get_mappings (bool, optional):
-        proxy_ip (string, optional): IP address of proxy server used to establish site connection (None by default)
-        proxy_port (string, optional): Port number of proxy server used to establish site connection (None by default)
+        proxy_servers (string, optional): IP addresses:port of proxy servers used to establish site connection (None by default)
         save_to_file (bool, optional): Selection of whether to save data to pbz2 file.
         folderpath (string, optional):  Path of folder to save data in. Can be a relative file path. None by default.
 
@@ -120,8 +119,8 @@ def get_whoscored_data(match_id, get_mappings = False, proxy_ip=None, proxy_port
     driver_options.add_argument("disable-infobars")
     driver_options.add_argument("--disable-extensions")
 
-    if proxy_ip is not None and proxy_port is not None:
-        driver_options.add_argument(f"--proxy-server={proxy_ip}:{proxy_port}")
+    if proxy_servers is not None:
+        driver_options.add_argument(f"--proxy-server={proxy_servers}")
 
     # Set-up driver and open match page
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=driver_options)
@@ -129,7 +128,7 @@ def get_whoscored_data(match_id, get_mappings = False, proxy_ip=None, proxy_port
 
     # Read html and close driver after short wait
     page_html = driver.page_source
-    WebDriverWait(driver, 15)
+    WebDriverWait(driver, 30)
     driver.close()
 
     # Extract embedded json from match centre page using regular expression.
@@ -182,9 +181,9 @@ def get_whoscored_data(match_id, get_mappings = False, proxy_ip=None, proxy_port
 
     # Save to file if user chooses to
     if save_to_file:
-        with bz2.BZ2File(f"{folderpath}/match-{match_id}-eventdata.pbz2", "wb") as f:
+        with bz2.BZ2File(f"{folderpath}/match-eventdata-{match_id}-{match_data_json['matchCentreData']['home']['name']}-{match_data_json['matchCentreData']['away']['name']}.pbz2", "wb") as f:
             pickle.dump(events_df, f)
-        with bz2.BZ2File(f"{folderpath}/match-{match_id}-playerdata.pbz2", "wb") as f:
+        with bz2.BZ2File(f"{folderpath}/match-playerdata-{match_id}-{match_data_json['matchCentreData']['home']['name']}-{match_data_json['matchCentreData']['away']['name']}.pbz2", "wb") as f:
             pickle.dump(players_df, f)
 
         if get_mappings:

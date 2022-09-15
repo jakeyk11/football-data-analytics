@@ -1,12 +1,15 @@
-# %% Create plot of shot positions and associated xG for a game, based on understat data
+# %% Create pass reports and visualisation from event data
 #
 # Inputs:   Year to plot data from
 #           League to plot data from
+#           Whoscored match id
 #           Home team
 #           Away team
+#           JDP zone type
 #
-# Outputs:  Pass flow and pass hull plots
-#
+# Outputs:  Pass flow diagrams
+#           Pass convex hulls 
+#           Home and away team pass reports
 
 # %% Imports and parameters
 
@@ -42,7 +45,7 @@ import analysis_tools.logos_and_badges as lab
 # %% User inputs
 
 # Input WhoScored match id
-match_id = '1640722'
+match_id = '1640718'
 
 # Select year
 year = '2022'
@@ -51,12 +54,12 @@ year = '2022'
 league = 'EPL'
 
 # Select team codes
-home_team = 'Liverpool'
-away_team = 'Newcastle'
+home_team = 'Leicester'
+away_team = 'Man Utd'
 
 # Team name to print
 home_team_print = None
-away_team_print = None
+away_team_print = 'Manchester Utd'
 
 # Pass flow zone type
 zone_type = 'jdp_custom'
@@ -67,7 +70,7 @@ central_pct = 75
 # %% Logos, colours and printed names
 
 home_logo, home_colourmap = lab.get_team_badge_and_colour(home_team, 'home')
-away_logo, away_colourmap = lab.get_team_badge_and_colour(away_team, 'away')
+away_logo, away_colourmap = lab.get_team_badge_and_colour(away_team, 'home')
 
 if home_team_print is None:
     home_team_print = home_team
@@ -80,11 +83,12 @@ cmaps = [home_colourmap, away_colourmap]
 # %% Read in data
 
 # Opta data
-events_df = bz2.BZ2File(f'../../data_directory/whoscored_data/match-{match_id}-eventdata.pbz2', 'rb')
+
+events_df = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/match-{match_id}-eventdata.pbz2", 'rb')
 events_df = pickle.load(events_df)
-players_df = bz2.BZ2File(f'../../data_directory/whoscored_data/match-{match_id}-playerdata.pbz2', 'rb')
+players_df = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/match-{match_id}-playerdata.pbz2", 'rb')
 players_df = pickle.load(players_df)
-event_types = bz2.BZ2File('../../data_directory/whoscored_data/event-types.pbz2', 'rb')
+event_types = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/event-types.pbz2", 'rb')
 event_types = pickle.load(event_types)
 
 # %% Calculate Scoreline (special accounting for own goals)
@@ -626,9 +630,9 @@ for idx in np.arange(0,5):
         away_short_name = f"{away_player['name']}" 
     else:
         away_short_name = f"{away_player['name'][0]}. {away_player['name'].split(' ')[-1]}"
-    if len(home_short_name)>= 15:
+    if len(home_short_name)>= 16:
         home_short_name = home_short_name[0:16] + '...'
-    if len(away_short_name)>= 15:
+    if len(away_short_name)>= 16:
         away_short_name = away_short_name[0:16] + '...'
         
     ax1.text(0.4, 0.81-0.16*idx, f"{idx+1}.   {home_short_name}", color='w')
@@ -760,9 +764,9 @@ for idx in np.arange(0,5):
         away_short_name = f"{home_top_area.iloc[idx:idx+1].index[0]}"   
     else:
         away_short_name = f"{away_top_area.iloc[idx:idx+1].index[0][0]}. {away_top_area.iloc[idx:idx+1].index[0].split(' ')[-1]}" 
-    if len(home_short_name)>= 15:
+    if len(home_short_name)> 16:
         home_short_name = home_short_name[0:16] + '...'
-    if len(away_short_name)>= 15:
+    if len(away_short_name)> 16:
         away_short_name = away_short_name[0:16] + '...'
 
     ax1.text(0.4, 0.81-0.16*idx, f"{idx+1}.   {home_short_name}", color='w')
@@ -853,9 +857,9 @@ for idx in np.arange(0,5):
         away_short_name = f"{away_player['name']}" 
     else:
         away_short_name = f"{away_player['name'][0]}. {away_player['name'].split(' ')[-1]}"
-    if len(home_short_name)>= 15:
+    if len(home_short_name)>= 16:
         home_short_name = home_short_name[0:16] + '...'
-    if len(away_short_name)>= 15:
+    if len(away_short_name)>= 16:
         away_short_name = away_short_name[0:16] + '...'
                 
     ax1.text(0.38, 0.81-0.16*idx, f"{idx+1}.   {home_short_name}", color='w')

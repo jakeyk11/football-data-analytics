@@ -12,7 +12,7 @@ longest_xi(players_df):
     Determine the xi players in each team on the pitch for the longest consistent time.
 
 create_player_list(lineups, additional_cols=None):
-    Create a list of players from whoscored-style lineups dataframe
+    Create a list of players from whoscored-style lineups dataframe. This requires minutes played information.
 
 find_offensive_actions(events_df):
     Return dataframe of in-play offensive actions from event data.
@@ -165,31 +165,50 @@ def longest_xi(players_df):
 
 
 def create_player_list(lineups, additional_cols=None):
-    """ Create a list of players from whoscored-style lineups dataframe
+    """ Create a list of players from whoscored-style lineups dataframe. This requires minutes played information.
 
     Function to read a whoscored-style lineups dataframe (single or multiple matches) and return a dataframe of
     players that featured in squad. The function will also aggregate player information if columns are passed into the
     additional_cols argument.
 
     Args:
-        lineups (pandas.DataFrame): statsbomb-style dataframe of lineups, can be from multiple matches.
+        lineups (pandas.DataFrame): statsbomb-style dataframe of lineups, including mins played, can be from multiple matches.
         additional_cols (list): list of column names to be aggregated and included in output dataframe.
 
     Returns:
-        pandas.DataFrame: players that feature in one or more lineup entries, may include total minutes played.
-    """
+        pandas.DataFrame: players that feature in one or more lineup entries, including most popular position played
+    """    
 
-    # Specify additional_cols as list if not assigned
-    if additional_cols is None:
-        additional_cols = list()
-
-    # Dataframe of player names and nicknames
+    # Dataframe of player names and team
     playerinfo_df = lineups[['name', 'position', 'team']].drop_duplicates()
 
-    # If include_mins = True, calculate total playing minutes for each player and add to dataframe
-    included_cols = lineups.groupby('name', axis=0).sum()[additional_cols]
-    playerinfo_df = playerinfo_df.merge(included_cols, left_on='name', right_index=True)
+    # Calculate total playing minutes for each player and add to dataframe
+    if additional_cols is None:
+        included_cols = lineups.groupby(['name', 'position', 'team'], axis=0).sum()['mins_played']
+    else:
+        included_cols = lineups.groupby(['name', 'position', 'team'], axis=0).sum()[['mins_played'] + [additional_cols]]
 
+    playerinfo_df = playerinfo_df.merge(included_cols, left_on=['name', 'position','team'], right_index=True)
+    
+    # Sum minutes played in each position
+    playerinfo_df['tot_mins_played'] = playerinfo_df.groupby(['name', 'team'])['mins_played'].transform('sum')
+    
+    # Order player entries by minutes played, ensuring most popular position is at the top.
+    playerinfo_df.sort_values('mins_played', ascending=False, inplace=True)
+    
+    # Remove duplicates, leaving only the player in their most popular position
+    playerinfo_df = playerinfo_df[~playerinfo_df.index.duplicated(keep='first')]
+    
+    # Rename columns 
+    playerinfo_df['mins_played'] = playerinfo_df['tot_mins_played']
+    playerinfo_df.drop('tot_mins_played', axis = 1, inplace = True)
+    
+    # Add position type
+    playerinfo_df['pos_type'] = playerinfo_df['position'].apply(lambda x: 'DEF' if x in ['DC', 'DL', 'DR', 'DMR', 'DML'] else 
+                                                                ('MID' if x in ['AML', 'AMR', 'AMC', 'DM', 'DMC', 'MC', 'ML', 'MR'] else 
+                                                                 ('FWD' if x in ['FW', 'FWL', 'FWR'] else 
+                                                                  'GK' if x in ['GK'] else 'SUB')))
+ 
     return playerinfo_df
 
 
