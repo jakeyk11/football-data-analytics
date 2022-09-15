@@ -46,9 +46,9 @@ import analysis_tools.statsbomb_custom_events as sce
 # %% Read in data
 
 # Statsbomb data
-events = bz2.BZ2File('../../data_directory/statsbomb_data/fifa-world-cup-2018-eventdata.pbz2', 'rb')
+events = bz2.BZ2File('../../data_directory/statsbomb_data/2017_18/FIFA World Cup/fifa-world-cup-2018-eventdata.pbz2', 'rb')
 events = pickle.load(events)
-lineups = bz2.BZ2File('../../data_directory/statsbomb_data/fifa-world-cup-2018-lineupdata.pbz2', 'rb')
+lineups = bz2.BZ2File('../../data_directory/statsbomb_data/2017_18/FIFA World Cup/fifa-world-cup-2018-lineupdata.pbz2', 'rb')
 lineups = pickle.load(lineups)
 
 # Misc data

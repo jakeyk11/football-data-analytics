@@ -27,4 +27,4 @@ start_year = '2021'
 all_comps = False
 
 # Obtain and save data using custom function
-player_info = gfd.get_transfermarkt_data(country_code, division_num, start_year, all_comps, save_to_file=True, folderpath='../../data_directory/transfermarkt_data')
+player_info = gfd.get_transfermarkt_data(country_code, division_num, start_year, all_comps, save_to_file=True, folderpath=f"../../data_directory/transfermarkt_data/{start_year}_{str(int(start_year.replace('20','')) + 1)}")

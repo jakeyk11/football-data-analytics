@@ -21,5 +21,5 @@ competition = 'FIFA World Cup'
 year = '2018'
 
 # Obtain and save data using custom function
-events, lineups = gfd.get_statsbomb_data(competition, year, save_to_file=True, folderpath='../../data_directory/statsbomb_data')
+events, lineups = gfd.get_statsbomb_data(competition, year, save_to_file=True, folderpath=f"../../data_directory/statsbomb_data/{int(year)-1}_{str(int(year.replace('20','')))}/{competition}")
 

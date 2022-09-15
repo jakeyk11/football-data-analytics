@@ -39,7 +39,7 @@ import adjustText
 
 # CSV file name corresponding to chosen league
 filename = 'transfermarkt_GB2_2021-2022.pbz2'
-playerinfo_df = bz2.BZ2File(f"../../data_directory/transfermarkt_data/{filename}", 'rb')
+playerinfo_df = bz2.BZ2File(f"../../data_directory/transfermarkt_data/2021_22/{filename}", 'rb')
 playerinfo_df = pickle.load(playerinfo_df)
 
 # Manual league input for plot titles
