@@ -58,7 +58,8 @@ dist_covered = pd.read_excel('../../data_directory/misc_data/worldcup_2010_to_20
 # %% Pre-process data
 
 # Add cumulative minutes information
-events, lineups = sde.cumulative_match_mins(events, lineups)
+events = sde.cumulative_match_mins(events)
+lineups = sde.get_playtime_and_position(events, lineups)
 
 # Add player nickname 
 events, lineups = sde.add_player_nickname(events, lineups)
@@ -76,7 +77,7 @@ events = sce.xg_assisted(events)
 
 # %% Create player information dataframe
 
-playerinfo_df = sde.create_player_list(lineups, additional_cols=['mins_played', 'opp_pass'])
+playerinfo_df = sde.create_player_list(lineups, additional_cols='opp_pass')
 
 # %% Filter dataframe
 
@@ -444,7 +445,7 @@ ax.imshow(img)
 plt.tight_layout()
 plt.show()
 
-# % % Plot 4, plot recoveries per 100 opposition passes vs. tackles and interceptions per 100 opposition passes
+# %% Plot 4, plot recoveries per 100 opposition passes vs. tackles and interceptions per 100 opposition passes
 
 # Set-up scatter plot
 fig, ax = plt.subplots(figsize=(14, 9))
@@ -460,7 +461,7 @@ x80 = np.percentile(playerinfo_df['recoveries_100pass'], 80)
 y80 = np.percentile(y.dropna(), 80)
 ax.axvline(x=x80, color="white", linestyle="--", lw=0.75)
 ax.axhline(y=y80, color="white", linestyle="--", lw=0.75)
-ax.text(0.01, y80 - 0.03, '80th Percentile', color='w', fontsize=8, fontweight='bold')
+ax.text(0.01, y80 - 0.05, '80th Percentile', color='w', fontsize=8, fontweight='bold')
 ax.text(x80 + 0.01, 0.01, '80th Percentile', color='w', fontsize=8, fontweight='bold')
 
 # Add player tags
@@ -476,8 +477,8 @@ adjustText.adjust_text(text)
 # Define axes
 ax.set_xlabel("Ball Recoveries per 100 Opposition Passes", fontweight="bold", fontsize=14, color='w')
 ax.set_ylabel("Tackles + Interceptions per 100 Opposition Passes", fontweight="bold", fontsize=14, color='w')
-ax.set_xlim(0, 3)
-ax.set_ylim(0, 1.4)
+ax.set_xlim(0, 4)
+ax.set_ylim(0, 3)
 
 # Create title and subtitles, using highlighting as figure legend
 title_text = "Midfielder ball winning and recovery"

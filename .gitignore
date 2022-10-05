@@ -1,7 +1,16 @@
 /projects/04_match_reports/pass_reports/
 /projects/04_match_reports/shot_reports/
 /projects/05_competition_reports/top_progressive_passers/
-/data_directory/whoscored_data/2022_23/
 /data_directory/statsbomb_data/2017_18/
 /data_directory/statsbomb_data/2022_23/
 /analysis_tools/get_football_data.py
+/data_directory/whoscored_data/2022_23/
+/data_directory/whoscored_data/2021_22/
+/data_directory/whoscored_data/2020_21/
+/data_directory/whoscored_data/2019_20/
+/data_directory/whoscored_data/2018_19/
+/data_directory/whoscored_data/2017_18/
+/projects/05_competition_reports/top_penalty_takers/
+/projects/05_competition_reports/top_defensive_actions/
+/projects/04_match_reports/out_of_posession_report_sb.py
+/projects/04_match_reports/out_of_possession_reports/

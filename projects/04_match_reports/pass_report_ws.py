@@ -45,7 +45,7 @@ import analysis_tools.logos_and_badges as lab
 # %% User inputs
 
 # Input WhoScored match id
-match_id = '1640718'
+match_id = '1640753'
 
 # Select year
 year = '2022'
@@ -54,12 +54,12 @@ year = '2022'
 league = 'EPL'
 
 # Select team codes
-home_team = 'Leicester'
-away_team = 'Man Utd'
+home_team = 'Wolves'
+away_team = 'Man City'
 
 # Team name to print
-home_team_print = None
-away_team_print = 'Manchester Utd'
+home_team_print = 'Wolves'
+away_team_print = 'Manchester City'
 
 # Pass flow zone type
 zone_type = 'jdp_custom'
@@ -84,9 +84,9 @@ cmaps = [home_colourmap, away_colourmap]
 
 # Opta data
 
-events_df = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/match-{match_id}-eventdata.pbz2", 'rb')
+events_df = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/match-eventdata-{match_id}-{home_team}-{away_team}.pbz2", 'rb')
 events_df = pickle.load(events_df)
-players_df = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/match-{match_id}-playerdata.pbz2", 'rb')
+players_df = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/match-playerdata-{match_id}-{home_team}-{away_team}.pbz2", 'rb')
 players_df = pickle.load(players_df)
 event_types = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/event-types.pbz2", 'rb')
 event_types = pickle.load(event_types)
@@ -117,7 +117,7 @@ players_df = wde.longest_xi(players_df)
 
 # %% Aggregate data per player
 
-playerinfo_df = wde.create_player_list(players_df, additional_cols = 'mins_played')
+playerinfo_df = wde.create_player_list(players_df)
 
 # Passes
 all_passes = events_df[events_df['eventType']=='Pass']
@@ -283,7 +283,7 @@ ax.axis("off")
 ax.imshow(home_logo)
 
 # Add away team Logo
-ax = fig.add_axes([0.78, 0.825, 0.14, 0.14])
+ax = fig.add_axes([0.79, 0.825, 0.14, 0.14])
 ax.axis("off")
 ax.imshow(away_logo)
 
@@ -465,7 +465,7 @@ ax.axis("off")
 ax.imshow(home_logo)
 
 # Add away team Logo
-ax = fig.add_axes([0.78, 0.825, 0.14, 0.14])
+ax = fig.add_axes([0.79, 0.825, 0.14, 0.14])
 ax.axis("off")
 ax.imshow(away_logo)
 

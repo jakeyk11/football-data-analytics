@@ -16,7 +16,7 @@ get_key_zones(zone_type='jdp_custom', halfspace=True, zone_14=True, cross_areas=
 import numpy as np
 
 
-def identify_zone(single_event, pitch_dims=(100, 100), zone_type='jdp_custom', get_centers=False):
+def identify_zone(single_event,  zone_type='jdp_custom', get_centers=False, source='WhoScored'):
     """ Identify pitch zone in which a WhoScored-style event started and finished.
 
     Function to identify the pitch zone in which an event started and finished. The function takes in a single event and
@@ -24,9 +24,9 @@ def identify_zone(single_event, pitch_dims=(100, 100), zone_type='jdp_custom', g
 
     Args:
         single_event (pandas.Series): series corresponding to a single event (row) from WhoScored-style event dataframe.
-        pitch_dims (tuple, optional): Pitch dimensions, formatted as (length, width). (100, 100) by default.
         zone_type (string, optional): Type of zoning to apply. Options are jdp_custom, jdp_custom2, jdp_sparse, jdp_dense and grid. jdp_custom by default.
         get_centers (bool, optional): Select whether to return central co-ordinate of start/end zone. False by default.
+        source (string, optional): Select source of input data. WhoScored by default.
 
     Returns:
         int: Pitch zone corresponding to event start position. None if not applicable.
@@ -35,16 +35,44 @@ def identify_zone(single_event, pitch_dims=(100, 100), zone_type='jdp_custom', g
         tuple: Co-ordinates of end zone centre. None if not applicable
 
     """
+    # Statsbomb
+    if source == 'Statsbomb':
+        pitch_dims = (120, 80)
+        pitch_length_x = pitch_dims[0]
+        pitch_width_y = pitch_dims[1]
+        x_startpos = (single_event['location'][0]
+                      if single_event['location'] == single_event['location']
+                      else single_event['location'])
+        y_startpos = (single_event['location'][1]
+                      if single_event['location'] == single_event['location']
+                      else single_event['location'])
+        if single_event['type'] == 'Pass':
+            x_endpos = (single_event['pass_end_location'][0]
+                        if single_event['pass_end_location'] == single_event['pass_end_location']
+                        else single_event['pass_end_location'])
+            y_endpos = (single_event['pass_end_location'][1]
+                        if single_event['pass_end_location'] == single_event['pass_end_location']
+                        else single_event['pass_end_location'])
+        elif single_event['type'] == 'Carry':
+            x_endpos = (single_event['carry_end_location'][0]
+                        if single_event['carry_end_location'] == single_event['carry_end_location']
+                        else single_event['carry_end_location'])
+            y_endpos = (single_event['carry_end_location'][1]
+                        if single_event['carry_end_location'] == single_event['carry_end_location']
+                        else single_event['carry_end_location'])
+        else:
+            x_endpos = np.nan
+            y_endpos = np.nan
 
-    # Isolate length and width
-    pitch_length_x = pitch_dims[0]
-    pitch_width_y = pitch_dims[1]
-
-    # Obtain start and end positions of event
-    x_startpos = pitch_length_x * single_event['x'] / 100
-    y_startpos = pitch_width_y * single_event['y'] / 100
-    x_endpos = pitch_length_x * single_event['endX'] / 100
-    y_endpos = pitch_width_y * single_event['endY'] / 100
+    # Whoscored & other
+    else:
+        pitch_dims = (100, 100)
+        pitch_length_x = pitch_dims[0]
+        pitch_width_y = pitch_dims[1]
+        x_startpos = pitch_length_x * single_event['x'] / pitch_length_x
+        y_startpos = pitch_width_y * single_event['y'] / pitch_width_y
+        x_endpos = pitch_length_x * single_event['endX'] / pitch_length_x
+        y_endpos = pitch_width_y * single_event['endY'] / pitch_width_y
 
     # Initialise outputs
     zone = [0] * 2

@@ -113,7 +113,7 @@ def progressive_pass(single_event, inplay=True):
         return float('nan')
 
 
-def create_convex_hull(events_df, name='default', min_events=3, include_percent=100, pitch_area = 10000):
+def create_convex_hull(events_df, name='default', min_events=3, include_percent=100, pitch_area=10000):
     """ Create a dataframe of convex hull information from statsbomb-style event data.
 
     Function to create convex hull information from a dataframe of whoscored-style event data, where each event has a

@@ -5,7 +5,6 @@
 import os
 import sys
 from statsbombpy import sb
-import pandas as pd
 
 # %% Add custom tools to path
 
@@ -19,11 +18,12 @@ import analysis_tools.get_football_data as gfd
 USERNAME = os.environ.get("STATSBOMB_USERNAME")
 PASSWORD = os.environ.get("STATSBOMB_PASSWORD")
 
-# %% Get available competitions
+# %% Get available competitions and matches
 
-available_comps = sb.competitions(creds = {"user": USERNAME, "passwd": PASSWORD})
+#available_comps = sb.competitions(creds = {"user": USERNAME, "passwd": PASSWORD})
+#available_matches = sb.matches(competition_id=3, season_id=235, creds = {"user": USERNAME, "passwd": PASSWORD})
 
-#%% User inputs
+# %% User inputs
 
 # Input competition name (Statsbomb convention)
 competition = 'Championship'

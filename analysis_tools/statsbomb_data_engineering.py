@@ -2,9 +2,15 @@
 
 Functions
 ---------
-cumulative_match_mins(events, lineups=None)
+cumulative_match_mins(events)
     Add cumulative minutes to event data and calculate true match minutes.
-    
+
+get_playtime_and_position(events, lineups)
+    Add time played and position played information to lineups dataframe.
+
+longest_xi(lineups):
+    Determine the xi players in each team on the pitch for the longest consistent time.
+
 events_while_playing(events, lineups, event_name='Pass', event_team='opposition')
     Determine number of times an event type occurs whilst players are on the pitch, and add to lineups dataframe.
 
@@ -29,35 +35,18 @@ import pandas
 import pandas as pd
 
 
-def cumulative_match_mins(events, lineups=None):
+def cumulative_match_mins(events):
     """ Add cumulative minutes to event data and calculate true match minutes.
 
     Function to calculate cumulative match minutes, accounting for extra time, and add the information to statsbomb
-    event data. If passed a lineups dataframe, the function will use cumulative minutes calculations to determine the
-    number of minutes played by each player in each match, again adding the information to the lineups dataframe.
+    event data.
 
     Args:
         events (pandas.DataFrame): statsbomb-style dataframe of event data. Events can be from multiple matches.
-        lineups (pandas.DataFrame, optional): statsbomb-style dataframe of lineups, can be from multiple matches.
 
     Returns:
         pandas.DataFrame: statsbomb-style event dataframe with additional 'cumulative_mins' column.
-        pandas.DataFrame: statsbomb-style lineup dataframe with additional time columns. Empty if lineups isn't passed.
         """
-
-    # Nested function to calculate and format time played from match duration and line-up dataframe
-    def time_played(match_lineup, match_minutes):
-        time_on = match_lineup['time_on']
-        time_off = match_lineup['time_off']
-        if not match_lineup['positions']:
-            time_on = 0
-            time_off = 0
-        if time_on != time_on:
-            time_on = 0
-        if time_off != time_off:
-            time_off = match_minutes
-        mins_played = time_off - time_on
-        return [time_on, time_off, mins_played]
 
     # Initialise output dataframes
     events_out = pd.DataFrame()
@@ -65,9 +54,8 @@ def cumulative_match_mins(events, lineups=None):
 
     # Add cumulative time to events data, resetting for each unique match
     for match_id in events['match_id'].unique():
-        match_events = events[events['match_id'] == match_id]
-        match_events.loc[:, 'cumulative_mins'] = (match_events.loc[:, 'minute'] +
-                                                  (1 / 60) * match_events.loc[:, 'second'])
+        match_events = events[events['match_id'] == match_id].copy()
+        match_events['cumulative_mins'] = (match_events['minute'] + (1 / 60) * match_events['second'])
 
         # Add time increment to cumulative minutes based on period of game.
         for period in np.arange(1, match_events['period'].max() + 1, 1):
@@ -80,29 +68,137 @@ def cumulative_match_mins(events, lineups=None):
                 t_delta = 0
             match_events.loc[match_events['period'] == period, 'cumulative_mins'] += t_delta
 
-        # Calculate total game time and rebuild events dataframe
-        total_mins = match_events['cumulative_mins'].max()
+        # Rebuild events dataframe
         events_out = pd.concat([events_out, match_events])
 
-        # Obtain corresponding match lineups, if lineups is passed as an input.
-        if lineups is not None:
-            lineup = lineups[lineups['match_id'] == match_id]
+    return events_out
 
-            # Add time on and time off to each player in the lineup by obtaining substitute info from match events
-            for _, sub in match_events[match_events['type'] == 'Substitution'].iterrows():
-                lineup.loc[lineup['player_name'] == sub['substitution_replacement'], 'time_on'] = sub['cumulative_mins']
-                lineup.loc[lineup['player_name'] == sub['player'], 'time_off'] = sub['cumulative_mins']
 
-            # Apply time_played function to reformat time on and time off, and calculate minutes played
-            lineup[['time_on', 'time_off', 'mins_played']] = lineup.apply(time_played, axis=1, result_type="expand",
-                                                                          match_minutes=total_mins)
-            # Rebuild lineups dataframe
-            lineups_out = pd.concat([lineups_out, lineup])
+def get_playtime_and_position(events, lineups):
+    """ Add time played and position played information to lineups dataframe.
 
-        else:
-            lineups_out = pd.DataFrame()
+    Function to calculate the total time (including added time) that a player spends on the pitch, and the position
+    in which they played. This information is obtained by scanning a Statsbomb style event dataframe for starting
+    xis, substitutions, tactical changes and red cards. The information is then added to a statsbomb style lineups
+    dataframe. Both events and lineups can be from one or multiple matchee.
 
-    return events_out, lineups_out
+    Args:
+        events (pandas.DataFrame): statsbomb-style dataframe of event data. Events can be from multiple matches.
+        lineups (pandas.DataFrame, optional): statsbomb-style dataframe of lineups, can be from multiple matches.
+
+    Returns:
+        pandas.DataFrame: statsbomb-style lineup dataframe with additional time and position columns.
+        """
+
+    # Initialise output dataframes
+    lineups_out = lineups
+    lineups_out['position'] = 'Sub'
+
+    # Isolate each match, calculate duration and find starting xi, substitutions, tactical changes and red cards
+    for match_id in events['match_id'].unique():
+        match_duration = events[events['match_id'] == match_id]['cumulative_mins'].max()
+        player_changes = events[(events['match_id'] == match_id) &
+                                (events['type'].isin(['Starting XI', 'Substitution',
+                                                      'Tactical Shift', 'Bad Behaviour']))]
+        # Isolate each team
+        for team in player_changes['team'].unique():
+            # Loop through starting xis, adding positions and time played to lineups dataframe
+            for player in player_changes[(player_changes['team'] == team) &
+                                         (player_changes['type'] == 'Starting XI')]['tactics'].values[0]['lineup']:
+                lineups_out.at[lineups_out[(lineups_out['player_id'] == player['player']['id'])
+                                           & (lineups_out['match_id'] == match_id)].index.values[0],
+                               'position'] = ''.join(s[0] for s in player['position']['name'].split())
+                lineups_out.at[lineups_out[(lineups_out['player_id'] == player['player']['id']) &
+                                           (lineups_out['match_id'] == match_id)].index.values[0], 'time_on'] = 0
+                lineups_out.at[lineups_out[(lineups_out['player_id'] == player['player']['id']) &
+                                           (lineups_out['match_id'] == match_id)].index.values[0],
+                               'time_off'] = match_duration
+            # Loop through substitutions, and update minutes played information
+            for _, substitution in player_changes[(player_changes['team'] == team) &
+                                                  (player_changes['type'] == 'Substitution')].iterrows():
+                lineups_out.at[lineups_out[(lineups_out['player_name'] == substitution['substitution_replacement']) &
+                                           (lineups_out['match_id'] == match_id)].index.values[0],
+                               'position'] = ''.join(s[0] for s in substitution['position'].split())
+                lineups_out.at[lineups_out[(lineups_out['player_id'] == substitution['player_id']) &
+                                           (lineups_out['match_id'] == match_id)].index.values[0],
+                               'time_off'] = substitution['cumulative_mins']
+                lineups_out.at[lineups_out[(lineups_out['player_name'] == substitution['substitution_replacement'])
+                                           & (lineups_out['match_id'] == match_id)].index.values[0],
+                               'time_on'] = substitution['cumulative_mins']
+                lineups_out.at[lineups_out[(lineups_out['player_name'] == substitution['substitution_replacement'])
+                                           & (lineups_out['match_id'] == match_id)].index.values[0],
+                               'time_off'] = match_duration
+            # Loop through red cards, and update minutes played information
+            for _, sent_off in player_changes[(player_changes['team'] == team) &
+                                              (player_changes['bad_behaviour_card'].isin(
+                                                  ['Red Card', 'Second Yellow']))].iterrows():
+                lineups_out.at[lineups_out[(lineups_out['player_id'] == sent_off['player_id']) &
+                                           (lineups_out['match_id'] == match_id)].index.values[0],
+                               'time_off'] = sent_off['cumulative_mins']
+
+    lineups_out['mins_played'] = lineups_out['time_off'] - lineups_out['time_on']
+    lineups_out.loc[lineups_out['mins_played'] != lineups_out['mins_played'], 'mins_played'] = 0
+
+    return lineups_out
+
+
+def longest_xi(lineups):
+    """ Determine the xi players in each team on the pitch for the longest consistent time.
+
+    Determine the xi players in each team that stay on the pitch for the longest time together, and add information
+    to the Statsbomb line-ups dataframe. It is intended that this function is used after playtime has been calculated.
+
+    Args:
+        lineups (pandas.DataFrame): Statsbomb-style dataframe of player information, can be from multiple matches.
+
+    Returns:
+        pandas.DataFrame: WhoScored-style player dataframe with additional longest_xi column."""
+
+    # Initialise output dataframes
+    lineups_out = pd.DataFrame()
+
+    # Add cumulative time to events data, resetting for each unique match
+    for match_id in lineups['match_id'].unique():
+        lineups = lineups[lineups['match_id'] == match_id]
+        lineups['longest_xi'] = np.nan
+
+        # Determine match length and initialise list of sub minutes.
+        match_end = lineups['time_off'].max()
+        sub_mins = [[], []]
+
+        # Determine the longest same xi for each team individually
+        for idx, team in enumerate(lineups['team_name'].unique()):
+            team_lineup_df = lineups[lineups['team_name'] == team]
+
+            # Get minutes players are subbed off
+            for _, player in team_lineup_df.iterrows():
+                if player['time_off'] != match_end and player['time_off'] == player['time_off']:
+                    sub_mins[idx].append(player['time_off'])
+
+            # Add in match start minute and match end minute, then sort by minute
+            sub_mins[idx].insert(0, 0)
+            sub_mins[idx].append(int(match_end))
+            sub_mins[idx].sort()
+
+            # Longest xi corresponds to the largest time between subs. Get indices of start and end min.
+            max_min_diff = 0
+            same_team_idxx = 1
+            for idxx in np.arange(1, len(sub_mins[idx])):
+                min_diff = sub_mins[idx][idxx] - sub_mins[idx][idxx - 1]
+                if min_diff > max_min_diff:
+                    max_min_diff = min_diff
+                    same_team_idxx = idxx
+            same_team_mins = [sub_mins[idx][same_team_idxx - 1], sub_mins[idx][same_team_idxx]]
+
+            # Check if players game time includes the longest xi times, and mark if they feature in the longest xi
+            for playerid, player in team_lineup_df.iterrows():
+                if player['time_on'] <= same_team_mins[0] and player['time_off'] >= same_team_mins[1]:
+                    lineups.loc[playerid, 'longest_xi'] = True
+
+        # Rebuild player dataframe
+        lineups_out = pd.concat([lineups_out, lineups])
+
+    return lineups_out
 
 
 def events_while_playing(events, lineups, event_name='Pass', event_team='opposition'):
@@ -149,8 +245,8 @@ def events_while_playing(events, lineups, event_name='Pass', event_team='opposit
 
             # For each player, count events whilst they were on the pitch
             for idx, player in team_lineup.iterrows():
-                event_count = len(team_events[(team_events['cumulative_mins'] > player['time_on']) &
-                                              (team_events['cumulative_mins'] < player['time_off'])])
+                event_count = len(team_events[(team_events['cumulative_mins'] >= player['time_on']) &
+                                              (team_events['cumulative_mins'] <= player['time_off'])])
                 lineup.loc[idx, col_name] = event_count
 
         # Rebuild lineups dataframe
@@ -192,31 +288,90 @@ def add_player_nickname(events, lineups):
     return events_out, lineups_out
 
 
-def create_player_list(lineups, additional_cols=None):
+def create_player_list(lineups, additional_cols=None, pass_extra=None):
     """ Create a list of players from statsbomb-style lineups dataframe
 
-    Function to read a statsbomb-style lineups dataframe (single or multiple matches) and return a dataframe of
-    players that featured in squad. The function will also aggregate player information if columns are passed into the
+    Function to read a whoscored-style lineups dataframe (single or multiple matches) and return a dataframe of
+    players that featured in squads. When multiple matches are passes, the function will determine the position that a
+    player most frequently plays. The function will also aggregate player information if columns are passed into the
     additional_cols argument.
 
     Args:
         lineups (pandas.DataFrame): statsbomb-style dataframe of lineups, can be from multiple matches.
-        additional_cols (list): list of column names to be aggregated and included in output dataframe.
+        additional_cols (list, optional): list of column names to be aggregated and included in output dataframe.
+        pass_extra (list, optional): list of extra columns within lineups to include in output dataframe.
 
     Returns:
         pandas.DataFrame: players that feature in one or more lineup entries, may include total minutes played.
     """
 
-    # Specify additional_cols as list if not assigned
+    # Nested function to group and categorise positions
+    def group_positions(position):
+        if position in ['G']:
+            position_group = 'Goalkeeper'
+        elif position in ['CB', 'LCB', 'RCB']:
+            position_group = 'Centre Back'
+        elif position in ['LB', 'RB']:
+            position_group = 'Full-back'
+        elif position in ['LWB', 'RWB']:
+            position_group = 'Wing-back'
+        elif position in ['CDM', 'LDM', 'RDM']:
+            position_group = 'Defensive Midfielder'
+        elif position in ['CM', 'LCM', 'RCM']:
+            position_group = 'Centre Midfielder'
+        elif position in ['CAM', 'LAM', 'RAM']:
+            position_group = 'Attacking Midfielder'
+        elif position in ['LM', 'RM']:
+            position_group = 'Wide Midfielder'
+        elif position in ['LW', 'RW']:
+            position_group = 'Winger'
+        elif position in ['CF', 'LCF', 'RCF']:
+            position_group = 'Centre Forward'
+        elif position in ['Sub']:
+            position_group = 'Substitute'
+        else:
+            position_group = 'Unknown'
+        if position_group in ['Goalkeeper']:
+            position_category = 'Goalkeeper'
+        elif position_group in ['Centre Back', 'Full-back', 'Wing-back']:
+            position_category = 'Defender'
+        elif position_group in ['Defensive Midfielder', 'Centre Midfielder', 'Attacking Midfielder', 'Wide Midfielder']:
+            position_category = 'Midfielder'
+        elif position_group in ['Winger', 'Centre Forward']:
+            position_category = 'Forward'
+        else:
+            position_category = position_group
+
+        return position_group, position_category
+
+    # Dataframe of player names and team
+    playerinfo_df = lineups[['player_id', 'player_name', 'player_nickname', 'position', 'country',
+                             'team_name'] + [pass_extra]].drop_duplicates().set_index('player_id')
+
+    # Calculate total playing minutes for each player and add to dataframe
     if additional_cols is None:
-        additional_cols = list()
+        included_cols = lineups.groupby(['player_id', 'position'], axis=0).sum()['mins_played']
+    else:
+        included_cols = lineups.groupby(['player_id', 'position'], axis=0).sum()[['mins_played'] + additional_cols]
 
-    # Dataframe of player names and nicknames
-    playerinfo_df = lineups[['player_name', 'player_nickname']].drop_duplicates()
+    playerinfo_df = playerinfo_df.merge(included_cols, left_on=['player_id', 'position'], right_index=True)
 
-    # If include_mins = True, calculate total playing minutes for each player and add to dataframe
-    included_cols = lineups.groupby('player_name', axis=0).sum()[additional_cols]
-    playerinfo_df = playerinfo_df.merge(included_cols, left_on='player_name', right_index=True)
+    # Sum minutes played in each position
+    playerinfo_df['tot_mins_played'] = playerinfo_df.groupby(['player_id'])['mins_played'].transform('sum')
+
+    # Order player entries by minutes played, ensuring most popular position is at the top.
+    playerinfo_df.sort_values('mins_played', ascending=False, inplace=True)
+
+    # Remove duplicates, leaving only the player in their most popular position
+    playerinfo_df = playerinfo_df[~playerinfo_df.index.duplicated(keep='first')]
+
+    # Rename columns
+    playerinfo_df['mins_played'] = playerinfo_df['tot_mins_played']
+    playerinfo_df.drop('tot_mins_played', axis=1, inplace=True)
+
+    # Add position info
+    playerinfo_df['position_group'], playerinfo_df['position_category'] = zip(*playerinfo_df['position'].
+                                                                              apply(group_positions))
 
     return playerinfo_df
 
@@ -250,17 +405,17 @@ def group_player_events(events, player_data, group_type='count', event_types=Non
 
     # Perform aggregation based on grouping type input
     if group_type == 'count':
-        grouped_events = events.groupby('player', axis=0).count()
-        selected_events = grouped_events[event_types]
+        grouped_events = events.groupby('player_id', axis=0).count()
+        selected_events = grouped_events[event_types].copy()
         selected_events.loc[:, primary_event_name] = grouped_events['match_id']
     elif group_type == 'sum':
-        grouped_events = events.groupby('player', axis=0).sum()
-        selected_events = grouped_events[event_types]
+        grouped_events = events.groupby('player_id', axis=0).sum()
+        selected_events = grouped_events[event_types].copy()
     else:
         selected_events = pd.DataFrame()
 
     # Merge into player information dataframe
-    player_data_out = player_data_out.merge(selected_events, left_on='player_name', right_index=True, how='outer')
+    player_data_out = player_data_out.merge(selected_events, left_on='player_id', right_index=True, how='outer')
     return player_data_out
 
 
@@ -284,10 +439,6 @@ def find_offensive_actions(events):
     # Remove defensive foul won
     offensive_action_df = offensive_action_df.drop(offensive_action_df[offensive_action_df['foul_won_defensive']
                                                                        == True].index)
-
-    # Remove unsuccessful pass
-    offensive_action_df = offensive_action_df.drop(offensive_action_df[offensive_action_df['pass_outcome'] ==
-                                                                       offensive_action_df['pass_outcome']].index)
 
     # Remove passes from set pieces
     offensive_action_df = offensive_action_df.drop(offensive_action_df[offensive_action_df['pass_type']

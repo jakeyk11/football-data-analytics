@@ -15,7 +15,13 @@ import analysis_tools.get_football_data as gfd
 # %% User inputs
 
 # Input WhoScored match id
-match_id = '1640718'
+match_id = '1640753'
+
+# Input start year of competition
+year = '2022'
+
+# Input league
+league = 'EPL'
 
 # Obtain and save data using custom function
-events, players, mappings = gfd.get_whoscored_data(match_id, get_mappings=False, save_to_file=True, folderpath='../../data_directory/whoscored_data')
+events, players, mappings = gfd.get_whoscored_data(match_id, get_mappings=False, save_to_file=True, folderpath=f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}")

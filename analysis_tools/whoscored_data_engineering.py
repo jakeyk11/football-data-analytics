@@ -11,6 +11,9 @@ minutes_played(lineups)
 longest_xi(players_df):
     Determine the xi players in each team on the pitch for the longest consistent time.
 
+events_while_playing(events_df, players_df, event_name='Pass', event_team='opposition'):
+    Determine number of times an event type occurs whilst players are on the pitch, and add to player dataframe.
+
 create_player_list(lineups, additional_cols=None):
     Create a list of players from whoscored-style lineups dataframe. This requires minutes played information.
 
@@ -88,10 +91,12 @@ def minutes_played(players_df, events_df=None):
     for match_id in players_df['match_id'].unique():
         players = players_df[players_df['match_id'] == match_id]
 
-        # Determine total match length from event data, if passed
+        # Determine total match length from event data, if passed (protect against erroneous mins)
         if events_df is not None:
             match_events = events_df[events_df['match_id'] == match_id]
-            match_minutes = max(match_events['expandedMinute'])
+            match_minutes = match_events['expandedMinute'].max()
+            if match_minutes >= 300:
+                match_minutes = 95
         else:
             match_minutes = 95
 
@@ -164,11 +169,66 @@ def longest_xi(players_df):
     return players_df_out
 
 
+def events_while_playing(events_df, players_df, event_name='Pass', event_team='opposition'):
+    """ Determine number of times an event type occurs whilst players are on the pitch, and add to player dataframe.
+
+    Function to calculate the total number of specific event-types that a player either faces or own team completes
+    in each game, and add the information to a WhoScored-style dataframe. The user must define the event type to
+    aggregate using WhoScored convention, and specify whether to aggregate for the player's own team or the
+    opposition. For example, this function could be used to calculate the number of passes the opposition team makes,
+    and assign to each player within the lineups dataframe.
+
+    Args:
+        events_df (pandas.DataFrame): WhoScored-style dataframe of event data. Events can be from multiple matches.
+        players_df (pandas.DataFrame): WhoScored-style dataframe of players, can be from multiple matches.
+        event_name (str): WhoScored event type to aggregate data on. Requires WhoScored convention. Defaults to 'Pass'
+        event_team (str): aggregate on the player's own team or opposition team. Defaults to opposition.
+
+    Returns:
+        pandas.DataFrame: WhoScored-style player dataframe with additional events count column.
+    """
+
+    # Initialise output dataframe
+    players_df_out = pd.DataFrame()
+
+    # Add event count to lineup data, resetting for each individual match
+    for match_id in events_df['match_id'].unique():
+        match_events = events_df[events_df['match_id'] == match_id]
+        players = players_df[players_df['match_id'] == match_id]
+
+        # For each team calculate team events, and assign to player
+        for team in set(match_events['teamId']):
+            team_players = players[players['teamId'] == team]
+
+            # Choose whether to include own team or opposition events, and build column name
+            if event_team == 'own':
+                team_events = match_events[(match_events['teamId'] == team) &
+                                           (match_events['eventType'] == event_name)]
+                col_name = 'team_' + event_name.lower()
+
+            else:
+                team_events = match_events[(match_events['teamId'] != team) &
+                                           (match_events['eventType'] == event_name)]
+                col_name = 'opp_' + event_name.lower()
+
+            # For each player, count events whilst they were on the pitch
+            for idx, player in team_players.iterrows():
+                event_count = len(team_events[(team_events['expandedMinute'] > player['time_on']) &
+                                              (team_events['expandedMinute'] < player['time_off'])])
+                team_players.loc[idx,col_name] = event_count
+
+            # Rebuild lineups dataframe
+            players_df_out = pd.concat([players_df_out, team_players])
+
+    return players_df_out
+
+
 def create_player_list(lineups, additional_cols=None):
     """ Create a list of players from whoscored-style lineups dataframe. This requires minutes played information.
 
     Function to read a whoscored-style lineups dataframe (single or multiple matches) and return a dataframe of
-    players that featured in squad. The function will also aggregate player information if columns are passed into the
+    players that featured in squads. When multiple matches are passes, the function will determine the position that a
+    player most frequently plays. The function will also aggregate player information if columns are passed into the
     additional_cols argument.
 
     Args:
@@ -186,22 +246,29 @@ def create_player_list(lineups, additional_cols=None):
     if additional_cols is None:
         included_cols = lineups.groupby(['name', 'position', 'team'], axis=0).sum()['mins_played']
     else:
-        included_cols = lineups.groupby(['name', 'position', 'team'], axis=0).sum()[['mins_played'] + [additional_cols]]
+        included_cols = lineups.groupby(['name', 'position', 'team'], axis=0).sum()[['mins_played'] + additional_cols]
 
-    playerinfo_df = playerinfo_df.merge(included_cols, left_on=['name', 'position','team'], right_index=True)
+    playerinfo_df = playerinfo_df.merge(included_cols, left_on=['name', 'position', 'team'], right_index=True)
     
     # Sum minutes played in each position
     playerinfo_df['tot_mins_played'] = playerinfo_df.groupby(['name', 'team'])['mins_played'].transform('sum')
-    
+    if additional_cols is not None:
+        for col in additional_cols:
+            playerinfo_df['tot_' + col] = playerinfo_df.groupby(['name', 'team'])[col].transform('sum')
+
     # Order player entries by minutes played, ensuring most popular position is at the top.
     playerinfo_df.sort_values('mins_played', ascending=False, inplace=True)
     
     # Remove duplicates, leaving only the player in their most popular position
-    playerinfo_df = playerinfo_df[~playerinfo_df.index.duplicated(keep='first')]
+    playerinfo_df = playerinfo_df[~playerinfo_df[['name','team']].duplicated(keep='first')]
     
     # Rename columns 
     playerinfo_df['mins_played'] = playerinfo_df['tot_mins_played']
-    playerinfo_df.drop('tot_mins_played', axis = 1, inplace = True)
+    playerinfo_df.drop('tot_mins_played', axis=1, inplace=True)
+    if additional_cols is not None:
+        for col in additional_cols:
+            playerinfo_df[col] = playerinfo_df['tot_' + col]
+            playerinfo_df.drop('tot_' + col, axis=1, inplace=True)
     
     # Add position type
     playerinfo_df['pos_type'] = playerinfo_df['position'].apply(lambda x: 'DEF' if x in ['DC', 'DL', 'DR', 'DMR', 'DML'] else 
@@ -245,6 +312,9 @@ def group_player_events(events, player_data, group_type='count', event_types=Non
         selected_events.loc[:, primary_event_name] = grouped_events['match_id']
     elif group_type == 'sum':
         grouped_events = events.groupby('playerId', axis=0).sum()
+        selected_events = grouped_events[event_types]
+    elif group_type == 'mean':
+        grouped_events = events.groupby('playerId', axis=0).mean()
         selected_events = grouped_events[event_types]
     else:
         selected_events = pd.DataFrame()

@@ -1,15 +1,14 @@
-# %% Create pass reports and visualisation from event data
+# %% Create visualisation of top progressive passers over a series of games
 #
 # Inputs:   Year to plot data from
 #           League to plot data from
 #           Whoscored match id
-#           Home team
-#           Away team
-#           JDP zone type
+#           Positions not to include
+#           Date of run
+#           Normalisation mode
+#           Minimum play time
 #
-# Outputs:  Pass flow diagrams
-#           Pass convex hulls 
-#           Home and away team pass reports
+# Outputs:  Top 12 progressive passers
 
 # %% Imports and parameters
 
