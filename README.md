@@ -23,7 +23,7 @@ This repository contains a collection of tools, scripts and projects that focus 
 </details>
 
 ## Project Description
-This repository contains a collection of projects that aim to generate meaningful insight from football data. Python is used for extraction, processing, analysis and visualisation of event data, aggregated team data, market value data and more. The project is broken down into sub-projects, each of which aims to either perform a specific analysis, generate some specific insight, or introduce automation to football data analytics. Using the contents of this repository, a number of novel & informative visuals and text threads have been created and shared with the football data analytics community via Twitter (@_JKDS_).
+This repository contains a collection of projects that aim to generate meaningful insight from football data. Python is used for extraction, processing, analysis and visualisation of event data, aggregated team data, market value data and more. The project is broken down into sub-projects, each of which aims to either perform a specific analysis, generate some specific insight, or introduce automation to football data analytics. Using the contents of this repository, a number of novel & informative visuals and text threads have been created and shared with the football data analytics community via Twitter [(@_JKDS_)](https://twitter.com/_JKDS_).
 
 ## Folder Structure
 
@@ -70,6 +70,8 @@ This repository contains a collection of projects that aim to generate meaningfu
     │   │   ├── shot_report_understat.py     
     │   ├── 05_competition_reports
     │   │   ├── import_data_whoscored.py
+    │   │   ├── top_defensive_actions.py
+    │   │   ├── top_penalty_takers.py
     │   │   ├── top_progressive_passers.py
     │ 
     ├── .gitignore 
@@ -159,4 +161,9 @@ Project table of contents: <br>
 
 ### 05 - Automated Competition Reporting
 
-**Summary:** Development of automated scripts to produce competition reports and multi-match player evaluations at any point throughout a competition. This work includes collection and processing of public-domain match event data, and the production of multiple visuals that generate novel and meaningful insight at a team and player level. Visuals currently include top progressive passers.
+**Summary:** Development of automated scripts to produce competition reports and multi-match player evaluations at any point throughout a competition. This work includes collection and processing of public-domain match event data, and the production of multiple visuals that generate novel and meaningful insight at a team and player level. Visuals currently include an assessment of progressive passes, forward defensive actions and penalty placement.
+
+<p align="center">
+  <img width="32%" src="./data_directory/misc_data/images/EPL-2021-top-defensive-actions-per-100-opposition-passes-in-that-third.png"> &nbsp &nbsp 
+    <img width="32%" src="./data_directory/misc_data/images/europe5-top-pen-takers-2019-2022.png"> &nbsp &nbsp 
+</p>
