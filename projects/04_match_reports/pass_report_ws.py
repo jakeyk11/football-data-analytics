@@ -45,21 +45,21 @@ import analysis_tools.logos_and_badges as lab
 # %% User inputs
 
 # Input WhoScored match id
-match_id = '1640753'
+match_id = '1549722'
 
 # Select year
-year = '2022'
+year = '2021'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
 league = 'EPL'
 
 # Select team codes
-home_team = 'Wolves'
-away_team = 'Man City'
+home_team = 'Liverpool'
+away_team = 'Leeds'
 
 # Team name to print
-home_team_print = 'Wolves'
-away_team_print = 'Manchester City'
+home_team_print = None
+away_team_print = None
 
 # Pass flow zone type
 zone_type = 'jdp_custom'

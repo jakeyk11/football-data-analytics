@@ -1,8 +1,8 @@
-# %% Create visualisation of top players by defensive actions across a game
+# %% Create visualisation of top players by defensive actions across a selection of games
 #
 # Inputs:   Year to plot data from
 #           League to plot data from
-#           Whoscored match id
+#           Whoscored match ids
 #           Positions not to include
 #           Date of run
 #           Normalisation mode
@@ -59,7 +59,7 @@ league = 'La_Liga'
 # Select position to exclude
 pos_exclude=[]
 
-# Select positions to exclude and position formatting on title
+# Position formatting on title
 pos_input = ''
 
 # Input run-date

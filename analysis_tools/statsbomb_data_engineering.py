@@ -48,6 +48,10 @@ def cumulative_match_mins(events):
         pandas.DataFrame: statsbomb-style event dataframe with additional 'cumulative_mins' column.
         """
 
+    # Function to format time stamp
+    def convert_time(t):
+        return 60 * float(t.split(':')[0]) + float(t.split(':')[1]) + (1/60) * float(t.split(':')[2])
+
     # Initialise output dataframes
     events_out = pd.DataFrame()
     lineups_out = pd.DataFrame()
@@ -55,7 +59,7 @@ def cumulative_match_mins(events):
     # Add cumulative time to events data, resetting for each unique match
     for match_id in events['match_id'].unique():
         match_events = events[events['match_id'] == match_id].copy()
-        match_events['cumulative_mins'] = (match_events['minute'] + (1 / 60) * match_events['second'])
+        match_events['cumulative_mins'] = match_events['timestamp'].apply(convert_time)
 
         # Add time increment to cumulative minutes based on period of game.
         for period in np.arange(1, match_events['period'].max() + 1, 1):
@@ -345,8 +349,12 @@ def create_player_list(lineups, additional_cols=None, pass_extra=None):
         return position_group, position_category
 
     # Dataframe of player names and team
-    playerinfo_df = lineups[['player_id', 'player_name', 'player_nickname', 'position', 'country',
-                             'team_name'] + [pass_extra]].drop_duplicates().set_index('player_id')
+    if pass_extra is None:
+        playerinfo_df = lineups[['player_id', 'player_name', 'player_nickname', 'position', 'country',
+                                 'team_name']].drop_duplicates().set_index('player_id')
+    else:
+        playerinfo_df = lineups[['player_id', 'player_name', 'player_nickname', 'position', 'country',
+                                 'team_name'] + [pass_extra]].drop_duplicates().set_index('player_id')
 
     # Calculate total playing minutes for each player and add to dataframe
     if additional_cols is None:

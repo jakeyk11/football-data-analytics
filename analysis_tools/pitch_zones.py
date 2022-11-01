@@ -40,6 +40,8 @@ def identify_zone(single_event,  zone_type='jdp_custom', get_centers=False, sour
         pitch_dims = (120, 80)
         pitch_length_x = pitch_dims[0]
         pitch_width_y = pitch_dims[1]
+        box_x_ratio = 0.15
+        box_y_ratio = 0.225
         x_startpos = (single_event['location'][0]
                       if single_event['location'] == single_event['location']
                       else single_event['location'])
@@ -69,6 +71,8 @@ def identify_zone(single_event,  zone_type='jdp_custom', get_centers=False, sour
         pitch_dims = (100, 100)
         pitch_length_x = pitch_dims[0]
         pitch_width_y = pitch_dims[1]
+        box_x_ratio = 0.17
+        box_y_ratio = 0.21
         x_startpos = pitch_length_x * single_event['x'] / pitch_length_x
         y_startpos = pitch_width_y * single_event['y'] / pitch_width_y
         x_endpos = pitch_length_x * single_event['endX'] / pitch_length_x
@@ -84,74 +88,74 @@ def identify_zone(single_event,  zone_type='jdp_custom', get_centers=False, sour
             if (x_pos == 0 and y_pos == 0) or x_pos != x_pos or y_pos != y_pos:
                 zone[idx] = np.nan
                 zone_center[idx] = np.nan
-            elif x_pos <= 0.17 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+            elif x_pos <= box_x_ratio * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(2)
-                    zone_center[idx] = (0.17 * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = (box_x_ratio * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(1)
-                    zone_center[idx] = (0.17 * pitch_length_x / 2, (0.79 + 0.21) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (box_x_ratio * pitch_length_x / 2, ((1-box_y_ratio) + box_y_ratio) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(0)
-                    zone_center[idx] = (0.17 * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
-            elif 0.17 * pitch_length_x < x_pos <= 0.5 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                    zone_center[idx] = (box_x_ratio * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
+            elif box_x_ratio * pitch_length_x < x_pos <= 0.5 * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(7)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(6)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(5)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.3675 + 0.6325) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, (0.3675 + 0.6325) * pitch_width_y / 2)
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(4)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.79 + 0.6325) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, ((1-box_y_ratio) + 0.6325) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(3)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.79 + 1) * pitch_width_y / 2)
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, ((1-box_y_ratio) + 1) * pitch_width_y / 2)
             elif 0.5 * pitch_length_x < x_pos < (2/3) * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(10)
-                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(12)
-                    zone_center[idx] = ((0.83 + 0.5) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = (((1-box_x_ratio) + 0.5) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(9)
                     zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (0.6325 + 0.3675) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(11)
-                    zone_center[idx] = ((0.83 + 0.5) * pitch_length_x / 2, (0.6325 + 0.79) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (((1-box_x_ratio) + 0.5) * pitch_length_x / 2, (0.6325 + (1-box_y_ratio)) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(8)
-                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
-            elif (2/3) * pitch_length_x <= x_pos < 0.83 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
+            elif (2/3) * pitch_length_x <= x_pos < (1-box_x_ratio) * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(15)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(12)
-                    zone_center[idx] = ((0.83 + 0.5) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = (((1-box_x_ratio) + 0.5) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(14)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, (0.6325 + 0.3675) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, (0.6325 + 0.3675) * pitch_width_y / 2)
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(11)
-                    zone_center[idx] = ((0.83 + 0.5) * pitch_length_x / 2, (0.6325 + 0.79) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (((1-box_x_ratio) + 0.5) * pitch_length_x / 2, (0.6325 + (1-box_y_ratio)) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(13)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
-            elif x_pos >= 0.83 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
+            elif x_pos >= (1-box_x_ratio) * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(18)
-                    zone_center[idx] = ((1 + 0.83) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = ((1 + (1-box_x_ratio)) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(17)
-                    zone_center[idx] = ((1 + 0.83) * pitch_length_x / 2, (0.21 + 0.79) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = ((1 + (1-box_x_ratio)) * pitch_length_x / 2, (box_y_ratio + (1-box_y_ratio)) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(16)
-                    zone_center[idx] = ((1 + 0.83) * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
+                    zone_center[idx] = ((1 + (1-box_x_ratio)) * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
 
     # Determine event zones and one centers for second custom jdp
     if zone_type == 'jdp_custom2':
@@ -159,74 +163,74 @@ def identify_zone(single_event,  zone_type='jdp_custom', get_centers=False, sour
             if (x_pos == 0 and y_pos == 0) or x_pos != x_pos or y_pos != y_pos:
                 zone[idx] = np.nan
                 zone_center[idx] = np.nan
-            elif x_pos <= 0.17 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+            elif x_pos <= box_x_ratio * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(2)
-                    zone_center[idx] = (0.17 * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = (box_x_ratio * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(1)
-                    zone_center[idx] = (0.17 * pitch_length_x / 2, (0.79 + 0.21) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (box_x_ratio * pitch_length_x / 2, ((1-box_y_ratio) + box_y_ratio) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(0)
-                    zone_center[idx] = (0.17 * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
-            elif 0.17 * pitch_length_x < x_pos <= 0.5 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                    zone_center[idx] = (box_x_ratio * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
+            elif box_x_ratio * pitch_length_x < x_pos <= 0.5 * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(7)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(6)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(5)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.3675 + 0.6325) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, (0.3675 + 0.6325) * pitch_width_y / 2)
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(4)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.79 + 0.6325) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, ((1-box_y_ratio) + 0.6325) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(3)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.79 + 1) * pitch_width_y / 2)
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, ((1-box_y_ratio) + 1) * pitch_width_y / 2)
             elif 0.5 * pitch_length_x < x_pos < (2/3) * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(12)
-                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(11)
-                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(10)
                     zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (0.6325 + 0.3675) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(9)
-                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (0.6325 + 0.79) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (0.6325 + (1-box_y_ratio)) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(8)
-                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
-            elif (2/3) * pitch_length_x <= x_pos < 0.83 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
+            elif (2/3) * pitch_length_x <= x_pos < (1-box_x_ratio) * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(17)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(16)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(15)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, (0.6325 + 0.3675) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, (0.6325 + 0.3675) * pitch_width_y / 2)
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(14)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, (0.6325 + 0.79) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, (0.6325 + (1-box_y_ratio)) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(13)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
-            elif x_pos >= 0.83 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
+            elif x_pos >= (1-box_x_ratio) * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(20)
-                    zone_center[idx] = ((1 + 0.83) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = ((1 + (1-box_x_ratio)) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(19)
-                    zone_center[idx] = ((1 + 0.83) * pitch_length_x / 2, (0.21 + 0.79) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = ((1 + (1-box_x_ratio)) * pitch_length_x / 2, (box_y_ratio + (1-box_y_ratio)) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(18)
-                    zone_center[idx] = ((1 + 0.83) * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
+                    zone_center[idx] = ((1 + (1-box_x_ratio)) * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
 
     # Determine event zones and zone centers for dense jdp
     elif zone_type == 'jdp_dense':
@@ -234,90 +238,90 @@ def identify_zone(single_event,  zone_type='jdp_custom', get_centers=False, sour
             if (x_pos == 0 and y_pos == 0) or x_pos != x_pos or y_pos != y_pos:
                 zone[idx] = np.nan
                 zone_center[idx] = np.nan
-            elif x_pos <= 0.17 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+            elif x_pos <= box_x_ratio * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(2)
-                    zone_center[idx] = (0.17 * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = (box_x_ratio * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(1)
-                    zone_center[idx] = (0.17 * pitch_length_x / 2, (0.79 + 0.21) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (box_x_ratio * pitch_length_x / 2, ((1-box_y_ratio) + box_y_ratio) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(0)
-                    zone_center[idx] = (0.17 * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
-            elif 0.17 * pitch_length_x < x_pos <= (1/3) * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                    zone_center[idx] = (box_x_ratio * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
+            elif box_x_ratio * pitch_length_x < x_pos <= (1/3) * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(7)
-                    zone_center[idx] = ((0.17 + (1/3)) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = ((box_x_ratio + (1/3)) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(6)
-                    zone_center[idx] = ((0.17 + (1/3)) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = ((box_x_ratio + (1/3)) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(5)
-                    zone_center[idx] = ((0.17 + (1/3)) * pitch_length_x / 2, (0.3675 + 0.6325) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = ((box_x_ratio + (1/3)) * pitch_length_x / 2, (0.3675 + 0.6325) * pitch_width_y / 2)
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(4)
-                    zone_center[idx] = ((0.17 + (1/3)) * pitch_length_x / 2, (0.79 + 0.6325) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = ((box_x_ratio + (1/3)) * pitch_length_x / 2, ((1-box_y_ratio) + 0.6325) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(3)
-                    zone_center[idx] = ((0.17 + (1/3)) * pitch_length_x / 2, (0.79 + 1) * pitch_width_y / 2)
+                    zone_center[idx] = ((box_x_ratio + (1/3)) * pitch_length_x / 2, ((1-box_y_ratio) + 1) * pitch_width_y / 2)
             elif (1/3) * pitch_length_x < x_pos <= 0.5 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(12)
-                    zone_center[idx] = (((1/3) + 0.5) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = (((1/3) + 0.5) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(11)
-                    zone_center[idx] = (((1/3) + 0.5) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = (((1/3) + 0.5) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(10)
                     zone_center[idx] = (((1/3) + 0.5) * pitch_length_x / 2, (0.3675 + 0.6325) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(9)
-                    zone_center[idx] = (((1/3) + 0.5) * pitch_length_x / 2, (0.79 + 0.6325) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (((1/3) + 0.5) * pitch_length_x / 2, ((1-box_y_ratio) + 0.6325) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(8)
-                    zone_center[idx] = (((1/3) + 0.5) * pitch_length_x / 2, (0.79 + 1) * pitch_width_y / 2)
+                    zone_center[idx] = (((1/3) + 0.5) * pitch_length_x / 2, ((1-box_y_ratio) + 1) * pitch_width_y / 2)
             elif 0.5 * pitch_length_x < x_pos < (2/3) * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(17)
-                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(16)
-                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(15)
                     zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (0.6325 + 0.3675) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(14)
-                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (0.6325 + 0.79) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (0.6325 + (1-box_y_ratio)) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(13)
-                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
-            elif (2/3) * pitch_length_x <= x_pos < 0.83 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
+            elif (2/3) * pitch_length_x <= x_pos < (1-box_x_ratio) * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(22)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(21)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(20)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, (0.6325 + 0.3675) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, (0.6325 + 0.3675) * pitch_width_y / 2)
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(19)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, (0.6325 + 0.79) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, (0.6325 + (1-box_y_ratio)) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(18)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
-            elif x_pos >= 0.83 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
+            elif x_pos >= (1-box_x_ratio) * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(25)
-                    zone_center[idx] = ((1 + 0.83) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = ((1 + (1-box_x_ratio)) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(24)
-                    zone_center[idx] = ((1 + 0.83) * pitch_length_x / 2, (0.21 + 0.79) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = ((1 + (1-box_x_ratio)) * pitch_length_x / 2, (box_y_ratio + (1-box_y_ratio)) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(23)
-                    zone_center[idx] = ((1 + 0.83) * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
+                    zone_center[idx] = ((1 + (1-box_x_ratio)) * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
 
     # Determine event zones and zone centers for sparse jdp
     elif zone_type == 'jdp_sparse':
@@ -325,90 +329,90 @@ def identify_zone(single_event,  zone_type='jdp_custom', get_centers=False, sour
             if (x_pos == 0 and y_pos == 0) or x_pos != x_pos or y_pos != y_pos:
                 zone[idx] = np.nan
                 zone_center[idx] = np.nan
-            elif x_pos <= 0.17 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+            elif x_pos <= box_x_ratio * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(2)
-                    zone_center[idx] = (0.17 * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = (box_x_ratio * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(1)
-                    zone_center[idx] = (0.17 * pitch_length_x / 2, (0.79 + 0.21) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (box_x_ratio * pitch_length_x / 2, ((1-box_y_ratio) + box_y_ratio) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(0)
-                    zone_center[idx] = (0.17 * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
-            elif 0.17 * pitch_length_x < x_pos <= (1/3) * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                    zone_center[idx] = (box_x_ratio * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
+            elif box_x_ratio * pitch_length_x < x_pos <= (1/3) * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(4)
-                    zone_center[idx] = ((0.17 + (1/3)) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = ((box_x_ratio + (1/3)) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(3)
-                    zone_center[idx] = ((0.17 + (1/3)) * pitch_length_x / 2, (0.79 + 1) * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = ((box_x_ratio + (1/3)) * pitch_length_x / 2, ((1-box_y_ratio) + 1) * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(7)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(6)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.3675 + 0.6325) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, (0.3675 + 0.6325) * pitch_width_y / 2)
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(5)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.79 + 0.6325) * pitch_width_y / 2)
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, ((1-box_y_ratio) + 0.6325) * pitch_width_y / 2)
             elif (1/3) * pitch_length_x < x_pos <= 0.5 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(9)
-                    zone_center[idx] = (((1/3) + 0.5) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (((1/3) + 0.5) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(8)
-                    zone_center[idx] = (((1/3) + 0.5) * pitch_length_x / 2, (0.79 + 1) * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = (((1/3) + 0.5) * pitch_length_x / 2, ((1-box_y_ratio) + 1) * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(7)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(6)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.3675 + 0.6325) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, (0.3675 + 0.6325) * pitch_width_y / 2)
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(5)
-                    zone_center[idx] = ((0.17 + 0.5) * pitch_length_x / 2, (0.79 + 0.6325) * pitch_width_y / 2)
+                    zone_center[idx] = ((box_x_ratio + 0.5) * pitch_length_x / 2, ((1-box_y_ratio) + 0.6325) * pitch_width_y / 2)
             elif 0.5 * pitch_length_x < x_pos < (2/3) * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(11)
-                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(10)
-                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + 0.5) * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(14)
-                    zone_center[idx] = ((0.83 + 0.5) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = (((1-box_x_ratio) + 0.5) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(13)
-                    zone_center[idx] = ((0.83 + 0.5) * pitch_length_x / 2, (0.6325 + 0.3675) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = (((1-box_x_ratio) + 0.5) * pitch_length_x / 2, (0.6325 + 0.3675) * pitch_width_y / 2)
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(12)
-                    zone_center[idx] = ((0.83 + 0.5) * pitch_length_x / 2, (0.6325 + 0.79) * pitch_width_y / 2)
-            elif (2/3) * pitch_length_x <= x_pos < 0.83 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                    zone_center[idx] = (((1-box_x_ratio) + 0.5) * pitch_length_x / 2, (0.6325 + (1-box_y_ratio)) * pitch_width_y / 2)
+            elif (2/3) * pitch_length_x <= x_pos < (1-box_x_ratio) * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(16)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(15)
-                    zone_center[idx] = (((2/3) + 0.83) * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
+                    zone_center[idx] = (((2/3) + (1-box_x_ratio)) * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos < 0.3675 * pitch_width_y:
                     zone[idx] = int(14)
-                    zone_center[idx] = ((0.83 + 0.5) * pitch_length_x / 2, (0.3675 + 0.21) * pitch_width_y / 2)
+                    zone_center[idx] = (((1-box_x_ratio) + 0.5) * pitch_length_x / 2, (0.3675 + box_y_ratio) * pitch_width_y / 2)
                 elif 0.3675 * pitch_width_y <= y_pos <= 0.6325 * pitch_width_y:
                     zone[idx] = int(13)
-                    zone_center[idx] = ((0.83 + 0.5) * pitch_length_x / 2, (0.6325 + 0.3675) * pitch_width_y / 2)
-                elif 0.6325 * pitch_width_y < y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = (((1-box_x_ratio) + 0.5) * pitch_length_x / 2, (0.6325 + 0.3675) * pitch_width_y / 2)
+                elif 0.6325 * pitch_width_y < y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(12)
-                    zone_center[idx] = ((0.83 + 0.5) * pitch_length_x / 2, (0.6325 + 0.79) * pitch_width_y / 2)
-            elif x_pos >= 0.83 * pitch_length_x:
-                if y_pos < 0.21 * pitch_width_y:
+                    zone_center[idx] = (((1-box_x_ratio) + 0.5) * pitch_length_x / 2, (0.6325 + (1-box_y_ratio)) * pitch_width_y / 2)
+            elif x_pos >= (1-box_x_ratio) * pitch_length_x:
+                if y_pos < box_y_ratio * pitch_width_y:
                     zone[idx] = int(19)
-                    zone_center[idx] = ((1 + 0.83) * pitch_length_x / 2, 0.21 * pitch_width_y / 2)
-                elif 0.21 * pitch_width_y <= y_pos <= 0.79 * pitch_width_y:
+                    zone_center[idx] = ((1 + (1-box_x_ratio)) * pitch_length_x / 2, box_y_ratio * pitch_width_y / 2)
+                elif box_y_ratio * pitch_width_y <= y_pos <= (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(18)
-                    zone_center[idx] = ((1 + 0.83) * pitch_length_x / 2, (0.21 + 0.79) * pitch_width_y / 2)
-                elif y_pos > 0.79 * pitch_width_y:
+                    zone_center[idx] = ((1 + (1-box_x_ratio)) * pitch_length_x / 2, (box_y_ratio + (1-box_y_ratio)) * pitch_width_y / 2)
+                elif y_pos > (1-box_y_ratio) * pitch_width_y:
                     zone[idx] = int(17)
-                    zone_center[idx] = ((1 + 0.83) * pitch_length_x / 2, (1 + 0.79) * pitch_width_y / 2)
+                    zone_center[idx] = ((1 + (1-box_x_ratio)) * pitch_length_x / 2, (1 + (1-box_y_ratio)) * pitch_width_y / 2)
 
     start_zone = zone[0]
     start_zone_center = zone_center[0]
@@ -421,7 +425,7 @@ def identify_zone(single_event,  zone_type='jdp_custom', get_centers=False, sour
         return start_zone, end_zone
 
 
-def add_pitch_zones(pitch, pitch_dims=(100, 100), zone_type='jdp_custom', pitch_orientation='vertical', show_zone_numbers=False, line_colour='grey', text_colour = 'w'):
+def add_pitch_zones(pitch, pitch_type='WhoScored', zone_type='jdp_custom', pitch_orientation='vertical', show_zone_numbers=False, line_colour='grey', text_colour='w'):
     """ Draw pitch zones on a mplsoccer style pitch.
 
     Draw a series of dashed lines on a mplsoccer style pitch to break it up into a series of zones. Takes in a
@@ -429,7 +433,7 @@ def add_pitch_zones(pitch, pitch_dims=(100, 100), zone_type='jdp_custom', pitch_
 
     Args:
         pitch (axes object): Mplsoccer pitch axis to plot on.
-        pitch_dims (tuple, optional): Pitch dimensions, formatted as (length, width). (100, 100) by default.
+        pitch_type (string, optional): Select pitch type being plotted on. WhoScored by default.
         zone_type (string, optional): Type of zoning to apply. Options are jdp_custom, jdp_custom2, jdp_sparse, jdp_dense and grid. jdp_custom by default.
         pitch_orientation (string, optional): Orientation of pitch (horizontal or vertical). vertical by default.
         show_zone_numbers (bool, optional): Selection of whether to show zone numbers on pitch. False by default.
@@ -442,6 +446,19 @@ def add_pitch_zones(pitch, pitch_dims=(100, 100), zone_type='jdp_custom', pitch_
 
     ls = '--'
     lw = 0.5
+    pitch_dims = (100, 100)
+    box_x_ratio = 0.17
+    box_y_ratio = 0.21
+
+    if pitch_type == 'WhoScored':
+        pitch_dims = (100, 100)
+        box_x_ratio = 0.17
+        box_y_ratio = 0.21
+    
+    elif pitch_type == 'Statsbomb':
+        pitch_dims = (120, 80)
+        box_x_ratio = 0.15
+        box_y_ratio = 0.225
 
     pitch_length_x = pitch_dims[0]
     pitch_width_y = pitch_dims[1]
@@ -451,29 +468,29 @@ def add_pitch_zones(pitch, pitch_dims=(100, 100), zone_type='jdp_custom', pitch_
 
         # Plot lines for dense jdp
         if zone_type == 'jdp_dense':
-            pitch.plot([0.21 * pitch_width_y, 0.21 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([box_y_ratio * pitch_width_y, box_y_ratio * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 *pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.21 * pitch_width_y, 0.21 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([box_y_ratio * pitch_width_y, box_y_ratio * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.79 * pitch_width_y, 0.79 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio) * pitch_width_y, (1 - box_y_ratio) * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.79 * pitch_width_y, 0.79 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio) * pitch_width_y, (1 - box_y_ratio) * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.6325 * pitch_width_y, 0.6325 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([0.6325 * pitch_width_y, 0.6325 * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.6325 * pitch_width_y, 0.6235 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([0.6325 * pitch_width_y, 0.6235 * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.001 * pitch_width_y, 0.209 * pitch_width_y], [0.17 * pitch_length_x, 0.17 * pitch_length_x],
+            pitch.plot([0.001 * pitch_width_y, (box_y_ratio - 0.001) * pitch_width_y], [box_x_ratio * pitch_length_x, box_x_ratio * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.791 * pitch_width_y, 0.999 * pitch_width_y], [0.17 * pitch_length_x, 0.17 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio - 0.001) * pitch_width_y, 0.999 * pitch_width_y], [box_x_ratio * pitch_length_x, box_x_ratio * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.001 * pitch_width_y, 0.209 * pitch_width_y], [0.83 * pitch_length_x, 0.83 * pitch_length_x],
+            pitch.plot([0.001 * pitch_width_y, (box_y_ratio - 0.001) * pitch_width_y], [(1 - box_x_ratio) * pitch_length_x, (1 - box_x_ratio) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.791 * pitch_width_y, 0.999 * pitch_width_y], [0.83 * pitch_length_x, 0.83 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio - 0.001) * pitch_width_y, 0.999 * pitch_width_y], [(1 - box_x_ratio) * pitch_length_x, (1 - box_x_ratio) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
             pitch.plot([0.001 * pitch_width_y, 0.999 * pitch_width_y], [(1/3) * pitch_length_x, (1/3) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
@@ -482,283 +499,283 @@ def add_pitch_zones(pitch, pitch_dims=(100, 100), zone_type='jdp_custom', pitch_
 
             # Show zone numbers for dense jdp
             if show_zone_numbers:
-                pitch.text((1 + 0.79) * pitch_width_y / 2, 0.17 * pitch_length_x / 2, 0,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, box_x_ratio * pitch_length_x / 2, 0,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.79 + 0.21) * pitch_width_y / 2, 0.17 * pitch_length_x / 2, 1,
+                pitch.text(pitch_width_y / 2, box_x_ratio * pitch_length_x / 2, 1,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, 0.17 * pitch_length_x / 2, 2,
+                pitch.text(box_y_ratio * pitch_width_y / 2, box_x_ratio * pitch_length_x / 2, 2,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, (0.17 + (1/3)) * pitch_length_x / 2, 3,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, (box_x_ratio + (1/3)) * pitch_length_x / 2, 3,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.79 + 0.6325) * pitch_width_y / 2, (0.17 + (1/3)) * pitch_length_x / 2, 4,
+                pitch.text(((1 - box_y_ratio) + 0.6325) * pitch_width_y / 2, (box_x_ratio + (1/3)) * pitch_length_x / 2, 4,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.21 + 0.79) * pitch_width_y / 2, (0.17 + (1/3)) * pitch_length_x / 2, 5,
+                pitch.text(pitch_width_y / 2, (box_x_ratio + (1/3)) * pitch_length_x / 2, 5,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.3675 + 0.21) * pitch_width_y / 2, (0.17 + (1/3)) * pitch_length_x / 2, 6,
+                pitch.text((0.3675 + box_y_ratio) * pitch_width_y / 2, (box_x_ratio + (1/3)) * pitch_length_x / 2, 6,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, (0.17 + (1/3)) * pitch_length_x / 2, 7,
+                pitch.text(box_y_ratio * pitch_width_y / 2, (box_x_ratio + (1/3)) * pitch_length_x / 2, 7,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.79 + 1) * pitch_width_y / 2, ((1 / 3) + 0.5) * pitch_length_x / 2, 8,
+                pitch.text(((1 - box_y_ratio) + 1) * pitch_width_y / 2, ((1 / 3) + 0.5) * pitch_length_x / 2, 8,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.79 + 0.6325) * pitch_width_y / 2, ((1/3) + 0.5) * pitch_length_x / 2, 9,
+                pitch.text(((1 - box_y_ratio) + 0.6325) * pitch_width_y / 2, ((1/3) + 0.5) * pitch_length_x / 2, 9,
                            ha="center", va="center", c=text_colour)
                 pitch.text((0.3675 + 0.6325) * pitch_width_y / 2, ((1/3) + 0.5) * pitch_length_x / 2, 10,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.3675 + 0.21) * pitch_width_y / 2, ((1/3) + 0.5) * pitch_length_x / 2, 11,
+                pitch.text((0.3675 + box_y_ratio) * pitch_width_y / 2, ((1/3) + 0.5) * pitch_length_x / 2, 11,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, ((1 / 3) + 0.5) * pitch_length_x / 2, 12,
+                pitch.text(box_y_ratio * pitch_width_y / 2, ((1 / 3) + 0.5) * pitch_length_x / 2, 12,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, ((2/3) + 0.5) * pitch_length_x / 2, 13,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, ((2/3) + 0.5) * pitch_length_x / 2, 13,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.6325 + 0.79) * pitch_width_y / 2, ((2/3) + 0.5) * pitch_length_x / 2, 14,
+                pitch.text((0.6325 + (1 - box_y_ratio)) * pitch_width_y / 2, ((2/3) + 0.5) * pitch_length_x / 2, 14,
                            ha="center", va="center", c=text_colour)
                 pitch.text((0.6325 + 0.3675) * pitch_width_y / 2, ((2/3) + 0.5) * pitch_length_x / 2, 15,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.3675 + 0.21) * pitch_width_y / 2, ((2/3) + 0.5) * pitch_length_x / 2, 16,
+                pitch.text((0.3675 + box_y_ratio) * pitch_width_y / 2, ((2/3) + 0.5) * pitch_length_x / 2, 16,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, ((2/3) + 0.5) * pitch_length_x / 2, 17,
+                pitch.text(box_y_ratio * pitch_width_y / 2, ((2/3) + 0.5) * pitch_length_x / 2, 17,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, ((2/3) + 0.83) * pitch_length_x / 2, 18,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, ((2/3) + (1 - box_x_ratio)) * pitch_length_x / 2, 18,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.6325 + 0.79) * pitch_width_y / 2, ((2/3) + 0.83) * pitch_length_x / 2, 19,
+                pitch.text((0.6325 + (1 - box_y_ratio)) * pitch_width_y / 2, ((2/3) + (1 - box_x_ratio)) * pitch_length_x / 2, 19,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.6325 + 0.3675) * pitch_width_y / 2, ((2/3) + 0.83) * pitch_length_x / 2, 20,
+                pitch.text((0.6325 + 0.3675) * pitch_width_y / 2, ((2/3) + (1 - box_x_ratio)) * pitch_length_x / 2, 20,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.3675 + 0.21) * pitch_width_y / 2, ((2/3) + 0.83) * pitch_length_x / 2, 21,
+                pitch.text((0.3675 + box_y_ratio) * pitch_width_y / 2, ((2/3) + (1 - box_x_ratio)) * pitch_length_x / 2, 21,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, ((2/3) + 0.83) * pitch_length_x / 2, 22,
+                pitch.text(box_y_ratio * pitch_width_y / 2, ((2/3) + (1 - box_x_ratio)) * pitch_length_x / 2, 22,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, (1 + 0.83) * pitch_length_x / 2, 23,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, (1 + (1 - box_x_ratio)) * pitch_length_x / 2, 23,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.21 + 0.79) * pitch_width_y / 2, (1 + 0.83) * pitch_length_x / 2, 24,
+                pitch.text(pitch_width_y / 2, (1 + (1 - box_x_ratio)) * pitch_length_x / 2, 24,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, (1 + 0.83) * pitch_length_x / 2, 25,
+                pitch.text(box_y_ratio * pitch_width_y / 2, (1 + (1 - box_x_ratio)) * pitch_length_x / 2, 25,
                            ha="center", va="center", c=text_colour)
 
         # Plot lines for sparse jdp
         if zone_type == 'jdp_sparse':
-            pitch.plot([0.21 * pitch_width_y, 0.21 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([box_y_ratio * pitch_width_y, box_y_ratio * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.21 * pitch_width_y, 0.21 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([box_y_ratio * pitch_width_y, box_y_ratio * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.79 * pitch_width_y, 0.79 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio) * pitch_width_y, (1 - box_y_ratio) * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.79 * pitch_width_y, 0.79 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio) * pitch_width_y, (1 - box_y_ratio) * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.6325 * pitch_width_y, 0.6325 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([0.6325 * pitch_width_y, 0.6325 * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.6325 * pitch_width_y, 0.6235 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([0.6325 * pitch_width_y, 0.6235 * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.001 * pitch_width_y, 0.209 * pitch_width_y], [0.17 * pitch_length_x, 0.17 * pitch_length_x],
+            pitch.plot([0.001 * pitch_width_y, (box_y_ratio - 0.001) * pitch_width_y], [box_x_ratio * pitch_length_x, box_x_ratio * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.791 * pitch_width_y, 0.999 * pitch_width_y], [0.17 * pitch_length_x, 0.17 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio - 0.001) * pitch_width_y, 0.999 * pitch_width_y], [box_x_ratio * pitch_length_x, box_x_ratio * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.001 * pitch_width_y, 0.209 * pitch_width_y], [0.83 * pitch_length_x, 0.83 * pitch_length_x],
+            pitch.plot([0.001 * pitch_width_y, (box_y_ratio - 0.001) * pitch_width_y], [(1 - box_x_ratio) * pitch_length_x, (1 - box_x_ratio) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.791 * pitch_width_y, 0.999 * pitch_width_y], [0.83 * pitch_length_x, 0.83 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio - 0.001) * pitch_width_y, 0.999 * pitch_width_y], [(1 - box_x_ratio) * pitch_length_x, (1 - box_x_ratio) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.001 * pitch_width_y, 0.209 * pitch_width_y], [(1/3) * pitch_length_x, (1/3) * pitch_length_x],
+            pitch.plot([0.001 * pitch_width_y, (box_y_ratio - 0.001) * pitch_width_y], [(1/3) * pitch_length_x, (1/3) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.999 * pitch_width_y, 0.791 * pitch_width_y], [(1/3) * pitch_length_x, (1/3) * pitch_length_x],
+            pitch.plot([0.999 * pitch_width_y, (1 - box_y_ratio - 0.001) * pitch_width_y], [(1/3) * pitch_length_x, (1/3) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.001 * pitch_width_y, 0.209 * pitch_width_y], [(2/3) * pitch_length_x, (2/3) * pitch_length_x],
+            pitch.plot([0.001 * pitch_width_y, (box_y_ratio - 0.001) * pitch_width_y], [(2/3) * pitch_length_x, (2/3) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.999 * pitch_width_y, 0.791 * pitch_width_y], [(2/3) * pitch_length_x, (2/3) * pitch_length_x],
+            pitch.plot([0.999 * pitch_width_y, (1 - box_y_ratio - 0.001) * pitch_width_y], [(2/3) * pitch_length_x, (2/3) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
 
             # Show zone numbers for sparse jdp
             if show_zone_numbers:
-                pitch.text((1 + 0.79) * pitch_width_y / 2, 0.17 * pitch_length_x / 2, 0,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, box_x_ratio * pitch_length_x / 2, 0,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.79 + 0.21) * pitch_width_y / 2, 0.17 * pitch_length_x / 2, 1,
+                pitch.text(pitch_width_y / 2, box_x_ratio * pitch_length_x / 2, 1,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, 0.17 * pitch_length_x / 2, 2,
+                pitch.text(box_y_ratio * pitch_width_y / 2, box_x_ratio * pitch_length_x / 2, 2,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, (0.17 + (1/3)) * pitch_length_x / 2, 3,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, (box_x_ratio + (1/3)) * pitch_length_x / 2, 3,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, (0.17 + (1/3)) * pitch_length_x / 2, 4,
+                pitch.text(box_y_ratio * pitch_width_y / 2, (box_x_ratio + (1/3)) * pitch_length_x / 2, 4,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.79 + 0.6325) * pitch_width_y / 2, (1/3) * pitch_length_x, 5,
+                pitch.text(((1 - box_y_ratio) + 0.6325) * pitch_width_y / 2, (1/3) * pitch_length_x, 5,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.21 + 0.79) * pitch_width_y / 2, (1/3) * pitch_length_x, 6,
+                pitch.text(pitch_width_y / 2, (1/3) * pitch_length_x, 6,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.3675 + 0.21) * pitch_width_y / 2, (1/3) * pitch_length_x, 7,
+                pitch.text((0.3675 + box_y_ratio) * pitch_width_y / 2, (1/3) * pitch_length_x, 7,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.79 + 1) * pitch_width_y / 2, ((1 / 3) + 0.5) * pitch_length_x / 2, 8,
+                pitch.text(((1 - box_y_ratio) + 1) * pitch_width_y / 2, ((1 / 3) + 0.5) * pitch_length_x / 2, 8,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, ((1 / 3) + 0.5) * pitch_length_x / 2, 9,
+                pitch.text(box_y_ratio * pitch_width_y / 2, ((1 / 3) + 0.5) * pitch_length_x / 2, 9,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, ((2/3) + 0.5) * pitch_length_x / 2, 10,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, ((2/3) + 0.5) * pitch_length_x / 2, 10,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, ((2/3) + 0.5) * pitch_length_x / 2, 11,
+                pitch.text(box_y_ratio * pitch_width_y / 2, ((2/3) + 0.5) * pitch_length_x / 2, 11,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.6325 + 0.79) * pitch_width_y / 2, (2/3) * pitch_length_x, 12,
+                pitch.text((0.6325 + (1 - box_y_ratio)) * pitch_width_y / 2, (2/3) * pitch_length_x, 12,
                            ha="center", va="center", c=text_colour)
                 pitch.text((0.6325 + 0.3675) * pitch_width_y / 2, (2/3) * pitch_length_x, 13,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.3675 + 0.21) * pitch_width_y / 2, (2/3) * pitch_length_x, 14,
+                pitch.text((0.3675 + box_y_ratio) * pitch_width_y / 2, (2/3) * pitch_length_x, 14,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, ((2/3) + 0.83) * pitch_length_x / 2, 15,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, ((2/3) + (1 - box_x_ratio)) * pitch_length_x / 2, 15,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, ((2/3) + 0.83) * pitch_length_x / 2, 16,
+                pitch.text(box_y_ratio * pitch_width_y / 2, ((2/3) + (1 - box_x_ratio)) * pitch_length_x / 2, 16,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, (1 + 0.83) * pitch_length_x / 2, 17,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, (1 + (1 - box_x_ratio)) * pitch_length_x / 2, 17,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.21 + 0.79) * pitch_width_y / 2, (1 + 0.83) * pitch_length_x / 2, 18,
+                pitch.text(pitch_width_y / 2, (1 + (1 - box_x_ratio)) * pitch_length_x / 2, 18,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, (1 + 0.83) * pitch_length_x / 2, 19,
+                pitch.text(box_y_ratio * pitch_width_y / 2, (1 + (1 - box_x_ratio)) * pitch_length_x / 2, 19,
                            ha="center", va="center", c=text_colour)
 
         # Plot lines for first variant of custom jdp
         if zone_type == 'jdp_custom':
-            pitch.plot([0.21 * pitch_width_y, 0.21 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([box_y_ratio * pitch_width_y, box_y_ratio * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.21 * pitch_width_y, 0.21 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([box_y_ratio * pitch_width_y, box_y_ratio * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.79 * pitch_width_y, 0.79 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio) * pitch_width_y, (1 - box_y_ratio) * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.79 * pitch_width_y, 0.79 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio) * pitch_width_y, (1 - box_y_ratio) * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.6325 * pitch_width_y, 0.6325 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([0.6325 * pitch_width_y, 0.6325 * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.6325 * pitch_width_y, 0.6235 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([0.6325 * pitch_width_y, 0.6235 * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.001 * pitch_width_y, 0.209 * pitch_width_y], [0.17 * pitch_length_x, 0.17 * pitch_length_x],
+            pitch.plot([0.001 * pitch_width_y, (box_y_ratio - 0.001) * pitch_width_y], [box_x_ratio * pitch_length_x, box_x_ratio * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.791 * pitch_width_y, 0.999 * pitch_width_y], [0.17 * pitch_length_x, 0.17 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio - 0.001) * pitch_width_y, 0.999 * pitch_width_y], [box_x_ratio * pitch_length_x, box_x_ratio * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.001 * pitch_width_y, 0.209 * pitch_width_y], [0.83 * pitch_length_x, 0.83 * pitch_length_x],
+            pitch.plot([0.001 * pitch_width_y, (box_y_ratio - 0.001) * pitch_width_y], [(1 - box_x_ratio) * pitch_length_x, (1 - box_x_ratio) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.791 * pitch_width_y, 0.999 * pitch_width_y], [0.83 * pitch_length_x, 0.83 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio - 0.001) * pitch_width_y, 0.999 * pitch_width_y], [(1 - box_x_ratio) * pitch_length_x, (1 - box_x_ratio) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.001 * pitch_width_y, 0.209 * pitch_width_y], [(2/3) * pitch_length_x, (2/3) * pitch_length_x],
+            pitch.plot([0.001 * pitch_width_y, (box_y_ratio - 0.001) * pitch_width_y], [(2/3) * pitch_length_x, (2/3) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
             pitch.plot([0.3675 * pitch_width_y, 0.6235 * pitch_width_y], [(2/3) * pitch_length_x, (2/3) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.999 * pitch_width_y, 0.791 * pitch_width_y], [(2/3) * pitch_length_x, (2/3) * pitch_length_x],
+            pitch.plot([0.999 * pitch_width_y, (1 - box_y_ratio - 0.001) * pitch_width_y], [(2/3) * pitch_length_x, (2/3) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
 
             # Show zone numbers for first variant of custom jdp
             if show_zone_numbers:
-                pitch.text((1 + 0.79) * pitch_width_y / 2, 0.17 * pitch_length_x / 2, 0,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, box_x_ratio * pitch_length_x / 2, 0,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.79 + 0.21) * pitch_width_y / 2, 0.17 * pitch_length_x / 2, 1,
+                pitch.text(pitch_width_y / 2, box_x_ratio * pitch_length_x / 2, 1,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, 0.17 * pitch_length_x / 2, 2,
+                pitch.text(box_y_ratio * pitch_width_y / 2, box_x_ratio * pitch_length_x / 2, 2,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 3,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 3,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, (1 / 3) * pitch_length_x, 4,
+                pitch.text(box_y_ratio * pitch_width_y / 2, (1 / 3) * pitch_length_x, 4,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.79 + 0.6325) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 5,
+                pitch.text(((1 - box_y_ratio) + 0.6325) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 5,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.21 + 0.79) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 6,
+                pitch.text(pitch_width_y / 2, (1 / 3) * pitch_length_x, 6,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.3675 + 0.21) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 7,
+                pitch.text((0.3675 + box_y_ratio) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 7,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 8,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 8,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.6325 + 0.79) * pitch_width_y / 2, (2 / 3) * pitch_length_x, 11,
+                pitch.text((0.6325 + (1 - box_y_ratio)) * pitch_width_y / 2, (2 / 3) * pitch_length_x, 11,
                            ha="center", va="center", c=text_colour)
                 pitch.text((0.6325 + 0.3675) * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 9,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.3675 + 0.21) * pitch_width_y / 2, (2 / 3) * pitch_length_x, 12,
+                pitch.text((0.3675 + box_y_ratio) * pitch_width_y / 2, (2 / 3) * pitch_length_x, 12,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 10,
+                pitch.text(box_y_ratio * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 10,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, ((2 / 3) + 0.83) * pitch_length_x / 2, 13,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, ((2 / 3) + (1 - box_x_ratio)) * pitch_length_x / 2, 13,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.6325 + 0.3675) * pitch_width_y / 2, ((2 / 3) + 0.83) * pitch_length_x / 2, 14,
+                pitch.text((0.6325 + 0.3675) * pitch_width_y / 2, ((2 / 3) + (1 - box_x_ratio)) * pitch_length_x / 2, 14,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, ((2 / 3) + 0.83) * pitch_length_x / 2, 15,
+                pitch.text(box_y_ratio * pitch_width_y / 2, ((2 / 3) + (1 - box_x_ratio)) * pitch_length_x / 2, 15,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, (1 + 0.83) * pitch_length_x / 2, 16,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, (1 + (1 - box_x_ratio)) * pitch_length_x / 2, 16,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.21 + 0.79) * pitch_width_y / 2, (1 + 0.83) * pitch_length_x / 2, 17,
+                pitch.text(pitch_width_y / 2, (1 + (1 - box_x_ratio)) * pitch_length_x / 2, 17,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, (1 + 0.83) * pitch_length_x / 2, 18,
+                pitch.text(box_y_ratio * pitch_width_y / 2, (1 + (1 - box_x_ratio)) * pitch_length_x / 2, 18,
                            ha="center", va="center", c=text_colour)
 
         # Plot lines for second variant of custom jdp
         if zone_type == 'jdp_custom2':
-            pitch.plot([0.21 * pitch_width_y, 0.21 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([box_y_ratio * pitch_width_y, box_y_ratio * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.21 * pitch_width_y, 0.21 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([box_y_ratio * pitch_width_y, box_y_ratio * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.79 * pitch_width_y, 0.79 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio) * pitch_width_y, (1 - box_y_ratio) * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.79 * pitch_width_y, 0.79 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio) * pitch_width_y, (1 - box_y_ratio) * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([0.3675 * pitch_width_y, 0.3675 * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.6325 * pitch_width_y, 0.6325 * pitch_width_y], [0.171 * pitch_length_x, 0.499 * pitch_length_x],
+            pitch.plot([0.6325 * pitch_width_y, 0.6325 * pitch_width_y], [(box_x_ratio + 0.001) * pitch_length_x, 0.499 * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.6325 * pitch_width_y, 0.6235 * pitch_width_y], [0.501 * pitch_length_x, 0.829 * pitch_length_x],
+            pitch.plot([0.6325 * pitch_width_y, 0.6235 * pitch_width_y], [0.501 * pitch_length_x, (1 - box_x_ratio - 0.001) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.001 * pitch_width_y, 0.209 * pitch_width_y], [0.17 * pitch_length_x, 0.17 * pitch_length_x],
+            pitch.plot([0.001 * pitch_width_y, (box_y_ratio - 0.001) * pitch_width_y], [box_x_ratio * pitch_length_x, box_x_ratio * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.791 * pitch_width_y, 0.999 * pitch_width_y], [0.17 * pitch_length_x, 0.17 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio - 0.001) * pitch_width_y, 0.999 * pitch_width_y], [box_x_ratio * pitch_length_x, box_x_ratio * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.001 * pitch_width_y, 0.209 * pitch_width_y], [0.83 * pitch_length_x, 0.83 * pitch_length_x],
+            pitch.plot([0.001 * pitch_width_y, (box_y_ratio - 0.001) * pitch_width_y], [(1 - box_x_ratio) * pitch_length_x, (1 - box_x_ratio) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
-            pitch.plot([0.791 * pitch_width_y, 0.999 * pitch_width_y], [0.83 * pitch_length_x, 0.83 * pitch_length_x],
+            pitch.plot([(1 - box_y_ratio - 0.001) * pitch_width_y, 0.999 * pitch_width_y], [(1 - box_x_ratio) * pitch_length_x, (1 - box_x_ratio) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
             pitch.plot([0.001 * pitch_width_y, 0.999 * pitch_width_y], [(2/3) * pitch_length_x, (2/3) * pitch_length_x],
                        c=line_colour, linestyle=ls, linewidth=lw)
 
             # Show zone numbers for second variant of custom jdp
             if show_zone_numbers:
-                pitch.text((1 + 0.79) * pitch_width_y / 2, 0.17 * pitch_length_x / 2, 0,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, box_x_ratio * pitch_length_x / 2, 0,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.79 + 0.21) * pitch_width_y / 2, 0.17 * pitch_length_x / 2, 1,
+                pitch.text(pitch_width_y / 2, box_x_ratio * pitch_length_x / 2, 1,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, 0.17 * pitch_length_x / 2, 2,
+                pitch.text(box_y_ratio * pitch_width_y / 2, box_x_ratio * pitch_length_x / 2, 2,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 3,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 3,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.79 + 0.6325) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 4,
+                pitch.text(((1 - box_y_ratio) + 0.6325) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 4,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.21 + 0.79) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 5,
+                pitch.text(pitch_width_y / 2, (1 / 3) * pitch_length_x, 5,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.3675 + 0.21) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 6,
+                pitch.text((0.3675 + box_y_ratio) * pitch_width_y / 2, (1 / 3) * pitch_length_x, 6,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, (1 / 3) * pitch_length_x, 7,
+                pitch.text(box_y_ratio * pitch_width_y / 2, (1 / 3) * pitch_length_x, 7,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 8,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 8,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.6325 + 0.79) * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 9,
+                pitch.text((0.6325 + (1 - box_y_ratio)) * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 9,
                            ha="center", va="center", c=text_colour)
                 pitch.text((0.6325 + 0.3675) * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 10,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.3675 + 0.21) * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 11,
+                pitch.text((0.3675 + box_y_ratio) * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 11,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 12,
+                pitch.text(box_y_ratio * pitch_width_y / 2, ((2 / 3) + 0.5) * pitch_length_x / 2, 12,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, ((2 / 3) + 0.83) * pitch_length_x / 2, 13,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, ((2 / 3) + (1 - box_x_ratio)) * pitch_length_x / 2, 13,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.6325 + 0.79) * pitch_width_y / 2, ((2 / 3) + 0.83) * pitch_length_x / 2, 14,
+                pitch.text((0.6325 + (1 - box_y_ratio)) * pitch_width_y / 2, ((2 / 3) + (1 - box_x_ratio)) * pitch_length_x / 2, 14,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.6325 + 0.3675) * pitch_width_y / 2, ((2 / 3) + 0.83) * pitch_length_x / 2, 15,
+                pitch.text((0.6325 + 0.3675) * pitch_width_y / 2, ((2 / 3) + (1 - box_x_ratio)) * pitch_length_x / 2, 15,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.3675 + 0.21) * pitch_width_y / 2, ((2 / 3) + 0.83) * pitch_length_x / 2, 16,
+                pitch.text((0.3675 + box_y_ratio) * pitch_width_y / 2, ((2 / 3) + (1 - box_x_ratio)) * pitch_length_x / 2, 16,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, ((2 / 3) + 0.83) * pitch_length_x / 2, 17,
+                pitch.text(box_y_ratio * pitch_width_y / 2, ((2 / 3) + (1 - box_x_ratio)) * pitch_length_x / 2, 17,
                            ha="center", va="center", c=text_colour)
-                pitch.text((1 + 0.79) * pitch_width_y / 2, (1 + 0.83) * pitch_length_x / 2, 18,
+                pitch.text((1 + (1 - box_y_ratio)) * pitch_width_y / 2, (1 + (1 - box_x_ratio)) * pitch_length_x / 2, 18,
                            ha="center", va="center", c=text_colour)
-                pitch.text((0.21 + 0.79) * pitch_width_y / 2, (1 + 0.83) * pitch_length_x / 2, 19,
+                pitch.text(pitch_width_y / 2, (1 + (1 - box_x_ratio)) * pitch_length_x / 2, 19,
                            ha="center", va="center", c=text_colour)
-                pitch.text(0.21 * pitch_width_y / 2, (1 + 0.83) * pitch_length_x / 2, 20,
+                pitch.text(box_y_ratio * pitch_width_y / 2, (1 + (1 - box_x_ratio)) * pitch_length_x / 2, 20,
                            ha="center", va="center", c=text_colour)
 
 
