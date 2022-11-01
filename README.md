@@ -69,6 +69,7 @@ This repository contains a collection of projects that aim to generate meaningfu
     │   │   ├── pass_report_ws.py
     │   │   ├── shot_report_understat.py     
     │   ├── 05_competition_reports
+    │   │   ├── defensive_contribution.py   
     │   │   ├── import_data_whoscored.py
     │   │   ├── top_defensive_actions.py
     │   │   ├── top_penalty_takers.py
@@ -112,13 +113,8 @@ Project table of contents: <br>
 
 <p align="center">
   <img width="29%" src="./data_directory/misc_data/images/top_12_progressive_passers.png"> &nbsp &nbsp 
-  <img width="29%" src="./data_directory/misc_data/images/ball_winning_and_recovery.png"> &nbsp &nbsp
-  <img width="29%" src="./data_directory/misc_data/images/passing_under_pressure.png">
-</p>
-<p align="center">
   <img width="29%" src="./data_directory/misc_data/images/top_12_pressers.png"> &nbsp &nbsp
-  <img width="29%" src="./data_directory/misc_data/images/top_12_action_distribution.png"> &nbsp &nbsp
-  <img width="18.65%" src="./data_directory/misc_data/images/player_radar_example.png">
+  <img width="29%" src="./data_directory/misc_data/images/top_12_action_distribution.png">
 </p>
 
 ### 02 - Transfermarkt Web-Scrape and Analyse
@@ -161,9 +157,12 @@ Project table of contents: <br>
 
 ### 05 - Automated Competition Reporting
 
-**Summary:** Development of automated scripts to produce competition reports and multi-match player evaluations at any point throughout a competition. This work includes collection and processing of public-domain match event data, and the production of multiple visuals that generate novel and meaningful insight at a team and player level. Visuals currently include an assessment of progressive passes, forward defensive actions and penalty placement.
+**Summary:** Development of automated scripts to produce competition reports and multi-match player evaluations at any point throughout a competition. This work includes collection and processing of public-domain match event data, and the production of multiple visuals that generate novel and meaningful insight at a team and player level. Visuals currently include an assessment of progressive passes, defensive actions and penalty placement.
 
 <p align="center">
   <img width="32%" src="./data_directory/misc_data/images/EPL-2021-top-defensive-actions-per-100-opposition-passes-in-that-third.png"> &nbsp &nbsp 
-    <img width="32%" src="./data_directory/misc_data/images/europe5-top-pen-takers-2019-2022.png"> &nbsp &nbsp 
+  <img width="32%" src="./data_directory/misc_data/images/europe5-top-pen-takers-2019-2022.png"> &nbsp &nbsp 
+</p>
+<p align="center">
+  <img width="24%" src="./data_directory/misc_data/images/EPL-2022-defensive-contributions-player-variant.png"> &nbsp &nbsp 
 </p>
