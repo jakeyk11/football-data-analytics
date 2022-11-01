@@ -179,15 +179,18 @@ right_ax_plot.replace(np.nan, 0, inplace=True)
 left_ax_norm_plot = 0.99 * left_ax_plot / max(left_ax_plot)
 right_ax_norm_plot = 0.99 * right_ax_plot / max(right_ax_plot)
 
-left_ax_quantile = left_ax_norm_plot.quantile([0.1,0.5,0.9]).tolist()
-right_ax_quantile = right_ax_norm_plot.quantile([0.1,0.5,0.9]).tolist()
+left_ax_quantile = left_ax_norm_plot.quantile([0.05,0.5,0.9]).tolist()
+right_ax_quantile = right_ax_norm_plot.quantile([0.05,0.5,0.9]).tolist()
 
 plot_player = playerinfo_df[(left_ax_norm_plot>left_ax_quantile[2]) | (right_ax_norm_plot>right_ax_quantile[2]) | ((left_ax_norm_plot<left_ax_quantile[0]) | (right_ax_norm_plot<right_ax_quantile[0]))]
 left_points = left_ax_norm_plot[(left_ax_norm_plot>left_ax_quantile[2]) | (right_ax_norm_plot>right_ax_quantile[2]) | ((left_ax_norm_plot<left_ax_quantile[0]) | (right_ax_norm_plot<right_ax_quantile[0]))]
 right_points = right_ax_norm_plot[(left_ax_norm_plot>left_ax_quantile[2]) | (right_ax_norm_plot>right_ax_quantile[2])| ((left_ax_norm_plot<left_ax_quantile[0]) | (right_ax_norm_plot<right_ax_quantile[0]))]
 
+# %% Add custom player identification / data point selection if desired
+
 #plot_player = playerinfo_df[playerinfo_df['team']=='Chelsea']
 #plot_player = plot_player[plot_player['name']=='Declan Rice']
+
 # %% Build visual
 
 # Overwrite rcparams
@@ -360,26 +363,11 @@ badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
 logo_ax.imshow(badge)
 
 # Save image
-fig.savefig(f"top_defensive_contributions/{league}-{year}-top-defensive-actions", dpi=300)
+fig.savefig(f"top_defensive_contributions/{league}-{year}-defensive-contributions-player-variant", dpi=300)
 
+# %% Repeat plot using different player points and colouring
 
-# %% Calculate metrics
-
-#playerinfo_df.dropna(subset=['interception_block_100opp_pass', 'balls_won_from_opp_100opp_pas'], inplace = True)
-
-left_ax_plot = playerinfo_df['balls_won_from_opp_100opp_pas']
-right_ax_plot = playerinfo_df['recovery_100opp_pass']
-
-left_ax_plot.replace(np.nan, 0, inplace=True)
-right_ax_plot.replace(np.nan, 0, inplace=True)
-
-left_ax_norm_plot = 0.99 * left_ax_plot / max(left_ax_plot)
-right_ax_norm_plot = 0.99 * right_ax_plot / max(right_ax_plot)
-
-left_ax_quantile = left_ax_norm_plot.quantile([0.1,0.5,0.9]).tolist()
-right_ax_quantile = right_ax_norm_plot.quantile([0.1,0.5,0.9]).tolist()
-
-plot_player =pd.DataFrame()
+plot_player = pd.DataFrame()
 
 for team in set(playerinfo_df['team'].values):
     team_players = playerinfo_df[playerinfo_df['team']==team]
@@ -400,15 +388,6 @@ for team in set(playerinfo_df['team'].values):
 
 left_points = left_ax_norm_plot[(left_ax_norm_plot>left_ax_quantile[2]) | (right_ax_norm_plot>right_ax_quantile[2]) | ((left_ax_norm_plot<left_ax_quantile[0]) | (right_ax_norm_plot<right_ax_quantile[0]))]
 right_points = right_ax_norm_plot[(left_ax_norm_plot>left_ax_quantile[2]) | (right_ax_norm_plot>right_ax_quantile[2])| ((left_ax_norm_plot<left_ax_quantile[0]) | (right_ax_norm_plot<right_ax_quantile[0]))]
-
-#plot_player = playerinfo_df[playerinfo_df['team']=='Chelsea']
-#plot_player = plot_player[plot_player['name']=='Declan Rice']
-# %% Build visual
-
-# Overwrite rcparams
-mpl.rcParams['xtick.color'] = 'w'
-mpl.rcParams['ytick.color'] = 'w'
-mpl.rcParams['text.color'] = 'w'
 
 # Set-up figure
 fig = plt.figure(figsize = (8.5,9), facecolor = '#313332')
@@ -622,4 +601,4 @@ badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
 logo_ax.imshow(badge)
 
 # Save image
-fig.savefig(f"top_defensive_contributions/{league}-{year}-top-defensive-actions", dpi=300)
+fig.savefig(f"top_defensive_contributions/{league}-{year}-defensive-contributions-team-variant", dpi=300)
