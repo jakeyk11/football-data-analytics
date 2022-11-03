@@ -168,8 +168,6 @@ playerinfo_df['interception_block_90'] = playerinfo_df['interception_90'] + play
 playerinfo_df['interception_block_100opp_pass'] = playerinfo_df['interception_100opp_pass'] + playerinfo_df['block_pass_100opp_pass']
 playerinfo_df['balls_won_from_opp_100opp_pas'] = playerinfo_df['interception_block_100opp_pass'] + playerinfo_df['tackle_duel_100opp_pass']
 
-#playerinfo_df.dropna(subset=['interception_block_100opp_pass', 'balls_won_from_opp_100opp_pas'], inplace = True)
-
 left_ax_plot = playerinfo_df['balls_won_from_opp_100opp_pas']
 right_ax_plot = playerinfo_df['recovery_100opp_pass']
 

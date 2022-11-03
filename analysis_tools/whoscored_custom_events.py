@@ -5,8 +5,11 @@ Functions
 def pre_assist(events):
     Calculate pre-assists from whoscored-style events dataframe, and returns with pre_assist column
 
-progressive_pass(single_event, inplay=True)
+progressive_pass(single_event, inplay=True, successful_only=True)
     Identify progressive pass from WhoScored-style pass event.
+
+pass_into_box(single_event, inplay=True, successful_only=True):
+    Identify successful pass into box from whoscored-style pass event.
 
 create_convex_hull(events_df, name='default', min_events=3, include_percent=100, pitch_area = 10000):
     Create a dataframe of convex hull information from statsbomb-style event data.
@@ -60,7 +63,7 @@ def pre_assist(events):
     return events_out
 
 
-def progressive_pass(single_event, inplay=True):
+def progressive_pass(single_event, inplay=True, successful_only=True):
     """ Identify progressive pass from WhoScored-style pass event.
 
     Function to identify progressive passes. A pass is considered progressive if the distance between the
@@ -73,13 +76,20 @@ def progressive_pass(single_event, inplay=True):
     Args:
         single_event (pandas.Series): series corresponding to a single event (row) from WhoScored-style event dataframe.
         inplay (bool, optional): selection of whether to include 'in-play' events only. True by default.
+        successful_only (bool, optional): selection of whether to only include successful passes. True by default
 
     Returns:
-        bool: True = progressive pass, nan = non-progressive pass or not a pass
+        bool: True = progressive pass, nan = non-progressive pass, unsuccessful progressive pass or not a pass
     """
 
     # Determine if event is pass
     if single_event['eventType'] == 'Pass':
+
+        # Check success (if successful_only = True)
+        if successful_only:
+            check_success = single_event['outcomeType'] == 'Successful'
+        else:
+            check_success = True
 
         # Check pass made in-play (if inplay = True)
         if inplay:
@@ -96,15 +106,58 @@ def progressive_pass(single_event, inplay=True):
                            np.sqrt((120 - x_endpos) ** 2 + (40 - y_endpos) ** 2))
 
         # At least 30m closer to the opponent’s goal if the starting and finishing points are within a team’s own half
-        if check_inplay and (x_startpos < 60 and x_endpos < 60) and delta_goal_dist >= 32.8:
+        if (check_success and check_inplay) and (x_startpos < 60 and x_endpos < 60) and delta_goal_dist >= 32.8:
             return True
 
         # At least 15m closer to the opponent’s goal if the starting and finishing points are in different halves
-        elif check_inplay and (x_startpos < 60 and x_endpos >= 60) and delta_goal_dist >= 16.4:
+        elif (check_success and check_inplay) and (x_startpos < 60 and x_endpos >= 60) and delta_goal_dist >= 16.4:
             return True
 
         # At least 10m closer to the opponent’s goal if the starting and finishing points are in the opponent’s half
-        elif check_inplay and (x_startpos >= 60 and x_endpos >= 60) and delta_goal_dist >= 10.94:
+        elif (check_success and check_inplay) and (x_startpos >= 60 and x_endpos >= 60) and delta_goal_dist >= 10.94:
+            return True
+        else:
+            return float('nan')
+
+    else:
+        return float('nan')
+
+
+def pass_into_box(single_event, inplay=True, successful_only=True):
+    """ Identify successful pass into box from whoscored-style pass event.
+
+    Function to identify successful passes that end up in the opposition box. The function takes in a single event,
+    and returns a boolean (True = successful pass into the box.) This function is best used with the dataframe apply
+    method.
+
+    Args:
+        single_event (pandas.Series): series corresponding to a single event (row) from whoscored-style event dataframe.
+        inplay (bool, optional): selection of whether to include 'in-play' events only. True by default.
+        successful_only (bool, optional): selection of whether to only include successful passes. True by default
+
+    Returns:
+        bool: True = successful pass into the box, nan = not box pass, unsuccessful pass or not a pass.
+    """
+
+    # Determine if event is pass and check pass success
+    if single_event['eventType'] == 'Pass':
+
+        # Check success (if successful_only = True)
+        if successful_only:
+            check_success = single_event['outcomeType'] == 'Successful'
+        else:
+            check_success = True
+
+        # Check pass made in-play (if inplay = True)
+        if inplay:
+            check_inplay = not any(item in single_event['satisfiedEventsTypes'] for item in [48, 50, 51, 42, 44, 45, 31, 34])
+        else:
+            check_inplay = True
+
+        # Determine pass end position, and whether it's a successful pass into box
+        x_position = 120 * single_event['endX'] / 100
+        y_position = 80 * single_event['endY'] / 100
+        if (check_success and check_inplay) and (x_position >= 102) and (18 <= y_position <= 62):
             return True
         else:
             return float('nan')
