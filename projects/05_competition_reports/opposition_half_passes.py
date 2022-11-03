@@ -332,4 +332,4 @@ badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
 logo_ax.imshow(badge)
 
 # Save image
-fig.savefig(f"top_opposition_half_passers/{league}-{year}-oppositon-half-passers-player-variant", dpi=300)
+fig.savefig(f"top_opposition_half_passers/{league}-{year}-opposition-half-passers-player-variant", dpi=300)
