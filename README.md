@@ -71,6 +71,7 @@ This repository contains a collection of projects that aim to generate meaningfu
     │   ├── 05_competition_reports
     │   │   ├── defensive_contribution.py   
     │   │   ├── import_data_whoscored.py
+    │   │   ├── opposition_half_passes.py    
     │   │   ├── top_defensive_actions.py
     │   │   ├── top_penalty_takers.py
     │   │   ├── top_progressive_passers.py
@@ -161,8 +162,9 @@ Project table of contents: <br>
 
 <p align="center">
   <img width="32%" src="./data_directory/misc_data/images/EPL-2021-top-defensive-actions-per-100-opposition-passes-in-that-third.png"> &nbsp &nbsp 
-  <img width="32%" src="./data_directory/misc_data/images/europe5-top-pen-takers-2019-2022.png"> &nbsp &nbsp 
+  <img width="32%" src="./data_directory/misc_data/images/europe5-top-pen-takers-2019-2022.png">
 </p>
 <p align="center">
   <img width="24%" src="./data_directory/misc_data/images/EPL-2022-defensive-contributions-player-variant.png"> &nbsp &nbsp 
+  <img width="24%" src="./data_directory/misc_data/images/EPL-2022-opposition-half-passers-player-variant.png">
 </p>
