@@ -53,6 +53,8 @@ This repository contains a collection of projects that aim to generate meaningfu
     │   ├── wyscout_data
     │
     ├── projects
+    │   ├── 00_misc_work
+    │   │   ├── saudi_arabia_argentina_world_cup_def_actions.py 
     │   ├── 01_worldcup_b2b_midfielders
     │   │   ├── import_data_statsbomb.py
     │   │   ├── worldcup_b2b_mids.py
@@ -69,12 +71,15 @@ This repository contains a collection of projects that aim to generate meaningfu
     │   │   ├── pass_report_ws.py
     │   │   ├── shot_report_understat.py     
     │   ├── 05_competition_reports
-    │   │   ├── defensive_contribution.py   
-    │   │   ├── import_data_whoscored.py
-    │   │   ├── opposition_half_passes.py    
-    │   │   ├── top_defensive_actions.py
-    │   │   ├── top_penalty_takers.py
-    │   │   ├── top_progressive_passers.py
+    │   │   ├── player_defensive_contribution.py   
+    │   │   ├── player_effective_passers.py
+    │   │   ├── player_high_defensive_actions.py    
+    │   │   ├── player_penalty_takers.py
+    │   │   ├── player_progressive_passers.py
+    │   │   ├── team_ball_winning.py
+    │   │   ├── team_threat_creation.py
+    │   ├── 06_player_reports
+    │   │   ├── ws_full_back_report.py
     │ 
     ├── .gitignore 
     │     
