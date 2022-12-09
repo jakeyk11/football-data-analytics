@@ -5,6 +5,9 @@ Functions
 get_recipient(events_df):
     Add pass recipient to whoscored-style event data.
 
+cumulative_match_mins(events):
+    Add cumulative minutes to event data and calculate true match minutes
+
 minutes_played(lineups)
     Add total minutes played to player data.
 
@@ -16,6 +19,9 @@ events_while_playing(events_df, players_df, event_name='Pass', event_team='oppos
 
 create_player_list(lineups, additional_cols=None):
     Create a list of players from whoscored-style lineups dataframe. This requires minutes played information.
+
+group_player_events(events, player_data, group_type='count', event_types=None, primary_event_name='Column Name'):
+    Aggregate event types per player, and add to player information dataframe
 
 find_offensive_actions(events_df):
     Return dataframe of in-play offensive actions from event data.
@@ -45,6 +51,44 @@ def get_recipient(events_df):
 
     # Shift dataframe to calculate pass recipient
     events_out["pass_recipient"] = events_out["playerId"].shift(-1)
+
+    return events_out
+
+
+def cumulative_match_mins(events):
+    """ Add cumulative minutes to event data and calculate true match minutes.
+
+    Function to calculate cumulative match minutes, accounting for extra time, and add the information to whoscored
+    event data.
+
+    Args:
+        events (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
+
+    Returns:
+        pandas.DataFrame: whoscored-style event dataframe with additional 'cumulative_mins' column.
+        """
+
+    # Initialise output dataframes
+    events_out = pd.DataFrame()
+
+    # Add cumulative time to events data, resetting for each unique match
+    for match_id in events['match_id'].unique():
+        match_events = events[events['match_id'] == match_id].copy()
+        match_events['cumulative_mins'] = match_events['minute'] + (1/60) * match_events['second']
+
+        # Add time increment to cumulative minutes based on period of game.
+        for period in np.arange(1, match_events['period'].max() + 1, 1):
+            if period > 1:
+                t_delta = match_events[match_events['period'] == period - 1]['cumulative_mins'].max() - \
+                          match_events[match_events['period'] == period]['cumulative_mins'].min()
+            elif period == 1 or period == 5:
+                t_delta = 0
+            else:
+                t_delta = 0
+            match_events.loc[match_events['period'] == period, 'cumulative_mins'] += t_delta
+
+        # Rebuild events dataframe
+        events_out = pd.concat([events_out, match_events])
 
     return events_out
 
@@ -239,6 +283,10 @@ def create_player_list(lineups, additional_cols=None):
         pandas.DataFrame: players that feature in one or more lineup entries, including most popular position played
     """    
 
+    # Resolve data integrity issues
+    lineups.loc[lineups['name'] == 'Vitalii Mykolenko', 'name'] = 'Vitaliy Mykolenko'
+    lineups.loc[lineups['name'] == 'Alexander Iwobi', 'name'] = 'Alex Iwobi'
+
     # Dataframe of player names and team
     playerinfo_df = lineups[['name', 'position', 'team']].drop_duplicates()
 
@@ -334,7 +382,7 @@ def find_offensive_actions(events_df):
         events_df (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
 
     Returns:
-        pandas.DataFrame: statsbomb-style dataframe of offensive actions.
+        pandas.DataFrame: whoscored-style dataframe of offensive actions.
     """
 
     # Define and filter offensive events

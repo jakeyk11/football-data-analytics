@@ -2,22 +2,35 @@
 
 Functions
 ---------
-def pre_assist(events):
+pre_assist(events):
     Calculate pre-assists from whoscored-style events dataframe, and returns with pre_assist column
 
 progressive_pass(single_event, inplay=True, successful_only=True)
     Identify progressive pass from WhoScored-style pass event.
 
+progressive_carry(single_event, successful_only=True):
+    Identify progressive carry from WhoScored-style carry event.
+
 pass_into_box(single_event, inplay=True, successful_only=True):
     Identify successful pass into box from whoscored-style pass event.
 
+carry_into_box(single_event, successful_only=True):
+    Identify successful carry into box from whoscored-style carry event.
+
 create_convex_hull(events_df, name='default', min_events=3, include_percent=100, pitch_area = 10000):
     Create a dataframe of convex hull information from statsbomb-style event data.
+
+insert_ball_carries(events_df, min_carry_length=3, max_carry_length=60, min_carry_duration=1, max_carry_duration=10):
+    Add carry events to whoscored-style events dataframe
+
+get_xthreat(events_df, interpolate=True, pitch_length=105, pitch_width=68):
+    Add expected threat metric to whoscored-style events dataframe
 """
 
 import numpy as np
 import pandas as pd
 from scipy.spatial import ConvexHull
+from scipy.interpolate import interp2d
 
 
 def pre_assist(events):
@@ -123,6 +136,59 @@ def progressive_pass(single_event, inplay=True, successful_only=True):
         return float('nan')
 
 
+def progressive_carry(single_event, successful_only=True):
+    """ Identify progressive carry from WhoScored-style carry event.
+
+    Function to identify progressive carries. A carry is considered progressive if the distance between the
+    starting point and the end position is: (i) at least 30 meters closer to the opponent’s goal if the starting and
+    finishing points are within a team’s own half, (ii) at least 15 meters closer to the opponent’s goal if the
+    starting and finishing points are in different halves, (iii) at least 10 meters closer to the opponent’s goal if
+    the starting and finishing points are in the opponent’s half. The function takes in a single event and returns a
+    boolean (True = successful progressive carry.) This function is best used with the dataframe apply method.
+
+    Args:
+        single_event (pandas.Series): series corresponding to a single event (row) from WhoScored-style event dataframe.
+        successful_only (bool, optional): selection of whether to only include successful carries. True by default
+
+    Returns:
+        bool: True = progressive carry, nan = non-progressive carry, unsuccessful progressive carry or not a carry
+    """
+
+    # Determine if event is pass
+    if single_event['eventType'] == 'Carry':
+
+        # Check success (if successful_only = True)
+        if successful_only:
+            check_success = single_event['outcomeType'] == 'Successful'
+        else:
+            check_success = True
+
+        # Determine pass start and end position in yards (assuming standard pitch), and determine whether progressive
+        x_startpos = 120*single_event['x']/100
+        y_startpos = 80*single_event['y']/100
+        x_endpos = 120*single_event['endX']/100
+        y_endpos = 80*single_event['endY']/100
+        delta_goal_dist = (np.sqrt((120 - x_startpos) ** 2 + (40 - y_startpos) ** 2) -
+                           np.sqrt((120 - x_endpos) ** 2 + (40 - y_endpos) ** 2))
+
+        # At least 30m closer to the opponent’s goal if the starting and finishing points are within a team’s own half
+        if check_success and (x_startpos < 60 and x_endpos < 60) and delta_goal_dist >= 32.8:
+            return True
+
+        # At least 15m closer to the opponent’s goal if the starting and finishing points are in different halves
+        elif check_success and (x_startpos < 60 and x_endpos >= 60) and delta_goal_dist >= 16.4:
+            return True
+
+        # At least 10m closer to the opponent’s goal if the starting and finishing points are in the opponent’s half
+        elif check_success and (x_startpos >= 60 and x_endpos >= 60) and delta_goal_dist >= 10.94:
+            return True
+        else:
+            return float('nan')
+
+    else:
+        return float('nan')
+
+
 def pass_into_box(single_event, inplay=True, successful_only=True):
     """ Identify successful pass into box from whoscored-style pass event.
 
@@ -166,7 +232,43 @@ def pass_into_box(single_event, inplay=True, successful_only=True):
         return float('nan')
 
 
-def create_convex_hull(events_df, name='default', min_events=3, include_percent=100, pitch_area=10000):
+def carry_into_box(single_event, successful_only=True):
+    """ Identify successful carry into box from whoscored-style pass event.
+
+    Function to identify successful carries that end up in the opposition box. The function takes in a single event,
+    and returns a boolean (True = successful carry into the box.) This function is best used with the dataframe apply
+    method.
+
+    Args:
+        single_event (pandas.Series): series corresponding to a single event (row) from whoscored-style event dataframe.
+        successful_only (bool, optional): selection of whether to only include successful carries. True by default
+
+    Returns:
+        bool: True = successful carry into the box, nan = not box carry, unsuccessful carry or not a carry.
+    """
+
+    # Determine if event is pass and check pass success
+    if single_event['eventType'] == 'Carry':
+
+        # Check success (if successful_only = True)
+        if successful_only:
+            check_success = single_event['outcomeType'] == 'Successful'
+        else:
+            check_success = True
+
+        # Determine pass end position, and whether it's a successful pass into box
+        x_position = 120 * single_event['endX'] / 100
+        y_position = 80 * single_event['endY'] / 100
+        if check_success and (x_position >= 102) and (18 <= y_position <= 62):
+            return True
+        else:
+            return float('nan')
+
+    else:
+        return float('nan')
+    
+
+def create_convex_hull(events_df, name='default', min_events=3, include_events='1std', pitch_area=10000):
     """ Create a dataframe of convex hull information from statsbomb-style event data.
 
     Function to create convex hull information from a dataframe of whoscored-style event data, where each event has a
@@ -180,7 +282,7 @@ def create_convex_hull(events_df, name='default', min_events=3, include_percent=
         name (string): identifier for convex hull, used as the dataframe index.
         min_events (int, optional): minimum number of events required to produce convex hull. 3 by default.
         include_percent (float, optional): percentage of event locations to include in convex hull. Event locations that
-                                       are furthest from the mean location are removed first. Defaults to 100%.
+                                       are furthest from the mean location are removed first. Defaults to 1 std dev.
         pitch_area (float, optional): total area of the pitch, used to calculate percentages. 10000 by default.
 
     Returns:
@@ -210,8 +312,13 @@ def create_convex_hull(events_df, name='default', min_events=3, include_percent=
         hull_data['dist_from_mean'] = np.sqrt(hull_data['x_from_mean']**2 + hull_data['y_from_mean']**2)
         hull_data.sort_values('dist_from_mean', inplace=True)
 
-        # Remove (100 - include_percent) of points, starting with furthest from action centroid
-        reduced_hull_data = hull_data.head(int(np.ceil(hull_data.shape[0] * include_percent / 100)))
+        # Remove (100 - include_percent) or count std of points, starting with furthest from action centroid
+        if 'std' in str(include_events):
+            num_stds = float(include_events.split('std')[0])
+            sqrt_variance = np.sqrt(sum(hull_data['dist_from_mean'] ** 2) / (len(hull_data['dist_from_mean']) - 1))
+            reduced_hull_data = hull_data[hull_data['dist_from_mean'] <= sqrt_variance * num_stds]
+        else:
+            reduced_hull_data = hull_data.head(int(np.ceil(hull_data.shape[0] * include_events / 100)))
 
         # Build list of hull points and a convex hull dataframe
         hull_pts = list(zip(reduced_hull_data['x_position'], reduced_hull_data['y_position']))
@@ -229,4 +336,212 @@ def create_convex_hull(events_df, name='default', min_events=3, include_percent=
     return hull_df
 
 
+def insert_ball_carries(events_df, min_carry_length=3, max_carry_length=60, min_carry_duration=1, max_carry_duration=10):
+    """ Add carry events to whoscored-style events dataframe
 
+    Function to read a whoscored-style events dataframe (single or multiple matches) and return an event dataframe
+    that contains carry information.
+
+    Args:
+        events_df (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
+        min_carry_length (float, optional): minimum distance required for event to qualify as carry. 5m by default.
+        max_carry_length (float, optional): largest distance in which event can qualify as carry. 60m by default.
+        min_carry_duration (float, optional): minimum duration required for event to quality as carry. 2s by default.
+        max_carry_duration (float, optional): longest duration in which event can qualify as carry. 10s by default.
+
+    Returns:
+        pandas.DataFrame: whoscored-style dataframe of events including carries
+    """
+
+    # Initialise output dataframe
+    events_out = pd.DataFrame()
+
+    # Carry conditions (convert from metres to opta)
+    min_carry_length = 3.0
+    max_carry_length = 60.0
+    min_carry_duration = 1.0
+    max_carry_duration = 10.0
+
+    for match_id in events_df['match_id'].unique():
+
+        match_events = events_df[events_df['match_id'] == match_id].reset_index()
+        match_carries = pd.DataFrame()
+
+        for idx, match_event in match_events.iterrows():
+
+            if idx < len(match_events) - 1:
+                prev_evt_team = match_event['teamId']
+                next_evt_idx = idx + 1
+                init_next_evt = match_events.loc[next_evt_idx]
+                take_ons = 0
+                incorrect_next_evt = True
+
+                while incorrect_next_evt:
+
+                    next_evt = match_events.loc[next_evt_idx]
+
+                    if next_evt['eventType'] == 'TakeOn' and next_evt['outcomeType'] == 'Successful':
+                        take_ons += 1
+                        incorrect_next_evt = True
+
+                    elif ((next_evt['eventType'] == 'TakeOn' and next_evt['outcomeType'] == 'Unsuccessful')
+                          or (next_evt['teamId'] != prev_evt_team and next_evt['eventType'] == 'Challenge' and next_evt[
+                                'outcomeType'] == 'Unsuccessful')
+                          or (next_evt['eventType'] == 'Foul')):
+                        incorrect_next_evt = True
+
+                    else:
+                        incorrect_next_evt = False
+
+                    next_evt_idx += 1
+
+                # Apply some conditioning to determine whether carry criteria is satisfied
+
+                same_team = prev_evt_team == next_evt['teamId']
+                not_ball_touch = match_event['eventType'] != 'BallTouch'
+                dx = 105*(match_event['endX'] - next_evt['x'])/100
+                dy = 68*(match_event['endY'] - next_evt['y'])/100
+                far_enough = dx ** 2 + dy ** 2 >= min_carry_length ** 2
+                not_too_far = dx ** 2 + dy ** 2 <= max_carry_length ** 2
+                dt = 60 * (next_evt['cumulative_mins'] - match_event['cumulative_mins'])
+                min_time = dt >= min_carry_duration
+                same_phase = dt < max_carry_duration
+                same_period = match_event['period'] == next_evt['period']
+
+                valid_carry = same_team & not_ball_touch & far_enough & not_too_far & min_time & same_phase &same_period
+
+                if valid_carry:
+                    carry = pd.DataFrame()
+                    prev = match_event
+                    nex = next_evt
+
+                    carry.loc[0, 'eventId'] = prev['eventId'] + 0.5
+                    carry['minute'] = np.floor(((init_next_evt['minute'] * 60 + init_next_evt['second']) + (
+                                prev['minute'] * 60 + prev['second'])) / (2 * 60))
+                    carry['second'] = (((init_next_evt['minute'] * 60 + init_next_evt['second']) +
+                                        (prev['minute'] * 60 + prev['second'])) / 2) - (carry['minute'] * 60)
+                    carry['teamId'] = nex['teamId']
+                    carry['x'] = prev['endX']
+                    carry['y'] = prev['endY']
+                    carry['expandedMinute'] = np.floor(
+                        ((init_next_evt['expandedMinute'] * 60 + init_next_evt['second']) +
+                         (prev['expandedMinute'] * 60 + prev['second'])) / (2 * 60))
+                    carry['period'] = nex['period']
+                    carry['type'] = carry.apply(lambda x: {'value': 99, 'displayName': 'Carry'}, axis=1)
+                    carry['outcomeType'] = 'Successful'
+                    carry['qualifiers'] = carry.apply(
+                        lambda x: {'type': {'value': 999, 'displayName': 'takeOns'}, 'value': str(take_ons)}, axis=1)
+                    carry['satisfiedEventsTypes'] = carry.apply(lambda x: [], axis=1)
+                    carry['isTouch'] = True
+                    carry['playerId'] = nex['playerId']
+                    carry['endX'] = nex['x']
+                    carry['endY'] = nex['y']
+                    carry['blockedX'] = np.nan
+                    carry['blockedY'] = np.nan
+                    carry['goalMouthZ'] = np.nan
+                    carry['goalMouthY'] = np.nan
+                    carry['isShot'] = np.nan
+                    carry['relatedEventId'] = nex['eventId']
+                    carry['relatedPlayerId'] = np.nan
+                    carry['isGoal'] = np.nan
+                    carry['cardType'] = np.nan
+                    carry['isOwnGoal'] = np.nan
+                    carry['match_id'] = nex['match_id']
+                    carry['eventType'] = 'Carry'
+                    carry['cumulative_mins'] = (prev['cumulative_mins'] + init_next_evt['cumulative_mins']) / 2
+
+                    match_carries = pd.concat([match_carries, carry], ignore_index=True, sort=False)
+
+        match_events_and_carries = pd.concat([match_carries, match_events], ignore_index=True, sort=False)
+        match_events_and_carries = match_events_and_carries.sort_values(
+            ['match_id', 'period', 'cumulative_mins']).reset_index(drop=True)
+
+        # Rebuild events dataframe
+        events_out = pd.concat([events_out, match_events_and_carries])
+
+    return events_out
+
+
+def get_xthreat(events_df, interpolate=True, pitch_length=105, pitch_width=68):
+    """ Add expected threat metric to whoscored-style events dataframe
+
+    Function to apply Karun Singh's expected threat model to all successful pass and carry events within a
+    whoscored-style events dataframe. This imposes a 12x8 grid of expected threat values on a standard pitch. An
+    interpolate parameter can be passed to impose a continous set of expected threat values on the pitch.
+
+    Args:
+        events_df (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
+        interpolate (bool, optional): selection of whether to impose a continous set of xT values. True by default.
+        pitch_length (float, optional): length of pitch in metres. 105m by default.
+        pitch_width (float, optional): width of pitch in metres. 68m by default.
+
+    Returns:
+        pandas.DataFrame: whoscored-style dataframe of events, including expected threat
+    """
+
+    # Define function to cell in which an x, y value falls
+    def get_cell_indexes(x_series, y_series, cell_cnt_l, cell_cnt_w, field_length, field_width):
+        xi = x_series.divide(field_length).multiply(cell_cnt_l)
+        yj = y_series.divide(field_width).multiply(cell_cnt_w)
+        xi = xi.astype('int64').clip(0, cell_cnt_l - 1)
+        yj = yj.astype('int64').clip(0, cell_cnt_w - 1)
+        return xi, yj
+
+    # Initialise output
+    events_out = pd.DataFrame()
+
+    # Get Karun Singh expected threat grid
+    path = "https://karun.in/blog/data/open_xt_12x8_v1.json"
+    xt_grid = pd.read_json(path)
+    init_cell_count_w, init_cell_count_l = xt_grid.shape
+
+    # Isolate actions that involve successfully moving the ball (successful carries and passes)
+    move_actions = events_df[(events_df['eventType'].isin(['Carry', 'Pass'])) &
+                             (events_df['outcomeType'] == 'Successful')]
+
+    # Set-up bilinear interpolator if user chooses to
+    if interpolate:
+        cell_length = pitch_length / init_cell_count_l
+        cell_width = pitch_width / init_cell_count_w
+        x = np.arange(0.0, pitch_length, cell_length) + 0.5 * cell_length
+        y = np.arange(0.0, pitch_width, cell_width) + 0.5 * cell_width
+        interpolator = interp2d(x=x, y=y, z=xt_grid.values, kind='linear', bounds_error=False)
+        interp_cell_count_l = int(pitch_length * 10)
+        interp_cell_count_w = int(pitch_width * 10)
+        xs = np.linspace(0, pitch_length, interp_cell_count_l)
+        ys = np.linspace(0, pitch_width, interp_cell_count_w)
+        grid = interpolator(xs, ys)
+    else:
+        grid = xt_grid.values
+
+    # Set cell counts based on use of interpolator
+    if interpolate:
+        cell_count_l = interp_cell_count_l
+        cell_count_w = interp_cell_count_w
+    else:
+        cell_count_l = init_cell_count_l
+        cell_count_w = init_cell_count_w
+
+    # For each match, apply expected threat grid (we go by match to avoid issues with identical event indicies)
+    for match_id in move_actions['match_id'].unique():
+        match_move_actions = move_actions[move_actions['match_id'] == match_id]
+
+        # Get cell indices of start location of event
+        startxc, startyc = get_cell_indexes(match_move_actions['x'], match_move_actions['y'], cell_count_l,
+                                            cell_count_w, pitch_length, pitch_width)
+        endxc, endyc = get_cell_indexes(match_move_actions['endX'], match_move_actions['endY'], cell_count_l,
+                                        cell_count_w, pitch_length, pitch_width)
+
+        # Calculate xt at start and end of eventa
+        xt_start = grid[startyc.rsub(cell_count_w - 1), startxc]
+        xt_end = grid[endyc.rsub(cell_count_w - 1), endxc]
+
+        # Build dataframe of event index and net xt
+        ratings = pd.DataFrame(data=xt_end-xt_start, index=match_move_actions.index, columns=['xThreat'])
+
+        # Merge ratings dataframe to all match events
+        match_events_and_ratings = pd.merge(left=events_df[events_df['match_id'] == match_id], right=ratings,
+                                            how="left", left_index=True, right_index=True)
+        events_out = pd.concat([events_out, match_events_and_ratings], ignore_index=True, sort=False)
+
+    return events_out

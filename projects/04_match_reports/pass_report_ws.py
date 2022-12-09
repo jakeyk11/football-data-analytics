@@ -45,17 +45,17 @@ import analysis_tools.logos_and_badges as lab
 # %% User inputs
 
 # Input WhoScored match id
-match_id = '1549722'
+match_id = '1632093'
 
 # Select year
-year = '2021'
+year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'World_Cup'
 
 # Select team codes
-home_team = 'Liverpool'
-away_team = 'Leeds'
+home_team = 'England'
+away_team = 'Iran'
 
 # Team name to print
 home_team_print = None
@@ -69,7 +69,7 @@ central_pct = 75
 
 # %% Logos, colours and printed names
 
-home_logo, home_colourmap = lab.get_team_badge_and_colour(home_team, 'home')
+home_logo, home_colourmap = lab.get_team_badge_and_colour(home_team, 'away')
 away_logo, away_colourmap = lab.get_team_badge_and_colour(away_team, 'home')
 
 if home_team_print is None:
@@ -88,8 +88,8 @@ events_df = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(ye
 events_df = pickle.load(events_df)
 players_df = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/match-playerdata-{match_id}-{home_team}-{away_team}.pbz2", 'rb')
 players_df = pickle.load(players_df)
-event_types = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/event-types.pbz2", 'rb')
-event_types = pickle.load(event_types)
+#event_types = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/event-types.pbz2", 'rb')
+#event_types = pickle.load(event_types)
 
 # %% Calculate Scoreline (special accounting for own goals)
 
@@ -113,7 +113,6 @@ players_df = wde.minutes_played(players_df, events_df)
 # Calculate longest consistent xi
 players_df = wde.longest_xi(players_df)
 
-# Determine positions substitutes played
 
 # %% Aggregate data per player
 
@@ -128,7 +127,7 @@ suc_passes = events_df[(events_df['eventType']=='Pass') & (events_df['outcomeTyp
 playerinfo_df = wde.group_player_events(suc_passes, playerinfo_df, primary_event_name='suc_passes')
 
 # Progressive passes
-events_df['progressive_pass'] = events_df.apply(wce.progressive_pass, axis=1)
+events_df['progressive_pass'] = events_df.apply(wce.progressive_pass, successful_only = False, axis=1)
 prog_passes = events_df[events_df['progressive_pass']==True]
 playerinfo_df = wde.group_player_events(prog_passes, playerinfo_df, primary_event_name='prog_passes')
 suc_prog_passes = events_df[(events_df['progressive_pass']==True) & (events_df['outcomeType']=='Successful')]
@@ -215,9 +214,9 @@ offensive_hull_df = pd.DataFrame()
 # Create convex hull for each player
 for player_id in players_df[players_df['longest_xi']==True].index:
     player_def_hull = wce.create_convex_hull(defensive_actions_df[defensive_actions_df['playerId'] == player_id], name=players_df.loc[player_id,'name'],
-        min_events=5, include_percent=central_pct, pitch_area = 10000)
+        min_events=5, include_events=central_pct, pitch_area = 10000)
     player_off_hull = wce.create_convex_hull(offensive_actions_df[offensive_actions_df['playerId'] == player_id], name=players_df.loc[player_id,'name'],
-        min_events=5, include_percent=40)
+        min_events=5, include_events=40)
     offensive_hull_df = pd.concat([offensive_hull_df, player_off_hull])
     defensive_hull_df = pd.concat([defensive_hull_df, player_def_hull])
 
@@ -264,9 +263,9 @@ for idx, team in enumerate(players_df['teamId'].unique()):
 
 # Title text
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'FIFA World Cup'}
 
-title_text = f"{leagues[league]} - {year}/{int(year) + 1}"
+title_text = f"{leagues[league]} - {year}/{int(year) + 1}" if not league in ['World_Cup'] else f"{leagues[league]} - {year}"
 subtitle_text = f"{home_team_print} {home_score}-{away_score} {away_team_print}"
 subsubtitle_text = "Pass Flow - Most Frequent Inter-zone Passes"
 
@@ -352,7 +351,7 @@ cm_count = 0
 cb_count = 0
 last_idx = 0
 
-# Plot progressive passes
+# Plot convex hulls
 for hull_idx, hull_row in offensive_hull_df.iterrows():
     
     # Determine team the hull applies to
@@ -448,7 +447,7 @@ ax.arrow(0.375, 0.55, -0.05, 0, color="w", width=0.001, head_width = 0.05, head_
 ax.arrow(0.625, 0.55, 0.05, 0, color="w", width=0.001, head_width = 0.05, head_length = 0.01, lw=0.5)
 
 # Title text
-title_text = f"{leagues[league]} - {year}/{int(year) + 1}"
+title_text = f"{leagues[league]} - {year}/{int(year) + 1}" if not league in ['World_Cup'] else f"{leagues[league]} - {year}"
 subtitle_text = f"{home_team_print} {home_score}-{away_score} {away_team_print}"
 subsubtitle_text = f"Variation in start position of player passes. Central {central_pct}%\n of passes shown per player, represented by a shaded region"
 
@@ -873,7 +872,7 @@ ax2.plot([0.33, 0.33], [0.15 ,0.92], lw=0.5, color='w')
 ax2.text(0.05, 0.52, "Top players\nby # of\nprogressive\npasses", va = 'center', color='w', fontsize=9)
 
 # Title text
-title_text = f"{leagues['EPL']} - {year}/{int(year) + 1}"
+title_text = f"{leagues[league]} - {year}/{int(year) + 1}" if not league in ['World_Cup'] else f"{leagues[league]} - {year}"
 subtitle_text = f"{home_team_print} {home_score}-{away_score} {away_team_print}"
 subsubtitle_text1 = f"{home_team_print} Pass Report"
 subsubtitle_text2 = f"{away_team_print} Pass Report"
