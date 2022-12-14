@@ -27,7 +27,6 @@ import sys
 import bz2
 import pickle
 import numpy as np
-from collections import Counter
 import highlight_text as htext
 import glob
 from mplsoccer.pitch import Pitch
@@ -39,16 +38,10 @@ root_folder = os.path.abspath(os.path.dirname(
 sys.path.append(root_folder)
 
 import analysis_tools.whoscored_custom_events as wce
-import analysis_tools.pitch_zones as pz
 import analysis_tools.whoscored_data_engineering as wde
 import analysis_tools.logos_and_badges as lab
 
 # %% User inputs
-
-# Input WhoScored range of match id
-match_id_start = 1640674
-match_id_end = 1640833
-match_ids = np.arange(match_id_start, match_id_end+1)
 
 # Select year
 year = '2022'
@@ -60,85 +53,256 @@ league = 'EPL'
 pos_exclude=['GK']
 
 # Position formatting on title
-pos_input = ''
+pos_input = 'outfield players'
 
 # Input run-date
 run_date = '17/11/2022'
 
-# Min minutes played
+# Normalisation (None, '_90', '_100pass', '_100teampass')
+norm_mode = '_90'
+
+# Min minutes played (only used if normalising)
 min_mins = 450
+
+# Brighten logo
+logo_brighten = True
 
 # %% League logo
 
-comp_logo = lab.get_competition_logo(league)
-enhancer = ImageEnhance.Brightness(comp_logo)
-comp_logo = enhancer.enhance(100)
+if logo_brighten:
+    comp_logo = lab.get_competition_logo(league)
+    enhancer = ImageEnhance.Brightness(comp_logo)
+    comp_logo = enhancer.enhance(100)
+else:
+    comp_logo = lab.get_competition_logo(league)
 
-# %% Read in data
+# %% Get data
 
-# Opta data
+file_path = f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}"
+files = os.listdir(file_path)
+
+# Initialise storage dataframes
 events_df = pd.DataFrame()
 players_df = pd.DataFrame()
-for match_id in match_ids:
-    match_event_path = f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/match-eventdata-{match_id}-*.pbz2"
-    match_players_path = f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/match-playerdata-{match_id}-*.pbz2"
-    try:
-        match_events = bz2.BZ2File(glob.glob(match_event_path)[0], 'rb')
+
+# Load data
+for file in files:
+    if file == 'event-types.pbz2':
+        event_types = bz2.BZ2File(f"{file_path}/{file}", 'rb')
+        event_types = pickle.load(event_types)
+    elif file == 'formation-mapping.pbz2':
+        formation_mapping = bz2.BZ2File(f"{file_path}/{file}", 'rb')
+        formation_mapping = pickle.load(formation_mapping)
+    elif '-eventdata-' in file:
+        match_events = bz2.BZ2File(f"{file_path}/{file}", 'rb')
         match_events = pickle.load(match_events)
-    except:
-        match_events = pd.DataFrame()
-    try:
-        match_players = bz2.BZ2File(glob.glob(match_players_path)[0], 'rb')
-        match_players = pickle.load(match_players)
-    except:
-        match_players = pd.DataFrame()
-    try:
         events_df = pd.concat([events_df, match_events])
+    elif '-playerdata-' in file:
+        match_players = bz2.BZ2File(f"{file_path}/{file}", 'rb')
+        match_players = pickle.load(match_players)
         players_df = pd.concat([players_df, match_players])
-    except IndexError:
-        events_df = match_events
-        players_df = match_players
-    
-event_types = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/event-types.pbz2", 'rb')
-event_types = pickle.load(event_types)
+    else:
+        pass
 
 # %% Pre-process data
+
+# Add pass recipient
+events_df = wde.get_recipient(events_df)
 
 # Add cumulative minutes information
 players_df = wde.minutes_played(players_df, events_df)
 
+# Add pre-assist information
+events_df = wce.pre_assist(events_df)
+
+# Calculate longest consistent xi
+players_df = wde.longest_xi(players_df)
+
+# Calculate pass events that each player's team makes per game
+players_df = wde.events_while_playing(events_df, players_df, event_name = 'Pass', event_team = 'own')
+
+# Add progressive pass and box entry information to event dataframe
+events_df['progressive_pass'] = events_df.apply(wce.progressive_pass, axis=1, inplay = True, successful_only = False)
+events_df['into_box'] = events_df.apply(wce.pass_into_box, axis=1, inplay = True, successful_only = False)
+
+# Determine substitute positions (TBC)
+#for idx, player in players_df.iterrows():
+ #   if player['subbedOutPlayerId'] == player['subbedOutPlayerId']:
+  #      subbed_on_position = players_df[players_df['match_id'] == player['match_id']].loc[player['subbedOutPlayerId'], 'position']
+   #     players_df.loc[idx,'position'] = subbed_on_position
+
 # %% Aggregate data per player
 
-playerinfo_df = wde.create_player_list(players_df)
+playerinfo_df = wde.create_player_list(players_df, additional_cols = ['team_pass'])
 
-# %% Add progressive pass and box entry information to event dataframe
+# Passes
+all_passes = events_df[events_df['eventType']=='Pass']
+playerinfo_df = wde.group_player_events(all_passes, playerinfo_df, primary_event_name='passes')
 
-events_df['progressive_pass'] = events_df.apply(wce.progressive_pass, axis=1, inplay = True, successful_only = True)
-events_df['into_box'] = events_df.apply(wce.pass_into_box, axis=1, inplay = True, successful_only = True)
+# Successful passes
+suc_passes = all_passes[all_passes['outcomeType']=='Successful']
+playerinfo_df = wde.group_player_events(suc_passes, playerinfo_df, primary_event_name='suc_passes')
 
-# %% Isolate passes into opposition box
+# Progressive passes
+prog_passes = all_passes[all_passes['progressive_pass']==True]
+playerinfo_df = wde.group_player_events(prog_passes, playerinfo_df, primary_event_name='prog_passes')
+suc_prog_passes = prog_passes[prog_passes['outcomeType']=='Successful']
+playerinfo_df = wde.group_player_events(suc_prog_passes, playerinfo_df, primary_event_name='suc_prog_passes')
 
-box_pass = events_df[events_df['into_box'] == True]
-playerinfo_df = wde.group_player_events(box_pass, playerinfo_df, primary_event_name='box_pass')
-playerinfo_df['box_pass'].replace(np.nan, 0, inplace=True)
-playerinfo_df['box_pass_90'] = round(90*playerinfo_df['box_pass']/playerinfo_df['mins_played'],2)
+# Successful progressive passes in opposition half
+opphalf_prog_pass = suc_prog_passes[suc_prog_passes['x'] > 50]
+playerinfo_df = wde.group_player_events(opphalf_prog_pass, playerinfo_df, primary_event_name='opphalf_prog_passes')
 
-# %% Isolate progressive passes in opposition half
+# Forward passes
+forward_passes = all_passes[all_passes['endX'] > all_passes['x']]
+playerinfo_df = wde.group_player_events(forward_passes, playerinfo_df, primary_event_name='fwd_passes')
+suc_forward_passes = forward_passes[forward_passes['outcomeType']=='Successful']
+playerinfo_df = wde.group_player_events(suc_forward_passes, playerinfo_df, primary_event_name='suc_fwd_passes')
 
-opphalf_prog_pass = events_df[(events_df['progressive_pass'] == True) & (events_df['x'] > 50)]
-playerinfo_df = wde.group_player_events(opphalf_prog_pass, playerinfo_df, primary_event_name='opphalf_prog_pass')
-playerinfo_df['opphalf_prog_pass'].replace(np.nan, 0, inplace=True)
-playerinfo_df['opphalf_prog_pass_90'] = round(90*playerinfo_df['opphalf_prog_pass']/playerinfo_df['mins_played'],2)
+# Crosses
+crosses = all_passes[all_passes['satisfiedEventsTypes'].apply(lambda x: 125 in x or 126 in x)]
+playerinfo_df = wde.group_player_events(crosses, playerinfo_df, primary_event_name='crosses')
+suc_crosses = all_passes[all_passes['satisfiedEventsTypes'].apply(lambda x: 125 in x)]
+playerinfo_df = wde.group_player_events(suc_crosses, playerinfo_df, primary_event_name='suc_crosses')
+
+# Through balls
+through_balls = all_passes[all_passes['satisfiedEventsTypes'].apply(lambda x: 129 in x or 130 in x or 131 in x)]
+playerinfo_df = wde.group_player_events(through_balls, playerinfo_df, primary_event_name='through_balls')
+suc_through_balls = all_passes[all_passes['satisfiedEventsTypes'].apply(lambda x: 129 in x)]
+playerinfo_df = wde.group_player_events(suc_through_balls, playerinfo_df, primary_event_name='suc_through_balls')
+
+# Long balls
+long_balls = all_passes[all_passes['satisfiedEventsTypes'].apply(lambda x: 127 in x or 128 in x)]
+playerinfo_df = wde.group_player_events(long_balls, playerinfo_df, primary_event_name='long_balls')
+suc_long_balls = all_passes[all_passes['satisfiedEventsTypes'].apply(lambda x: 127 in x)]
+playerinfo_df = wde.group_player_events(suc_long_balls, playerinfo_df, primary_event_name='suc_long_balls')
+
+# Key passes
+key_passes = all_passes[all_passes['satisfiedEventsTypes'].apply(lambda x: 123 in x)]
+playerinfo_df = wde.group_player_events(key_passes, playerinfo_df, primary_event_name='key_passes')
+
+# Key progressive passes
+key_prog_passes = suc_prog_passes[suc_prog_passes['satisfiedEventsTypes'].apply(lambda x: 123 in x)]
+playerinfo_df = wde.group_player_events(key_prog_passes, playerinfo_df, primary_event_name='key_prog_passes')
+
+# Assists
+assists = all_passes[all_passes['satisfiedEventsTypes'].apply(lambda x: 92 in x)]
+touch_assists = events_df[(events_df['eventType']!='Pass') & (events_df['satisfiedEventsTypes'].apply(lambda x: 92 in x))]
+playerinfo_df = wde.group_player_events(assists, playerinfo_df, primary_event_name='assists')
+
+# Pre assists
+pre_assists = all_passes[all_passes['pre_assist']==True]
+playerinfo_df = wde.group_player_events(pre_assists, playerinfo_df, primary_event_name='pre_assists')
+
+# Passes into opposition box
+box_passes = all_passes[all_passes['into_box'] == True]
+playerinfo_df = wde.group_player_events(box_passes, playerinfo_df, primary_event_name='box_passes')
+suc_box_passes = box_passes[box_passes['outcomeType']=='Successful']
+playerinfo_df = wde.group_player_events(suc_box_passes, playerinfo_df, primary_event_name='suc_box_passes')
+
+# %% Calculate statistics as percentages and per 90 mins
+
+# Passes
+playerinfo_df['passes_90'] =  round(90*playerinfo_df['passes']/playerinfo_df['mins_played'],2)
+playerinfo_df['passes_100teampass'] =  round(100*playerinfo_df['passes']/playerinfo_df['team_pass'],1)
+
+# Successful Passes
+playerinfo_df['suc_passes_pct'] = round(100*playerinfo_df['suc_passes']/playerinfo_df['passes'],1)
+playerinfo_df['suc_passes_90'] = round(90*playerinfo_df['suc_passes']/playerinfo_df['mins_played'],2)
+playerinfo_df['suc_passes_100teampass'] = round(100*playerinfo_df['suc_passes']/playerinfo_df['team_pass'],1)
+
+# Progressive Passes
+playerinfo_df['prog_passes_pct'] = round(100*playerinfo_df['prog_passes']/playerinfo_df['passes'],1)
+playerinfo_df['prog_passes_90'] = round(90*playerinfo_df['prog_passes']/playerinfo_df['mins_played'],2)
+playerinfo_df['prog_passes_100teampass'] = round(100*playerinfo_df['prog_passes']/playerinfo_df['team_pass'],1)
+playerinfo_df['suc_prog_passes_pct'] = round(100*playerinfo_df['suc_prog_passes']/playerinfo_df['passes'],1)
+playerinfo_df['suc_prog_passes_pctpp'] = round(100*playerinfo_df['suc_prog_passes']/playerinfo_df['prog_passes'],1)
+playerinfo_df['suc_prog_passes_90'] = round(90*playerinfo_df['suc_prog_passes']/playerinfo_df['mins_played'],2)
+playerinfo_df['suc_prog_passes_100teampass'] = round(100*playerinfo_df['suc_prog_passes']/playerinfo_df['team_pass'],1)
+
+# Successful progressive passes in opposition half
+playerinfo_df['opphalf_prog_passes_pct'] = round(100*playerinfo_df['opphalf_prog_passes']/playerinfo_df['passes'],1)
+playerinfo_df['opphalf_prog_passes_90'] = round(90*playerinfo_df['opphalf_prog_passes']/playerinfo_df['mins_played'],2)
+
+# Forward passes
+playerinfo_df['fwd_passes_pct'] = round(100*playerinfo_df['fwd_passes']/playerinfo_df['passes'],1)
+playerinfo_df['fwd_passes_90'] = round(90*playerinfo_df['fwd_passes']/playerinfo_df['mins_played'],2)
+playerinfo_df['suc_fwd_passes_pct'] = round(100*playerinfo_df['suc_fwd_passes']/playerinfo_df['passes'],1)
+playerinfo_df['suc_fwd_passes_pctfwd'] = round(100*playerinfo_df['suc_fwd_passes']/playerinfo_df['fwd_passes'],1)
+playerinfo_df['suc_fwd_passes_90'] = round(90*playerinfo_df['suc_fwd_passes']/playerinfo_df['mins_played'],2)
+
+# Crosses
+playerinfo_df['crosses_pct'] = round(100*playerinfo_df['crosses']/playerinfo_df['passes'],1)
+playerinfo_df['crosses_90'] = round(90*playerinfo_df['crosses']/playerinfo_df['mins_played'],2)
+playerinfo_df['suc_crosses_pct'] = round(100*playerinfo_df['suc_crosses']/playerinfo_df['passes'],1)
+playerinfo_df['suc_crosses_pctcross'] = round(100*playerinfo_df['suc_crosses']/playerinfo_df['crosses'],1)
+playerinfo_df['suc_crosses_90'] = round(90*playerinfo_df['suc_crosses']/playerinfo_df['mins_played'],2)
+
+# Through balls
+playerinfo_df['through_balls_pct'] = round(100*playerinfo_df['through_balls']/playerinfo_df['passes'],1)
+playerinfo_df['through_balls_90'] = round(90*playerinfo_df['through_balls']/playerinfo_df['mins_played'],2)
+playerinfo_df['suc_through_balls_pct'] = round(100*playerinfo_df['suc_through_balls']/playerinfo_df['passes'],1)
+playerinfo_df['suc_through_balls_pcttb'] = round(100*playerinfo_df['suc_through_balls']/playerinfo_df['through_balls'],1)
+playerinfo_df['suc_through_balls_90'] = round(90*playerinfo_df['suc_through_balls']/playerinfo_df['mins_played'],2)
+
+# Long balls
+playerinfo_df['long_balls_pct'] = round(100*playerinfo_df['long_balls']/playerinfo_df['passes'],1)
+playerinfo_df['long_balls_90'] = round(90*playerinfo_df['long_balls']/playerinfo_df['mins_played'],2)
+playerinfo_df['suc_long_balls_pct'] = round(100*playerinfo_df['suc_long_balls']/playerinfo_df['passes'],1)
+playerinfo_df['suc_long_balls_pctlb'] = round(100*playerinfo_df['suc_long_balls']/playerinfo_df['long_balls'],1)
+playerinfo_df['suc_long_balls_90'] = round(90*playerinfo_df['suc_long_balls']/playerinfo_df['mins_played'],2)
+
+# Key Passes
+playerinfo_df['key_passes_pct'] = round(100*playerinfo_df['key_passes']/playerinfo_df['passes'],1)
+playerinfo_df['key_passes_90'] = round(90*playerinfo_df['key_passes']/playerinfo_df['mins_played'],2)
+
+# Key Progressive Passes
+playerinfo_df['key_prog_passes_pct'] = round(100*playerinfo_df['key_prog_passes']/playerinfo_df['passes'],1)
+playerinfo_df['key_prog_passes_90'] = round(90*playerinfo_df['key_prog_passes']/playerinfo_df['mins_played'],2)
+
+# Assists
+playerinfo_df['assists_90'] = round(90*playerinfo_df['assists']/playerinfo_df['mins_played'],2)
+
+# Pre-assists
+playerinfo_df['pre_assists_90'] = round(90*playerinfo_df['pre_assists']/playerinfo_df['mins_played'],2)
+
+# Passes into opposition box
+playerinfo_df['box_passes_pct'] = round(100*playerinfo_df['box_passes']/playerinfo_df['passes'],1)
+playerinfo_df['box_passes_90'] = round(90*playerinfo_df['box_passes']/playerinfo_df['mins_played'],2)
+playerinfo_df['suc_box_passes_pct'] = round(100*playerinfo_df['suc_box_passes']/playerinfo_df['passes'],1)
+playerinfo_df['suc_box_passes_pctbp'] = round(100*playerinfo_df['suc_box_passes']/playerinfo_df['box_passes'],1)
+playerinfo_df['suc_box_passes_90'] = round(90*playerinfo_df['suc_box_passes']/playerinfo_df['mins_played'],2)
 
 # %% Filter playerinfo
 
 playerinfo_df = playerinfo_df[(playerinfo_df['mins_played']>=min_mins) & (~playerinfo_df['pos_type'].isin(pos_exclude))]
 playerinfo_df = playerinfo_df[~playerinfo_df.index.duplicated(keep='first')]
 
-# %% Plotting metrics
+# %% Order playerinfo for progressive pass plot
 
-left_ax_plot = playerinfo_df['box_pass_90']
-right_ax_plot = playerinfo_df['opphalf_prog_pass_90']
+if norm_mode == None:
+    pp_sorted_df = playerinfo_df.sort_values(['suc_prog_passes', 'suc_prog_passes_90'], ascending=[False, False])
+elif norm_mode == '_90':
+    pp_sorted_df = playerinfo_df.sort_values(['suc_prog_passes_90', 'suc_prog_passes'], ascending=[False, False])
+elif norm_mode == '_100pass':
+    pp_sorted_df = playerinfo_df.sort_values(['suc_prog_passes_100pass', 'suc_prog_passes'], ascending=[False, False])
+elif norm_mode == '_100teampass':
+    pp_sorted_df = playerinfo_df.sort_values(['suc_prog_passes_100teampass', 'suc_prog_passes'], ascending=[False, False])
+
+# %% Plot formatting
+
+# Overwrite rcparams
+mpl.rcParams['xtick.color'] = 'w'
+mpl.rcParams['ytick.color'] = 'w'
+mpl.rcParams['text.color'] = 'w'
+
+# %% ------- VISUAL 1 - DIAMOND PLOT X VS Y METRIC -------
+
+# Plotting metrics
+left_metric = 'box_passes_90'
+right_metric = 'opphalf_prog_passes_90'
+left_ax_plot = playerinfo_df[left_metric]
+right_ax_plot = playerinfo_df[right_metric]
 
 left_ax_plot.replace(np.nan, 0, inplace=True)
 right_ax_plot.replace(np.nan, 0, inplace=True)
@@ -154,12 +318,7 @@ plot_quantile_right = right_ax_norm_plot.quantile([0,0.5,0.9]).tolist()
 plot_player = playerinfo_df[(left_ax_norm_plot>plot_quantile_left[2]) | (right_ax_norm_plot>plot_quantile_right[2])]
 #plot_player = playerinfo_df[playerinfo_df['team']=='Man Utd']
 
-# %% Build visual
-
-# Overwrite rcparams
-mpl.rcParams['xtick.color'] = 'w'
-mpl.rcParams['ytick.color'] = 'w'
-mpl.rcParams['text.color'] = 'w'
+# Build visual
 
 # Set-up figure
 fig = plt.figure(figsize = (8.5,9), facecolor = '#313332')
@@ -308,7 +467,6 @@ subtitle_text = "Passes into Opposition Box & Progressive Passes within Oppositi
 # Title
 fig.text(0.12, 0.935, title_text, fontweight="bold", fontsize=16, color='w')
 fig.text(0.12, 0.905, subtitle_text, fontweight="regular", fontsize=13, color='w')
-#fig.text(0.847, 0.902, subsubsubtitle_text, fontweight="regular", fontsize=9, color='w')
 
 # Add competition logo
 comp_ax = fig.add_axes([0.015, 0.877, 0.1, 0.1])
@@ -327,4 +485,113 @@ badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
 logo_ax.imshow(badge)
 
 # Save image
-fig.savefig(f"top_opposition_half_passers/{league}-{year}-opposition-half-passers-player-variant", dpi=300)
+fig.savefig(f"player_effective_passers/{league}-{year}-diamond-{run_date.replace('/','_')}-{left_metric}-vs-{right_metric}-player-variant", dpi=300)
+
+# %% ------- VISUAL 2 - TOP 12 PROGRESSIVE PASSERS -------
+
+# Text formatting 
+if norm_mode == None:
+    title_addition = ''
+    subsubtitle_addition = ''
+elif norm_mode == '_90':
+    title_addition = 'per 90mins'
+    subsubtitle_addition = f"Players with less than {min_mins} mins play-time omitted."
+elif norm_mode == '_100pass':
+    title_addition = 'per 100 passes'
+    subsubtitle_addition = f"Players with less than {min_mins} mins play-time omitted."
+elif norm_mode == '_100teampass':
+    title_addition = 'per 100 team passes'
+    subsubtitle_addition = f"Players with less than {min_mins} mins play-time omitted." 
+if len(pos_exclude)==0:
+    title_pos_str = 'players'
+    file_pos_str = ''
+else:
+    title_pos_str = pos_input
+    file_pos_str = '-' + pos_input
+
+# Set-up pitch subplots
+pitch = Pitch(pitch_color='#313332', pitch_type='opta', line_color='white', linewidth=1, stripe=False)
+fig, ax = pitch.grid(nrows=3, ncols=4, grid_height=0.75, space=0.12, axis=False)
+fig.set_size_inches(14, 9)
+fig.set_facecolor('#313332')
+ax['pitch'] = ax['pitch'].reshape(-1)
+
+# Plot successful prog passes as arrows, using for loop to iterate through each player and each pass
+idx = 0
+
+for player_id, name in pp_sorted_df.head(12).iterrows():
+    player_passes = suc_prog_passes[suc_prog_passes['playerId'] == player_id]
+    player_assists = assists[assists['playerId'] == player_id]
+    player_touch_assists = touch_assists[touch_assists['playerId'] == player_id]
+    player_key_passes = key_prog_passes[key_prog_passes['playerId'] == player_id]
+
+    ax['pitch'][idx].set_title(f"  {idx + 1}: {name['name']}", loc = "left", color='w', fontsize = 10)
+
+    pitch.lines(player_passes['x'], player_passes['y'], player_passes['endX'], player_passes['endY'],
+                lw = 2, comet=True, capstyle='round', label = 'Progressive Pass', color = 'cyan', transparent=True, alpha = 0.1, zorder=1, ax=ax['pitch'][idx])
+  
+    pitch.lines(player_key_passes['x'], player_key_passes['y'], player_key_passes['endX'], player_key_passes['endY'],
+                lw = 2, comet=True, capstyle='round', label = 'Assists', color = 'lime', transparent=True, alpha = 0.5, zorder=2, ax=ax['pitch'][idx])
+      
+    pitch.lines(player_assists['x'], player_assists['y'], player_assists['endX'], player_assists['endY'],
+            lw = 2, comet=True, capstyle='round', label = 'Assists', color = 'magenta', transparent=True, alpha = 0.5, zorder=3, ax=ax['pitch'][idx])
+
+    pitch.scatter(player_touch_assists['x'], player_touch_assists['y'], color = 'magenta', alpha = 0.8, s = 12, zorder=3, ax=ax['pitch'][idx])
+
+    ax['pitch'][idx].text(2, 4, "Total:", fontsize=8, fontweight='bold', color='w', zorder=3)
+    ax['pitch'][idx].text(15, 4, f"{int(name['suc_prog_passes'])}", fontsize=8, color='w', zorder=3)
+    
+    if norm_mode  == '_100pass':
+        ax['pitch'][idx].text(2, 12, "/100 pass:", fontsize=8, fontweight='bold', color='w', zorder=3)
+        ax['pitch'][idx].text(26, 12, f"{round(name['suc_prog_passes_100pass'],1)}", fontsize=8, color='w', zorder=3)
+    elif norm_mode  == '_100teampass':
+        ax['pitch'][idx].text(2, 12, "/100 team pass:", fontsize=8, fontweight='bold', color='w', zorder=3)
+        ax['pitch'][idx].text(38, 12, f"{round(name['suc_prog_passes_100teampass'],1)}", fontsize=8, color='w', zorder=3)
+    
+    team = name['team']
+    team_logo, _ = lab.get_team_badge_and_colour(team)
+            
+    ax_pos = ax['pitch'][idx].get_position()
+    
+    logo_ax = fig.add_axes([ax_pos.x1-0.035, ax_pos.y1, 0.035, 0.035])
+    logo_ax.axis("off")
+    logo_ax.imshow(team_logo)
+    
+    idx += 1
+
+# Create title and subtitles, using highlighting as figure legend
+leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship'}
+
+title_text = f"Top 12 {title_pos_str}, ranked by successful opposition-half progressive passes {title_addition}"
+subtitle_text = f"{leagues[league]} {year}/{int(year) + 1} - <Successful Progressive Passes>, <Key Progressive Passes> and <Assists>"
+subsubtitle_text = f"Correct as of {run_date}. {subsubtitle_addition}"
+fig.text(0.1, 0.945, title_text, fontweight="bold", fontsize=14.5, color='w')
+htext.fig_text(0.1, 0.93, s=subtitle_text, fontweight="regular", fontsize=13, color='w',
+               highlight_textprops=[{"color": 'cyan', "fontweight": 'bold'}, {"color": 'lime', "fontweight": 'bold'},
+                                    {"color": 'magenta', "fontweight": 'bold'}])
+fig.text(0.1, 0.8875, subsubtitle_text, fontweight="regular", fontsize=10, color='w')
+
+# Add direction of play arrow
+ax = fig.add_axes([0.042, 0.05, 0.18, 0.01])
+ax.axis("off")
+plt.arrow(0.51, 0.15, 0.1, 0, color="white")
+fig.text(0.13, 0.03, "Direction of play", ha="center", fontsize=10, color="white", fontweight="regular")
+
+# Add footer text
+fig.text(0.5, 0.04, "Created by Jake Kolliari (@_JKDS_). Data provided by Opta.",
+         fontstyle="italic", ha="center", fontsize=9, color="white")
+
+# Add competition logo
+ax = fig.add_axes([0.015, 0.877, 0.1, 0.1])
+ax.axis("off")
+ax.imshow(comp_logo)
+
+# Add twitter logo
+ax = fig.add_axes([0.92, 0.025, 0.04, 0.04])
+ax.axis("off")
+badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
+ax.imshow(badge)
+
+# Save image
+fig.savefig(f"player_effective_passers/{league}-{year}-top-progressive-passers-{run_date.replace('/','_')}{file_pos_str.replace(' & ','-').replace(' ','-')}-{title_addition.replace(' ','-')}", dpi=300)

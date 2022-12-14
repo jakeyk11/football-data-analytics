@@ -369,6 +369,7 @@ def group_player_events(events, player_data, group_type='count', event_types=Non
 
     # Merge into player information dataframe
     player_data_out = player_data_out.merge(selected_events, left_on='playerId', right_index=True, how='outer')
+    player_data_out.replace(np.nan, 0, inplace=True)
     return player_data_out
 
 
