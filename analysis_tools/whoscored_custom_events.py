@@ -20,6 +20,9 @@ carry_into_box(single_event, successful_only=True):
 create_convex_hull(events_df, name='default', min_events=3, include_percent=100, pitch_area = 10000):
     Create a dataframe of convex hull information from statsbomb-style event data.
 
+passes_into_hull(hull_info, events, opp_passes=True, xt_info=False):
+    Add pass into hull information to dataframe of convex hulls for whoscored-style event data.
+
 insert_ball_carries(events_df, min_carry_length=3, max_carry_length=60, min_carry_duration=1, max_carry_duration=10):
     Add carry events to whoscored-style events dataframe
 
@@ -31,6 +34,8 @@ import numpy as np
 import pandas as pd
 from scipy.spatial import ConvexHull
 from scipy.interpolate import interp2d
+from scipy.spatial import Delaunay
+from shapely.geometry.polygon import Polygon
 
 
 def pre_assist(events):
@@ -336,6 +341,113 @@ def create_convex_hull(events_df, name='default', min_events=3, include_events='
     return hull_df
 
 
+def passes_into_hull(hull_info, events, opp_passes=True, xt_info=False):
+    """ Add pass into hull information to dataframe of convex hulls for whoscored-style event data.
+
+    Function to determine whether one or more passes (passed in as a whoscored-style event dataframe) end within a
+    convex hull. The function produces a list of successful and unsucessful passes that end within the hull. This
+    information is then used to count passes into the hull, and add the information to the hull information
+    dataframe. This function must be used after create_convex_hull.
+
+    Args:
+        hull_info (pandas.Series): series of hull information.
+        events (pandas.DataFrame): whoscored-style events conaining all passes to be checked.
+        opp_passes (bool, optional): selection of whether the passes to be checked are opposition or own team.
+        xt_info (bool, optional): selection of whether to include expected threat information. False by default.
+
+    Returns:
+        pandas.DataFrame: convex hull information with additional pass columns.
+    """
+
+    def in_hull(p, hull):
+        """
+        Test if points in `p` are in `hull`
+
+        `p` should be a `NxK` coordinates of `N` points in `K` dimensions
+        `hull` is either a scipy.spatial.Delaunay object or the `MxK` array of the
+        coordinates of `M` points in `K`dimensions for which Delaunay triangulation
+        will be computed
+        """
+
+        if not isinstance(hull, Delaunay):
+            hull = Delaunay(hull)
+
+        return hull.find_simplex(p) >= 0
+
+    # Initialise output
+    hull_df = hull_info.copy()
+    hull_df['suc_pass_into_hull'] = []
+    hull_df['unsuc_pass_into_hull'] = []
+
+    # Ensure only pass events are checked
+    events_to_check = events[events['eventType'] == 'Pass']
+
+    # Create polygon object for convex hull that is being assessed
+    polygon = Polygon(list(zip(hull_df['hull_reduced_x'], hull_df['hull_reduced_y'])))
+    hull_pts = list(zip(hull_df['hull_reduced_x'], hull_df['hull_reduced_y']))
+
+    # Initialise pass counters
+    suc_into_hull_count = 0
+    suc_into_hull_xt_net = 0
+    suc_into_hull_xt_gen = 0
+    unsuc_into_hull_count = 0
+    unsuc_into_hull_xt_net = 0
+    unsuc_into_hull_xt_gen = 0
+
+    # Check each pass individually
+    for _, pass_event in events_to_check.iterrows():
+
+        # If the pass being checked is an opposition pass, flip co-ordinates
+        if opp_passes is True:
+            pass_start_loc_flip = [100 - pass_event['x'], 100 - pass_event['y']]
+            pass_end_loc_flip = [100 - pass_event['endX'], 100 - pass_event['endY']]
+        else:
+            pass_start_loc_flip = [pass_event['x'], pass_event['y']]
+            pass_end_loc_flip = [pass_event['endX'], pass_event['endY']]
+
+        # Check point is within polygon
+        if in_hull(pass_end_loc_flip, hull_pts):
+
+            # Add successful and unsuccessful passes to columns, and count passes / accumulate obv
+            if pass_event['outcomeType'] == 'Successful':
+                suc_into_hull_count += 1
+                if xt_info:
+                    hull_df['suc_pass_into_hull'].append([pass_start_loc_flip, pass_end_loc_flip,
+                                                          pass_event['xThreat']])
+                    suc_into_hull_xt_net = np.nansum([suc_into_hull_xt_net, pass_event['xThreat']])
+                    suc_into_hull_xt_gen = np.nansum([suc_into_hull_xt_gen,
+                                                      0 if pass_event['xThreat'] < 0 else pass_event['xThreat']])
+                else:
+                    hull_df['suc_pass_into_hull'].append([pass_start_loc_flip, pass_end_loc_flip])
+
+            else:
+                unsuc_into_hull_count += 1
+                if xt_info:
+                    hull_df['unsuc_pass_into_hull'].append([pass_start_loc_flip, pass_end_loc_flip,
+                                                            pass_event['xThreat']])
+                    unsuc_into_hull_xt_net = np.nansum([unsuc_into_hull_xt_net, pass_event['xThreat']])
+                    unsuc_into_hull_xt_gen = np.nansum([unsuc_into_hull_xt_gen,
+                                                        0 if pass_event['xThreat'] < 0 else pass_event['xThreat']])
+                else:
+                    hull_df['unsuc_pass_into_hull'].append([pass_start_loc_flip, pass_end_loc_flip])
+
+    hull_df['count_suc_pass_into_hull'] = suc_into_hull_count
+    hull_df['count_unsuc_pass_into_hull'] = unsuc_into_hull_count
+    hull_df['pct_tot_pass_into_hull'] = round(100 * (suc_into_hull_count + unsuc_into_hull_count) /
+                                              len(events_to_check), 2)
+    hull_df['hull_pass_prevented_%'] = round(100 * unsuc_into_hull_count /
+                                             (suc_into_hull_count + unsuc_into_hull_count), 2)
+    if xt_info:
+        hull_df['xt_net_suc_pass_into_hull'] = suc_into_hull_xt_net
+        hull_df['xt_gen_suc_pass_into_hull'] = suc_into_hull_xt_gen
+        hull_df['xt_net_unsuc_pass_into_hull'] = unsuc_into_hull_xt_net
+        hull_df['xt_gen_unsuc_pass_into_hull'] = unsuc_into_hull_xt_gen
+        hull_df['xt_net_into_hull'] = suc_into_hull_xt_net + suc_into_hull_xt_net
+        hull_df['obvtot_into_hull'] = suc_into_hull_xt_gen + unsuc_into_hull_xt_gen
+
+    return hull_df
+
+
 def insert_ball_carries(events_df, min_carry_length=3, max_carry_length=60, min_carry_duration=1, max_carry_duration=10):
     """ Add carry events to whoscored-style events dataframe
 
@@ -462,7 +574,7 @@ def insert_ball_carries(events_df, min_carry_length=3, max_carry_length=60, min_
     return events_out
 
 
-def get_xthreat(events_df, interpolate=True, pitch_length=105, pitch_width=68):
+def get_xthreat(events_df, interpolate=True, pitch_length=100, pitch_width=100):
     """ Add expected threat metric to whoscored-style events dataframe
 
     Function to apply Karun Singh's expected threat model to all successful pass and carry events within a
@@ -472,14 +584,14 @@ def get_xthreat(events_df, interpolate=True, pitch_length=105, pitch_width=68):
     Args:
         events_df (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
         interpolate (bool, optional): selection of whether to impose a continous set of xT values. True by default.
-        pitch_length (float, optional): length of pitch in metres. 105m by default.
-        pitch_width (float, optional): width of pitch in metres. 68m by default.
+        pitch_length (float, optional): extent of pitch x coordinate (based on event data). 100 by default.
+        pitch_width (float, optional): extent of pitch y coordinate (based on event data). 100 by default.
 
     Returns:
         pandas.DataFrame: whoscored-style dataframe of events, including expected threat
     """
 
-    # Define function to cell in which an x, y value falls
+    # Define function to get cell in which an x, y value falls
     def get_cell_indexes(x_series, y_series, cell_cnt_l, cell_cnt_w, field_length, field_width):
         xi = x_series.divide(field_length).multiply(cell_cnt_l)
         yj = y_series.divide(field_width).multiply(cell_cnt_w)
@@ -543,5 +655,6 @@ def get_xthreat(events_df, interpolate=True, pitch_length=105, pitch_width=68):
         match_events_and_ratings = pd.merge(left=events_df[events_df['match_id'] == match_id], right=ratings,
                                             how="left", left_index=True, right_index=True)
         events_out = pd.concat([events_out, match_events_and_ratings], ignore_index=True, sort=False)
+        events_out['xThreat_gen'] = events_out['xThreat'].apply(lambda xt: xt if (xt > 0 or xt != xt) else 0)
 
     return events_out

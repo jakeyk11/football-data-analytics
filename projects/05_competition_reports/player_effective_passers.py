@@ -50,7 +50,7 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'World_Cup'
+league = 'EPL'
 
 # Select position to exclude
 pos_exclude=['GK']
@@ -59,13 +59,13 @@ pos_exclude=['GK']
 pos_input = 'outfield players'
 
 # Input run-date
-run_date = '15/12/2022'
+run_date = '28/12/2022'
 
 # Normalisation (None, '_90', '_100pass', '_100teampass')
-norm_mode = '_100teampass'
+norm_mode = None
 
 # Min minutes played (only used if normalising)
-min_mins = 180
+min_mins = 450
 
 # Brighten logo
 logo_brighten = True
@@ -124,7 +124,6 @@ events_df = wce.pre_assist(events_df)
 
 # Add expected threat information
 events_df = wce.get_xthreat(events_df, interpolate = True)
-events_df['xThreat_gen'] = events_df['xThreat'].apply(lambda x: x if x > 0 else 0)
 
 # Calculate longest consistent xi
 players_df = wde.longest_xi(players_df)
@@ -147,7 +146,7 @@ events_df['into_box'] = events_df.apply(wce.pass_into_box, axis=1, inplay = True
 playerinfo_df = wde.create_player_list(players_df, additional_cols = ['team_pass'])
 
 # Passes and total xT
-all_passes = events_df[events_df['eventType']=='Pass']
+all_passes = events_df[(events_df['eventType']=='Pass') & (~events_df['satisfiedEventsTypes'].apply(lambda x: 31 in x or 32 in x or 33 in x or 34 in x or 212 in x))]
 playerinfo_df = wde.group_player_events(all_passes, playerinfo_df, primary_event_name='passes')
 playerinfo_df = wde.group_player_events(all_passes, playerinfo_df, group_type='sum', event_types = ['xThreat', 'xThreat_gen'])
 
@@ -387,14 +386,14 @@ ax.axis['left'].major_ticklabels.set_rotation(0)
 ax.axis['left'].major_ticklabels.set_horizontalalignment("center")
 
 # Label axes
-ax.axis['left'].set_label("Successful passes into opposition box per 90mins")
+ax.axis['left'].set_label("Successful in-play passes into opp. box per 90mins")
 ax.axis['left'].label.set_rotation(0)
 ax.axis['left'].label.set_color("w")
 ax.axis['left'].label.set_fontweight("bold")
 ax.axis['left'].label.set_fontsize(9)
 ax.axis['left'].LABELPAD += 7
 
-ax.axis['bottom'].set_label("Successful progressive passes within opposition half per 90mins")
+ax.axis['bottom'].set_label("Successful in-play progressive passes within opp. half per 90mins")
 ax.axis['bottom'].label.set_color("w")
 ax.axis['bottom'].label.set_fontweight("bold")
 ax.axis['bottom'].label.set_fontsize(9)
@@ -477,7 +476,7 @@ text_ax_bottom.set_xlim([0,1])
 text_ax_bottom.set_ylim([0,1])
 
 title_text = f"{leagues[league]} {year}/{int(year) + 1}: Dangerous Passers"
-subtitle_text = "Passes into Opposition Box & Progressive Passes within Opposition Half"
+subtitle_text = "Passes into Opposition Box & Progressive Passes within Opposition Half" 
 
 # Title
 fig.text(0.12, 0.935, title_text, fontweight="bold", fontsize=16, color='w')
@@ -556,7 +555,10 @@ for player_id, name in pp_sorted_df.head(12).iterrows():
     ax['pitch'][idx].text(2, 4, "Total:", fontsize=8, fontweight='bold', color='w', zorder=3)
     ax['pitch'][idx].text(15, 4, f"{int(name['suc_prog_passes'])}", fontsize=8, color='w', zorder=3)
     
-    if norm_mode  == '_100pass':
+    if norm_mode == '_90':
+        ax['pitch'][idx].text(2, 12, "/90 mins:", fontsize=8, fontweight='bold', color='w', zorder=3)
+        ax['pitch'][idx].text(24, 12, f"{name['suc_prog_passes_90']}", fontsize=8, color='w', zorder=3) 
+    elif norm_mode  == '_100pass':
         ax['pitch'][idx].text(2, 12, "/100 pass:", fontsize=8, fontweight='bold', color='w', zorder=3)
         ax['pitch'][idx].text(26, 12, f"{round(name['suc_prog_passes_pct'],1)}", fontsize=8, color='w', zorder=3)
     elif norm_mode  == '_100teampass':
@@ -575,7 +577,7 @@ for player_id, name in pp_sorted_df.head(12).iterrows():
     idx += 1
 
 # Create title and subtitles, using highlighting as figure legend
-title_text = f"Top 12 {title_pos_str}, ranked by successful progressive passes {title_addition}"
+title_text = f"Top 12 {title_pos_str}, ranked by successful in-play progressive passes {title_addition}"
 subtitle_text = f"{leagues[league]} {year}/{int(year) + 1} - <Successful Progressive Passes>, <Key Progressive Passes> and <Assists>"
 subsubtitle_text = f"Correct as of {run_date}. {subsubtitle_addition}"
 fig.text(0.1, 0.945, title_text, fontweight="bold", fontsize=14.5, color='w')
@@ -639,7 +641,7 @@ for player_id, name in xt_sorted_df.head(12).iterrows():
             line_alpha = 0.7
 
         pitch.lines(pass_evt['x'], pass_evt['y'], pass_evt['endX'], pass_evt['endY'],
-                    lw = 2, comet=True, capstyle='round', label = 'Progressive Pass', color = line_colour, transparent=True, alpha = line_alpha, zorder=1, ax=ax['pitch'][idx])
+                    lw = 2, comet=True, capstyle='round', label = 'Pass', color = line_colour, transparent=True, alpha = line_alpha, zorder=1, ax=ax['pitch'][idx])
 
     ax['pitch'][idx].text(2, 4, "Total:", fontsize=8, fontweight='bold', color='w', zorder=3)
     ax['pitch'][idx].text(15, 4, f"{round(name['xThreat_gen'],2)}", fontsize=8, color='w', zorder=3)
@@ -665,7 +667,7 @@ for player_id, name in xt_sorted_df.head(12).iterrows():
     idx += 1
     
 # Create title and subtitles, using highlighting as figure legend
-title_text = f"Top 12 {title_pos_str}, ranked by threat generated from passes {title_addition}"
+title_text = f"Top 12 {title_pos_str}, ranked by threat generated from in-play passes {title_addition}"
 subtitle_text = f"{leagues[league]} {year} - <Low Threat> and <High Threat> Successful Passes Shown"
 subsubtitle_text = f"Correct as of {run_date}. {subsubtitle_addition}"
 fig.text(0.1, 0.945, title_text, fontweight="bold", fontsize=16, color='w')

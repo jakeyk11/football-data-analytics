@@ -21,3 +21,9 @@
 /data_directory/statsbomb_data/2021_22/
 /projects/06_player_reports/winger_analysis.py
 /projects/06_player_reports/test_env.py
+/projects/05_competition_reports/player_effective_carriers/
+/projects/05_competition_reports/player_effective_passers/
+/projects/05_competition_reports/player_penalty_takers/
+/projects/05_competition_reports/team_ball_winning/
+/projects/05_competition_reports/team_threat_creation/
+/projects/05_competition_reports/player_threat_creators/

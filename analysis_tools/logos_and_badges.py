@@ -118,6 +118,9 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://cdn.countryflags.com/thumbs/australia/flag-round-250.png"
         cmap = cm.get_cmap('YlOrBr') if hoa == 'home' else cm.get_cmap('Blues')
 
+    if team in ['Auxerre', 'AJ Auxerre']:
+        url = "https://assets.stickpng.com/images/580b57fcd9996e24bc43c4c7.png"
+
     if team in ['Barcelona', 'FC Barcelona']:
         url = "https://logos-world.net/wp-content/uploads/2020/04/Barcelona-Logo-700x394.png"
 
@@ -300,7 +303,7 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://assets.stickpng.com/images/580b57fcd9996e24bc43c4e9.png"
 
     if team in ['Nottingham Forest', 'Nottingham Forest FC', 'Notts Forest']:
-        url = "https://upload.wikimedia.org/wikipedia/sco/thumb/d/d2/Nottingham_Forest_logo.svg/238px-Nottingham_Forest_logo.svg.png"
+        url = "https://d2zywfiolv4f83.cloudfront.net/img/teams/174.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('YlOrBr')
 
     if team in ['Olympique Marseille', 'Marseille', 'OM']:

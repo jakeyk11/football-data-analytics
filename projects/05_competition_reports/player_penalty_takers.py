@@ -1,7 +1,8 @@
 # %% Create visualisation of top players penalty quality
 #
-# Inputs:   List containing year, league, whoscored match ids
-#           Minimum penalties
+# Inputs:   List containing years and leagues
+#           Minimum penalties to quality
+#           Plot mode
 #
 # Outputs:  Top 12 players by penalty quality
 
@@ -36,64 +37,97 @@ import analysis_tools.logos_and_badges as lab
 # %% User inputs
 
 # Input WhoScored range of match id
-data_grab = [['La_Liga', '2021', [1559817,1560197]],
-             ['La_Liga', '2020', [1491953,1492332]],
-             ['La_Liga', '2019', [1394138,1394517]],
-             ['EPL', '2021', [1549539,1549918]],
-             ['EPL', '2020', [1485184,1485563]],
-             ['EPL', '2019', [1375927,1376306]],
-             ['Bundesliga', '2021', [1557324,1557629]],
-             ['Bundesliga', '2020', [1480995,1481617]],
-             ['Bundesliga', '2019', [1388138,1388443]],
-             ['Serie_A', '2021', [1575781,1576160]],
-             ['Serie_A', '2020', [1495315,1495614]],
-             ['Serie_A', '2019', [1415693,1416072]],
-             ['Ligue_1', '2021', [1558305,1558684]],
-             ['Ligue_1', '2020', [1463920,1464579]],
-             ['Ligue_1', '2019', [1376556,1376936]]]
+data_grab = [['La_Liga', '2021'],
+             ['La_Liga', '2020'],
+             ['La_Liga', '2019'],
+             ['EPL', '2021'],
+             ['EPL', '2020'],
+             ['EPL', '2019'],
+             ['Bundesliga', '2021'],
+             ['Bundesliga', '2020'],
+             ['Bundesliga', '2019'],
+             ['Serie_A', '2021'],
+             ['Serie_A', '2020'],
+             ['Serie_A', '2019'],
+             ['Ligue_1', '2021'],
+             ['Ligue_1', '2020'],
+             ['Ligue_1', '2019']]
+
+data_grab = [['World_Cup', '2022']]
 
 # Min minutes played
-min_pens = 10
+min_pens = 1
+
+# Special mode (e.g. normal, top_5_europe)
+mode = "normal"
 
 #%% Get logos
 
+logo = lab.get_competition_logo(data_grab[0][0], data_grab[0][1]) 
 epl_logo = lab.get_competition_logo('EPL') 
 bundesliga_logo = lab.get_competition_logo('Bundesliga') 
 ligue1_logo = lab.get_competition_logo('Ligue_1') 
 seriea_logo = lab.get_competition_logo('Serie_A') 
-laliga_logo = lab.get_competition_logo('La_Liga') 
+laliga_logo = lab.get_competition_logo('La_Liga')
+
+# %% Calculate year range
+
+min_year = int(data_grab[0][1])
+max_year = int(data_grab[0][1])
+
+for data in data_grab:
+    year = int(data[1])
+    min_year = year if year < min_year else min_year
+    max_year = year if year > max_year else max_year
+
+# %% Create titles
+
+# Create title and subtitles
+leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
+
+# Add titles
+if mode == "europe_top_5":
+    title_str = "Europe Big Five Leagues"
+elif mode == "normal":
+    title_str = leagues[data_grab[0][0]]
+    
+if min_year == max_year:
+    year_str = f"{min_year}"
+else:
+    year_str = f"{min_year}-{max_year}"
 
 # %% Get data
 
+# Initialise storage dataframes
 events_df = pd.DataFrame()
 players_df = pd.DataFrame()
+
 for data in data_grab:
     league = data[0]
     year = data[1]
-    match_id_start = data[2][0]
-    match_id_end = data[2][1]
-    match_ids = np.arange(match_id_start, match_id_end+1)
-
-    for match_id in match_ids:
-        match_event_path = f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','', 1)) + 1)}/{league}/match-eventdata-{match_id}-*.pbz2"
-        match_players_path = f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','', 1)) + 1)}/{league}/match-playerdata-{match_id}-*.pbz2"
-        try:
-            match_events = bz2.BZ2File(glob.glob(match_event_path)[0], 'rb')
+        
+    file_path = f"../../data_directory/whoscored_data/{data[1]}_{str(int(data[1].replace('20','')) + 1)}/{data[0]}"
+    files = os.listdir(file_path)
+    
+    # Load data
+    for file in files:
+        if file == 'event-types.pbz2':
+            event_types = bz2.BZ2File(f"{file_path}/{file}", 'rb')
+            event_types = pickle.load(event_types)
+        elif file == 'formation-mapping.pbz2':
+            formation_mapping = bz2.BZ2File(f"{file_path}/{file}", 'rb')
+            formation_mapping = pickle.load(formation_mapping)
+        elif '-eventdata-' in file:
+            match_events = bz2.BZ2File(f"{file_path}/{file}", 'rb')
             match_events = pickle.load(match_events)
-            match_events = match_events[((match_events['eventType']=='Goal') | (match_events['eventType']=='MissedShots') | (match_events['eventType']=='SavedShot') | (match_events['eventType']=='ShotOnPost')) & (match_events['satisfiedEventsTypes'].apply(lambda x: 22 in x or 135 in x))]
-        except:
-            match_events = pd.DataFrame()
-        try:
-            match_players = bz2.BZ2File(glob.glob(match_players_path)[0], 'rb')
-            match_players = pickle.load(match_players)
-        except:
-            match_players = pd.DataFrame()
-        try:
             events_df = pd.concat([events_df, match_events])
+        elif '-playerdata-' in file:
+            match_players = bz2.BZ2File(f"{file_path}/{file}", 'rb')
+            match_players = pickle.load(match_players)
             players_df = pd.concat([players_df, match_players])
-        except IndexError:
-            events_df = match_events
-            players_df = match_players
+        else:
+            pass
             
     print(f"{league}, {year} data import complete")
 
@@ -123,10 +157,11 @@ playerinfo_df_formatted.index.name = 'playerId'
 
 # %% Aggregate penalties
 
-penalty_events = events_df
+penalty_events = events_df[(events_df['satisfiedEventsTypes'].apply(lambda x: 22 in x or 135 in x or 207 in x or 208 in x or 209 in x))]
+
 playerinfo_df_formatted = wde.group_player_events(penalty_events, playerinfo_df_formatted, primary_event_name='penalties_taken')
 playerinfo_df_formatted = wde.group_player_events(penalty_events[penalty_events['eventType']=='Goal'], playerinfo_df_formatted, primary_event_name='penalties_scored')
-playerinfo_df_formatted['penalty_conversion'] = playerinfo_df_formatted['penalties_scored'] / playerinfo_df_formatted['penalties_taken']*100
+playerinfo_df_formatted['penalty_conversion'] = 100*playerinfo_df_formatted['penalties_scored'] / playerinfo_df_formatted['penalties_taken']
 
 # %% Calculate distance to gk midriff (assign zero if off target)
 
@@ -147,9 +182,10 @@ gk_z_pos_yards = 2.06667/2
 gk_z_pos_opta = gk_z_pos_yards * (1/goal_height_factor)
 
 # Distance of penalty from gk in yards
+penalty_events['goal_marker'] = penalty_events['eventType'].apply(lambda x: 1 if x == 'Goal' else 0)
 penalty_events.loc[:,'y_dist_from_gk']= abs((penalty_events['goalMouthY']-50)*goal_width_factor - gk_y_pos_yards)
 penalty_events.loc[:,'z_dist_from_gk'] = abs(penalty_events['goalMouthZ']*goal_height_factor - gk_z_pos_yards)
-penalty_events.loc[:,'dist_from_gk'] = np.sqrt(penalty_events.loc[:,'y_dist_from_gk']**2 + penalty_events.loc[:,'z_dist_from_gk']**2)
+penalty_events.loc[:,'dist_from_gk'] = np.sqrt(penalty_events.loc[:,'y_dist_from_gk']**2 + penalty_events.loc[:,'z_dist_from_gk']**2) #* penalty_events.loc[:,'goal_marker']
 
 # Reset distance for off target shots
 penalty_events.loc[penalty_events['eventType'].isin(['MissedShots', 'ShotOnPost']), 'dist_from_gk'] = 0
@@ -279,8 +315,7 @@ for player_id, player in pentaker_df.head(12).iterrows():
         logo_delta -= -0.028
     idx += 1
 
-# Add titles
-title_text = "Europe's Big Five Leagues 2019-2022 - Top 12 Players by Penalty Placement"
+title_text = f"{title_str} {year_str} - Top 12 Players by Penalty Placement"
 subtitle_text = "Players ranked by mean distance of on-target penalties from Goalkeeper midriff"
 subsubtitle_text = f"Off target penalties are penalised by\nassigning a distance of 0 yards. Saved\npenalties are not penalised. Only\nplayers that have taken {min_pens}+ penalties\nare included."
 
@@ -289,21 +324,26 @@ fig.text(0.137, 0.907, subtitle_text, fontweight="regular", fontsize=13, color='
 fig.text(0.8, 0.89, subsubtitle_text, fontweight="regular", fontsize=9, color='w')
 
 # Add competition logos
-ax = fig.add_axes([0.02, 0.93, 0.05, 0.05])
-ax.axis("off")
-ax.imshow(epl_logo)
-ax = fig.add_axes([0.05, 0.93, 0.05, 0.05])
-ax.axis("off")
-ax.imshow(ligue1_logo)
-ax = fig.add_axes([0.083, 0.931, 0.048, 0.048])
-ax.axis("off")
-ax.imshow(seriea_logo)
-ax = fig.add_axes([0.039, 0.877, 0.045, 0.045])
-ax.axis("off")
-ax.imshow(bundesliga_logo)
-ax = fig.add_axes([0.071, 0.875, 0.05, 0.05])
-ax.axis("off")
-ax.imshow(laliga_logo)
+if mode == "europe_top_5":
+    ax = fig.add_axes([0.02, 0.93, 0.05, 0.05])
+    ax.axis("off")
+    ax.imshow(epl_logo)
+    ax = fig.add_axes([0.05, 0.93, 0.05, 0.05])
+    ax.axis("off")
+    ax.imshow(ligue1_logo)
+    ax = fig.add_axes([0.083, 0.931, 0.048, 0.048])
+    ax.axis("off")
+    ax.imshow(seriea_logo)
+    ax = fig.add_axes([0.039, 0.877, 0.045, 0.045])
+    ax.axis("off")
+    ax.imshow(bundesliga_logo)
+    ax = fig.add_axes([0.071, 0.875, 0.05, 0.05])
+    ax.axis("off")
+    ax.imshow(laliga_logo)
+elif mode == "normal":
+   ax = fig.add_axes([0.015, 0.877, 0.1, 0.1])
+   ax.axis("off")
+   ax.imshow(logo)
 
 # Add legend
 path_eff = [path_effects.Stroke(linewidth=1, foreground='#313332'), path_effects.Normal()]
@@ -332,4 +372,4 @@ ax.axis("off")
 badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
 ax.imshow(badge)
 
-fig.savefig("top_penalty_takers/europe5-top-pen-takers-2019-2022", dpi=300)
+fig.savefig(f"player_penalty_takers/{title_str.replace(' ','_')}-{year_str}-top-penalty-takers", dpi=300)
