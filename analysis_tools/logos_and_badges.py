@@ -56,7 +56,6 @@ def get_competition_logo(competition, year=None):
         if year == '2018':
             url = "https://purepng.com/public/uploads/large/purepng.com-world-cup-russia-2018-fifa-pocal-logofifawmworld-cupsoccer2018footballfussballpocalsport-31528992075ouo57.png"
 
-
     # Get image, and resize
     response = requests.get(url)
     img = Image.open(BytesIO(response.content))

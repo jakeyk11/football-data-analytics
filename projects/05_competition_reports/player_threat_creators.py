@@ -181,9 +181,9 @@ right_ax_quantile = right_ax_norm_plot.quantile([0.2,0.5,0.8]).tolist()
 
 plot_quantile_left = left_ax_norm_plot.quantile([0,0.5,0.9]).tolist()
 plot_quantile_right = right_ax_norm_plot.quantile([0,0.5,0.9]).tolist()
-plot_player = playerinfo_df[(left_ax_norm_plot>plot_quantile_left[2]) | (right_ax_norm_plot>plot_quantile_right[2])]
+plot_player = playerinfo_df#[(left_ax_norm_plot>plot_quantile_left[2]) | (right_ax_norm_plot>plot_quantile_right[2])]
 
-#plot_player = playerinfo_df[playerinfo_df['team']=='Man Utd']
+plot_player = playerinfo_df[playerinfo_df['team']=='Man Utd']
 
 # Set-up figure
 fig = plt.figure(figsize = (8.5,9), facecolor = '#313332')
@@ -203,8 +203,8 @@ for i in ticks:
         left_dict[i] = ''
         right_dict[i] =  ''
     else:
-        left_dict[i] = str(round((i * left_ax_plot.max())/0.99,2))
-        right_dict[i] = str(round((i * right_ax_plot.max())/0.99,2))
+        left_dict[i] = str(round((i * left_ax_plot.max())/0.99,3))
+        right_dict[i] = str(round((i * right_ax_plot.max())/0.99,3))
     
 tick_formatter1 = DictFormatter(right_dict)
 tick_formatter2 = DictFormatter(left_dict)
