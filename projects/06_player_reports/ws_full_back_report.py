@@ -47,22 +47,24 @@ import analysis_tools.logos_and_badges as lab
 # %% Inputs
 
 # Player, league and year to analyse
-player_name = 'Gideon Mensah'
-league = "Ligue_1"
+player_name = 'Diogo Dalot'
+league = "EPL"
 year = '2022'
 
 # Players, leagues and years to compare
-comparison_players = [('Abdul Rahman Baba', 'EFLC', '2022'),
-                      ('Quentin Bernard', 'Ligue_1', '2022')]
+comparison_players = [('Trent Alexander-Arnold', 'EPL', '2022'),
+                      ('Ben White', 'EPL', '2022')]
 
 # %%
 # Full league and criteria to compare against
-comparison_league = ('Ligue_1', '2021')
-comparison_pos = 'DL'
-comparison_min_mins = 900
+comparison_league = ('EPL', '2022')
+comparison_pos = 'DR'
+comparison_min_mins = 450
 
 # Abbreviated league name for printing
-comparison_league_abbrev = 'L1'
+comparison_league_abbrev = 'EPL'
+player_pos_abbrev = 'RB'
+comparison_pos_abbrev = 'RB'
 
 # %% Load analysis and comparison data
 
@@ -427,7 +429,7 @@ playerinfo['recoveries_90'] = round(90*(playerinfo['recoveries']/playerinfo['min
 
 for idx, player_stat in player_stats.iterrows():
     
-    ranking_df = pd.concat([playerinfo, player_stat.to_frame().T], axis = 0)
+    ranking_df = pd.concat([playerinfo[playerinfo['name']!=player_stat['name']], player_stat.to_frame().T], axis = 0)
     
     for stat in ['suc_touch_box_90', 'suc_touch_opp3_90', 'suc_action_opp3_90', 'suc_prog_pass_90', 'suc_prog_carry_90', 'xt_pass_90', 'xt_carry_90', 'suc_tackles_90', 'dribble_prevented_pct', 'interceptions_90', 'aerials_won_90', 'aerial_win_pct', 'cross_complete_pct', 'recoveries_90', 'suc_prog_action_90', 'suc_action_box_90', 'suc_cross_90']:
         
@@ -484,7 +486,7 @@ pass_cmap = pass_cmap(np.linspace(0.35,1,256))
 text_start_y = 0.78
 fig.text(0.142, 0.905, "Player\nReport", fontsize=18, fontweight="bold", color='w', ha = "center", va = "center")
 fig.text(0.1, text_start_y, player_name, fontsize=16, fontweight="bold", color='w', ha = "center")
-fig.text(0.1, text_start_y-0.03, player_stats.loc[0, 'position'] + ", " + player_stats.loc[0, 'team'], fontsize=12, fontweight="regular", color='w', ha = "center")
+fig.text(0.1, text_start_y-0.03, player_pos_abbrev + ", " + player_stats.loc[0, 'team'], fontsize=12, fontweight="regular", color='w', ha = "center")
 fig.text(0.1, text_start_y-0.057, f"{player_stats.loc[0, 'league'].replace('_',' ')}, {player_stats.loc[0, 'year']}/{int(player_stats.loc[0, 'year'])+1}", fontsize=9, fontweight="regular", color='w', ha = "center")
 
 # Logo
@@ -556,8 +558,7 @@ bar2.barh(0.5, player_stats.loc[0, 'suc_touch_opp3_90_percentile'] , height = 1,
 bar2.axis("off")
 fig.text(0.188, stat_start_y-0.545, f"Rank: {int(player_stats.loc[0, 'suc_touch_opp3_90_rank'])}/{int(player_stats.loc[0, 'comparison_pts'])}", fontsize=6, color='w', ha = "right", va = "center")
 
-fig.text(0.1, 0.08, f"All rankings are against {comparison_pos}s playing\nover {comparison_min_mins} minutes in {comparison_league[0]} during\nthe {comparison_league[1]}/{int(comparison_league[1])+1} season. If not specified,\nrankings are calculated on stat per 90.", fontsize=8, fontweight="regular", color='w', va = "top", ha = "center")
-
+fig.text(0.1, 0.08, f"Rankings and percentile bars against {comparison_pos_abbrev}s\nplaying over {comparison_min_mins} minutes in {comparison_league[0]} during\nthe {comparison_league[1]}/{int(comparison_league[1])+1} season. If not specified,\nrankings are calculated on stat per 90.", fontsize=8, fontweight="regular", color='w', va = "top", ha = "center")
 
 ## Heatmap of player touches
 
@@ -575,10 +576,22 @@ for _,touch in player_inplay_touches.iterrows():
     else:
         c = 'r'
     full_pitch.scatter(touch['x'], touch['y'], color = c, marker='o', alpha = 0.5, s = 2, zorder=1, ax=pitch1)
+
+# Add legend
+legend_ax = fig.add_axes([0.22, 0.5, 0.1, 0.06])
+legend_ax.axis("off")
+
+legend_ax.scatter(0.04,0.8, s=30, color = 'w')
+legend_ax.text(0.1,0.89, "Successful Touch", va = "top", color='w', fontsize = 7)
+legend_ax.scatter(0.04,0.4, s=30, color = 'r')
+legend_ax.text(0.1,0.49, "Unsuccessful Touch", va = "top", color='w', fontsize = 7)
+
+legend_ax.set_xlim(0,1)
+legend_ax.set_ylim(0,1)
     
 ## Convex hull plot
 
-pitch2.set_title("Defensive Territories &\nOpposition Actions", pad = -1, fontsize = 9, color = 'w', fontweight = "bold")
+pitch2.set_title("Defensive Territory &\nOpposition Actions (xT)", pad = -1, fontsize = 9, color = 'w', fontweight = "bold")
 # Player initials
 if len(player_name.split(' ')) == 1:
     player_initials = player_name.split(' ')[0][0:2]
@@ -587,10 +600,10 @@ else:
 
 # Convex hull
 plot_hull = full_pitch.convexhull(player_hull['hull_reduced_x'], player_hull['hull_reduced_y'])
-full_pitch.polygon(plot_hull, ax=pitch2, color='cornflowerblue', alpha=0.2, zorder=2)
-full_pitch.polygon(plot_hull, ax=pitch2, edgecolor='cornflowerblue', alpha=0.5, lw=1.5, facecolor='none', zorder=3)
-pitch2.scatter(player_hull['hull_centre'][1], player_hull['hull_centre'][0], marker ='H', color = 'cornflowerblue', alpha = 0.6, s = 300, zorder = 4)
-pitch2.scatter(player_hull['hull_centre'][1], player_hull['hull_centre'][0], marker ='H', edgecolor = 'cornflowerblue', facecolor = 'none', alpha = 1, lw = 2, s = 300, zorder = 4)
+full_pitch.polygon(plot_hull, ax=pitch2, color='lightgrey', alpha=0.3, zorder=2)
+full_pitch.polygon(plot_hull, ax=pitch2, edgecolor='lightgrey', alpha=0.7, lw=1.5, facecolor='none', zorder=3)
+pitch2.scatter(player_hull['hull_centre'][1], player_hull['hull_centre'][0], marker ='H', color = 'grey', alpha = 0.8, s = 300, zorder = 4)
+pitch2.scatter(player_hull['hull_centre'][1], player_hull['hull_centre'][0], marker ='H', edgecolor = 'lightgrey', facecolor = 'none', alpha = 1, lw = 2, s = 300, zorder = 4)
 pitch2.text(player_hull['hull_centre'][1], player_hull['hull_centre'][0], player_initials, fontsize = 7, fontweight = 'bold', va = 'center', ha = 'center', color = 'w', zorder = 7, path_effects = path_eff)
 
 # Passes into hull
@@ -616,7 +629,7 @@ labels = full_pitch.label_heatmap(bin_statistic_1, color='w', fontsize=8, fontwe
                              ax=pitch3, ha='center', va='center', str_format='{:.0%}', path_effects=path_eff)
 
 # Progressive passes
-pitch4.set_title("Progressive Passes", pad = -1, fontsize = 9, color = 'w', fontweight = "bold")
+pitch4.set_title("Progressive Passes (xT)", pad = -1, fontsize = 9, color = 'w', fontweight = "bold")
 for _, single_pass in player_suc_prog_passes.iterrows():
     pass_xt = single_pass['xThreat']
     if pass_xt < 0.005:
@@ -631,7 +644,7 @@ for _, single_pass in player_suc_prog_passes.iterrows():
                 alpha = line_alpha, color = line_colour, zorder=zorder, ax=pitch4)
 
 # Progressive carries
-pitch5.set_title("Progressive Carries", pad = -1, fontsize = 9, color = 'w', fontweight = "bold")
+pitch5.set_title("Progressive Carries (xT)", pad = -1, fontsize = 9, color = 'w', fontweight = "bold")
 for _, single_carry in player_suc_prog_carries.iterrows():
     pass_xt = single_carry['xThreat']
     if pass_xt < 0.005:
@@ -655,8 +668,8 @@ full_pitch.heatmap(bin_statistic_2, pitch6, cmap='cividis', edgecolor='w', lw=0.
 labels = full_pitch.label_heatmap(bin_statistic_2, color='w', fontsize=8, fontweight = 'bold',
                              ax=pitch6, ha='center', va='center', str_format='{:.0%}', path_effects=path_eff)
 
-# Add legend
-legend_ax = fig.add_axes([0.22, 0.023, 0.21, 0.06])
+# Add legends
+legend_ax = fig.add_axes([0.22, 0.023, 0.18, 0.06])
 legend_ax.axis("off")
 plt.xlim([0, 8])
 plt.ylim([0, 1])
@@ -681,9 +694,9 @@ for idx in np.arange(0,hex_count):
         xt = round(0.005 + (0.05-0.005) * ((idx-1)/(hex_count-2)),2)
         color = pass_cmap[int(255*(idx-1)/(hex_count-2))]
     
-    legend_ax.scatter(xpos, ypos, marker='H', s=600, color=color, edgecolors=None)
+    legend_ax.scatter(xpos, ypos, marker='H', s=400, color=color, edgecolors=None)
     legend_ax.text(xpos+0.03, ypos-0.02, xt, color='w', fontsize = 8, ha = "center", va = "center", path_effects = path_eff)
-    legend_ax.text(0.1, 0.5, "xThreat:", color='w', fontsize = 9, ha = "left", va = "center", fontweight="regular")
+    legend_ax.text(0, 0.5, "xThreat:", color='w', fontsize = 9, ha = "left", va = "center", fontweight="regular")
     
 ## Create table
 tab_ax = fig.add_axes([0.68, 0.03, 0.3, 0.95])
@@ -698,7 +711,8 @@ stats_to_tabulate = ['suc_tackles_90', 'dribble_prevented_pct', 'interceptions_9
                      'suc_cross_90', 'cross_complete_pct']
 stat_names = ['Tackles / 90', 'Tackle Success %', 'Interceptions / 90', 'Aerial Duels Won / 90', 'Aerial Duel Success %', 'Recoveries / 90',
                      'Opp. Box Touches / 90', 'Progressive Actions / 90', 'Actions into Opp 3rd / 90', 'Actions into Opp box / 90',
-                     'Pass xThreat / 90', 'Carry xThreat / 90', 'Crosses / 90', 'Cross success']
+                     'Pass xThreat / 90', 'Carry xThreat / 90', 'Crosses / 90', 'Cross Success %']
+
  # Determine row and columns count
 num_rows = len(stats_to_tabulate)
 num_cols = len(player_stats)
@@ -722,8 +736,12 @@ for idx in np.arange(0, num_cols+1):
     tab_ax.plot([xpos_colend,xpos_colend],[0,1], 'w', alpha = 0.2, lw = 1)
     if idx != num_cols:
         xpos_txt = (column_indent+col_width/2) + (idx*col_width)
-        tab_ax.text(xpos_txt, (1+header_start_height)/2, f"{player_stats.loc[idx, 'name'].split(' ')[0][0]} {player_stats.loc[idx, 'name'].split(' ')[1]}\n{int(player_stats.loc[idx, 'year'].replace('20',''))}/{1+int(player_stats.loc[idx, 'year'].replace('20',''))}",
-                    fontsize=8, va="center", rotation=90, color = 'w', fontweight='bold')
+        plyr_name = player_stats.loc[idx, 'name'].split(' ')[0][0] + " " + player_stats.loc[idx, 'name'].split(' ')[1]
+        plyr_year = str(int(player_stats.loc[idx, 'year'].replace('20',''))) + "/" + str(1+int(player_stats.loc[idx, 'year'].replace('20','')))
+        if len(plyr_name)>14:
+            plyr_name = player_stats.loc[idx, 'name'].split(' ')[0][0] + " " + player_stats.loc[1, 'name'].split(' ')[1][0:2+int(len(player_stats.loc[1, 'name'].split(' ')[1])/2)] + "\n" + player_stats.loc[1, 'name'].split(' ')[1][2+int(len(player_stats.loc[1, 'name'].split(' ')[1])/2):]                                                                                                                                                           
+        tab_ax.text(xpos_txt, (1+header_start_height)/2, f"{plyr_name} {plyr_year}",
+                    fontsize=8, va="center", ha="center", rotation=90, color = 'w', fontweight='bold')
         
 # Plot row lines and stats
 for idx in np.arange(0, num_rows+1):
@@ -742,3 +760,7 @@ for idx in np.arange(0, num_rows+1):
 
 tab_ax.set_xlim(0,1)
 tab_ax.set_ylim(0,1)
+
+fig.text(0.535, 0.08, f"Adjacent table compares {player_name} to a set of relevant\n{comparison_pos_abbrev}s. Performance metrics are provided, with each player\nranked against {comparison_pos_abbrev}s playing over {comparison_min_mins} minutes in {comparison_league[0]} during\nthe {comparison_league[1]}/{int(comparison_league[1])+1} season.", fontsize=8, fontweight="regular", color='w', va = "top", ha = "center")
+
+fig.savefig(f"player_reports/{player_name}-{player_stats.loc[0, 'team']}-{player_stats.loc[0, 'league']}-{player_stats.loc[0, 'year']}-{player_stats.loc[0, 'position']}-report", dpi=600)
