@@ -71,12 +71,14 @@ This repository contains a collection of projects that aim to generate meaningfu
     │   │   ├── pass_report_ws.py
     │   │   ├── shot_report_understat.py     
     │   ├── 05_competition_reports
-    │   │   ├── player_defensive_contribution.py   
+    │   │   ├── player_defensive_contribution.py
+    │   │   ├── player_effective_carriers.py
     │   │   ├── player_effective_passers.py
     │   │   ├── player_high_defensive_actions.py    
     │   │   ├── player_penalty_takers.py
-    │   │   ├── player_progressive_passers.py
+    │   │   ├── player_threat_creators.py
     │   │   ├── team_ball_winning.py
+    │   │   ├── team_fullback_combinations.py
     │   │   ├── team_threat_creation.py
     │   ├── 06_player_reports
     │   │   ├── ws_full_back_report.py
