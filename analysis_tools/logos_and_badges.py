@@ -107,7 +107,7 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/195px-Logo_of_AC_Milan.svg.png"
 
     if team in ['Aston Villa', 'Aston Villa FC', 'Villa']:
-        url = "https://upload.wikimedia.org/wikipedia/en/thumb/f/f9/Aston_Villa_FC_crest_%282016%29.svg/800px-Aston_Villa_FC_crest_%282016%29.svg.png"
+        url = "https://logos-world.net/wp-content/uploads/2020/06/Aston-Villa-Logo-2008-2016.png"
         cmap = cm.get_cmap('BuPu') if hoa == 'home' else cm.get_cmap('Blues')
 
     if team in ['Athletico Madrid', 'Atlético de Madrid']:
