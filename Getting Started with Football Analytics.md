@@ -14,7 +14,7 @@ I have put together a basic roadmap that identifies a logical sequence of activi
 
 One of the most common mistakes I have seen, and therefore a key piece of advice I have is; don't try and run before you can walk. Whilst it is seriously tempting to immerse yourself in football data immediately, it's critical that you develop a thorough understanding of the Python programming language before-hand. In taking the time to learn the fundamentals of Python coding as part of a wider analytics skill-set, you will better position yourself to develop as a football data analyst.
 
-I have listed a few courses below that I have completed and highly recommend. It wouldn't be excessive to spend 1-3/4 months learning Python before you get started with football data.
+I have listed a few courses below that I have completed and highly recommend. It wouldn't be excessive to spend 1-3 months learning Python before you get started with football data.
 
 |Course Name|Platform|Time Commitment|Cost|
 |----------|:-------------:|:------:|:------:|
@@ -62,7 +62,7 @@ If you are struggling, here's a list of ideas:
 - Build a tool to extract and visualise shot event data from Understat 
 - Develop a model that attempts to predict player market value from seasonal performance (for a specific player position)
 - Implement an expected threat model, and use it to determine the value of all actions during the 2017/18 season in Europe's top 5 leagues
-- Build a tool that quickly produces a scatter plot to compare a set of player against 2 FBref metrics
+- Build a tool that quickly produces a scatter plot to compare a set of players against 2 FBref metrics
 
 When you have completed a project and are happy with your work, post it! Whilst this might seem daunting, Twitter is a great place to share your work and obtain feedback. Feel free to send me your work directly and I'll take a look too.
 
