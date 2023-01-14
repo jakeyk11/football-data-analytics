@@ -1,12 +1,12 @@
 # Football Data Analytics
-This repository contains a collection of tools, scripts and projects that focus on analysis and visualisation of football data.
+This repository contains a collection of tools, projects and resources that enable effective analysis and visualisation of football data.
 
 ## Contents
 
 <details open="open">
   <summary>Table of Contents</summary>
   <ol>
-    <li><a href="#project-description"> ➤ Project Description </a></li>
+    <li><a href="#introduction"> ➤ Introduction</a></li>
     <li><a href="#folder-structure"> ➤ Folder Structure</a></li>
     <li><a href="#workflow"> ➤ Workflow</a></li>
     <li>
@@ -22,8 +22,10 @@ This repository contains a collection of tools, scripts and projects that focus 
   </ol>
 </details>
 
-## Project Description
-This repository contains a collection of projects that aim to generate meaningful insight from football data. Python is used for extraction, processing, analysis and visualisation of event data, aggregated team data, market value data and more. The project is broken down into sub-projects, each of which aims to either perform a specific analysis, generate some specific insight, or introduce automation to football data analytics. Using the contents of this repository, a number of novel & informative visuals and text threads have been created and shared with the football data analytics community via Twitter [(@_JKDS_)](https://twitter.com/_JKDS_).
+## Introduction
+This repository contains a collection of tools, projects and resources that aim to support the generation of meaningful insight from football data. Python is used for extraction, processing, analysis and visualisation of event data, aggregated team data, market value data and more. The repository is broken down into mutliple projects and sub-projects, each of which aims to either perform a specific analysis, generate some specific insight, or introduce some level of automation to football data analytics. Using the contents of this repository, a number of novel & informative visuals and text threads have been created and shared with the football data analytics community via Twitter [(@_JKDS_)](https://twitter.com/_JKDS_).
+
+To support others who are wishing to develop their data analytics skills within the context of football data, I have produced a Getting Started Guide
 
 ## Folder Structure
 
@@ -91,20 +93,20 @@ This repository contains a collection of projects that aim to generate meaningfu
 
 ## Workflow
 
-As shown in the folder structure above, the project contains three key folders:
-- **data_directory**: Collection of raw football data used for projects.
-- **analysis_tools**: Python package containing modules that support football data import, processing, manipulation and visualisation.
-- **projects**: Series of sub-projects, that cover various elements of football data analytics. Also contains any template scripts used to import raw data from various football data APIs, websites or data services.
+As shown in the folder structure above, the repository contains three key folders:
+- **data_directory**: Storage of raw football data used for projects.
+- **analysis_tools**: Custom python package containing modules that support football data import, processing, manipulation and visualisation.
+- **projects**: Series of projects that cover various elements of football data analytics. Also contains any template scripts used to import raw data from various football data APIs, websites or data services.
 
 In general, each project follows a number of logical steps:
 1. Create a folder within the Projects area to store files associated with the project.
-2. Use analysis_tools package > get_football_data module [note this module is not available within the git repo] to import raw data from football data API, website or data service:
+2. Use analysis_tools package: get_football_data module [note this module is not available within the git repo] to import raw data from football data API, website or data service:
     * If imported dataset is large, save to data_directory area in compressed BZ2 format and create a new script for analysis.
-    * If imported dataset is small, data import and analysis can be completed in the same script (without saving data).
-3. Within data analysis script import required modules from analysis_tools package.
-4. Pre-process and format data using data_engineering modules within analysis_tools package.
-5. Synthesise additional information using custom_events and pitch_zones modules within analysis_tools package.
-6. Create visuals and generate insight for end-consumer using visualisation and logos_and_badges modules within analysis_tools package.
+    * If imported dataset is small, data import and analysis can be completed in the same script (without the need to store/save data).
+3. Within the analysis script, import any required modules from the analysis_tools package.
+4. Pre-process and format data using data_engineering modules within the analysis_tools package.
+5. Synthesise additional information using custom_events and pitch_zones modules within the analysis_tools package.
+6. With data formatted appropriately, create visuals and generate insight for end-consumer.
 
 ## Projects
 
