@@ -34,7 +34,7 @@ I would strongly recommend that you not only watch, but follow along with the co
 
 Before going at it alone, it's important to understand what football data exists in the public domain, and equally what doesn't? What do you have to pay for, and what's available for free? 
 
-Throught taking the time to consider this, you can appropriately scope your future projects and ensure that the data required to complete them is actually available. If you have completed various sections of the [Mathematical Modelling of Football](https://soccermatics.readthedocs.io/en/latest/) course, then you will likely have at least some awareness of what data is available and accessible. 
+Through taking the time to consider this, you can appropriately scope your future projects and ensure that the data required to complete them is actually available. If you have completed various sections of the [Mathematical Modelling of Football](https://soccermatics.readthedocs.io/en/latest/) course, then you will likely have at least some awareness of what data is available and accessible. 
 
 In my experience, working with different types/formats of football data not only stretches you from a technical programming perspective, but encourages you to think about different ways to process and draw insight from football data. When getting started with football data analytics, I believe the following sources of free data are key.
 
