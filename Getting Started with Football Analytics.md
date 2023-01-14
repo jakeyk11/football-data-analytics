@@ -41,10 +41,10 @@ In my experience, working with different types/formats of football data not only
 |Data Provider|Data Description|Data Format|
 |----------|-------------|:------:|
 |[Statsbomb Open Data](https://github.com/statsbomb/open-data)|Statsbomb match event data from a collection of games and competitions|[API](https://github.com/statsbomb/statsbombpy) or [.json](https://github.com/statsbomb/open-data)|
-|[Wyscout Free Data](https://figshare.com/collections/Soccer_match_event_dataset/4415000/2)|Wyscout match event data for all matches in Europe's top 5 leagues during 2017-18 season|.json|
-|[Understat](https://understat.com/)|Shot event data for all matches in Europe's top 5 leages (+ Russian Prem)|Web|
-|[FBref](https://fbref.com/en/)|Aggregated team and player data/performance metrics|Web, .xlsx or .csv|
-|[Transfermarkt](https://www.transfermarkt.co.uk/)|Team and player market value|Web|
+|[Wyscout Free Data](https://figshare.com/collections/Soccer_match_event_dataset/4415000/2)|Wyscout match event data for all matches in Europe's top 5 leagues during 2017-18 season|[.json](https://figshare.com/collections/Soccer_match_event_dataset/4415000/2)|
+|[Understat](https://understat.com/)|Shot event data for all matches in Europe's top 5 leages (+ Russian Prem)|[API](https://pypi.org/project/understatapi/) or [Web](https://understat.com/)|
+|[FBref](https://fbref.com/en/)|Aggregated team and player data/performance metrics|[Web](https://fbref.com/en/), .xlsx or .csv|
+|[Transfermarkt](https://www.transfermarkt.co.uk/)|Team and player market value|[Web](https://www.transfermarkt.co.uk/)|
 
 There are many more data sources, the majority of which are listed and explained within Edd Webster's brilliant [football analytics repository](https://github.com/eddwebster/football_analytics#data-sources). Given the number of web-based resources around, any time spent understanding the basics of web-scraping with Python is time well spent. 
 
