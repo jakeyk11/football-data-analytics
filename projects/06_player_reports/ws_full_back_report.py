@@ -47,24 +47,24 @@ import analysis_tools.logos_and_badges as lab
 # %% Inputs
 
 # Player, league and year to analyse
-player_name = 'Diogo Dalot'
+player_name = 'Lucas Digne'
 league = "EPL"
 year = '2022'
 
 # Players, leagues and years to compare
-comparison_players = [('Trent Alexander-Arnold', 'EPL', '2022'),
-                      ('Ben White', 'EPL', '2022')]
+comparison_players = [('Álex Moreno', 'La_Liga', '2022'),
+                      ('Ashley Young', 'EPL', '2022')]
 
 # %%
 # Full league and criteria to compare against
 comparison_league = ('EPL', '2022')
-comparison_pos = 'DR'
+comparison_pos = 'DL'
 comparison_min_mins = 450
 
 # Abbreviated league name for printing
 comparison_league_abbrev = 'EPL'
-player_pos_abbrev = 'RB'
-comparison_pos_abbrev = 'RB'
+player_pos_abbrev = 'LB'
+comparison_pos_abbrev = 'LB'
 
 # %% Load analysis and comparison data
 
@@ -738,8 +738,8 @@ for idx in np.arange(0, num_cols+1):
         xpos_txt = (column_indent+col_width/2) + (idx*col_width)
         plyr_name = player_stats.loc[idx, 'name'].split(' ')[0][0] + " " + player_stats.loc[idx, 'name'].split(' ')[1]
         plyr_year = str(int(player_stats.loc[idx, 'year'].replace('20',''))) + "/" + str(1+int(player_stats.loc[idx, 'year'].replace('20','')))
-        if len(plyr_name)>14:
-            plyr_name = player_stats.loc[idx, 'name'].split(' ')[0][0] + " " + player_stats.loc[1, 'name'].split(' ')[1][0:2+int(len(player_stats.loc[1, 'name'].split(' ')[1])/2)] + "\n" + player_stats.loc[1, 'name'].split(' ')[1][2+int(len(player_stats.loc[1, 'name'].split(' ')[1])/2):]                                                                                                                                                           
+        if len(plyr_name)>10:
+            plyr_name = player_stats.loc[idx, 'name'].split(' ')[0][0] + " " + player_stats.loc[idx, 'name'].split(' ')[1][0:10] + "\n" + player_stats.loc[idx, 'name'].split(' ')[1][10:]                                                                                                                                                           
         tab_ax.text(xpos_txt, (1+header_start_height)/2, f"{plyr_name} {plyr_year}",
                     fontsize=8, va="center", ha="center", rotation=90, color = 'w', fontweight='bold')
         
@@ -761,6 +761,6 @@ for idx in np.arange(0, num_rows+1):
 tab_ax.set_xlim(0,1)
 tab_ax.set_ylim(0,1)
 
-fig.text(0.535, 0.08, f"Adjacent table compares {player_name} to a set of relevant\n{comparison_pos_abbrev}s. Performance metrics are provided, with each player\nranked against {comparison_pos_abbrev}s playing over {comparison_min_mins} minutes in {comparison_league[0]} during\nthe {comparison_league[1]}/{int(comparison_league[1])+1} season.", fontsize=8, fontweight="regular", color='w', va = "top", ha = "center")
+fig.text(0.535, 0.08, f"Adjacent table compares the players to a set of relevant\n{comparison_pos_abbrev}s. Performance metrics are provided, with each player\nranked against {comparison_pos_abbrev}s playing over {comparison_min_mins} minutes in {comparison_league[0]} during\nthe {comparison_league[1]}/{int(comparison_league[1])+1} season.", fontsize=8, fontweight="regular", color='w', va = "top", ha = "center")
 
 fig.savefig(f"player_reports/{player_name}-{player_stats.loc[0, 'team']}-{player_stats.loc[0, 'league']}-{player_stats.loc[0, 'year']}-{player_stats.loc[0, 'position']}-report", dpi=600)

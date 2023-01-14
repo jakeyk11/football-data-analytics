@@ -354,7 +354,7 @@ def create_player_list(lineups, additional_cols=None, pass_extra=None):
                                  'team_name']].drop_duplicates().set_index('player_id')
     else:
         playerinfo_df = lineups[['player_id', 'player_name', 'player_nickname', 'position', 'country',
-                                 'team_name'] + [pass_extra]].drop_duplicates().set_index('player_id')
+                                 'team_name'] + pass_extra].drop_duplicates().set_index('player_id')
 
     # Calculate total playing minutes for each player and add to dataframe
     if additional_cols is None:
@@ -418,6 +418,9 @@ def group_player_events(events, player_data, group_type='count', event_types=Non
         selected_events.loc[:, primary_event_name] = grouped_events['match_id']
     elif group_type == 'sum':
         grouped_events = events.groupby('player_id', axis=0).sum()
+        selected_events = grouped_events[event_types].copy()
+    elif group_type == 'mean':
+        grouped_events = events.groupby('player_id', axis=0).mean()
         selected_events = grouped_events[event_types].copy()
     else:
         selected_events = pd.DataFrame()
