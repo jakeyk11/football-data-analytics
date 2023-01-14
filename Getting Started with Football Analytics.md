@@ -26,7 +26,7 @@ I have listed a few courses below that I have completed and highly recommend. It
 
 ## Step 2 - Analysing Football Event Data
 
-With the fundamentals of Python nailed down, you can move onto the good bit! There is an absolutely essential resource that will get you started with analysing football event data. Uppsala University (Sweden) run an online course called [Mathematical Modelling of Football](https://soccermatics.readthedocs.io/en/latest/). It is delivered by the author of Soccermatics, David Sumpter, who has kindly made the majority of lectures/resources publically available.
+With the fundamentals of Python nailed down, you can move onto the good bit! There is an absolutely essential resource that will get you started with analysing football event data. Uppsala University (Sweden) run an online course called [Mathematical Modelling of Football](https://soccermatics.readthedocs.io/en/latest/). It is delivered by the author of Soccermatics, [David Sumpter](https://www.david-sumpter.com/), who has kindly made the majority of lectures/resources publically available.
 
 I would strongly recommend that you not only watch, but follow along with the course material. Prioritise the first three sections; event data, models and scouting. These sections will get you up to speed with crucial football data analytics topics, as well as provide invaluable guidance on producing effective visuals. The remaining sections; valuing actions, randomness & prediction, pitch control, positioning & movmement, and physical data, cover more advanced topics but are still well worth completing.  
 
