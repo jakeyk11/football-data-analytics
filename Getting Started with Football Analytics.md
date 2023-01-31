@@ -14,7 +14,7 @@ I have put together a basic roadmap that identifies a logical sequence of activi
 
 One of the most common mistakes I have seen, and therefore a key piece of advice I have is; don't try and run before you can walk. Whilst it is seriously tempting to immerse yourself in football data immediately, it's critical that you develop a thorough understanding of the Python programming language before-hand. In taking the time to learn the fundamentals of Python coding as part of a wider analytics skill-set, you will better position yourself to develop as a football data analyst.
 
-I have listed a few courses below that I have completed and highly recommend. It wouldn't be excessive to spend 1-3/4 months learning Python before you get started with football data.
+I have listed a few courses below that I have completed and highly recommend. It wouldn't be excessive to spend 1-3 months learning Python before you get started with football data.
 
 |Course Name|Platform|Time Commitment|Cost|
 |----------|:-------------:|:------:|:------:|
@@ -26,7 +26,7 @@ I have listed a few courses below that I have completed and highly recommend. It
 
 ## Step 2 - Analysing Football Event Data
 
-With the fundamentals of Python nailed down, you can move onto the good bit! There is an absolutely essential resource that will get you started with analysing football event data. Uppsala University (Sweden) run an online course called [Mathematical Modelling of Football](https://soccermatics.readthedocs.io/en/latest/). It is delivered by the author of Soccermatics, David Sumpter, who has kindly made the majority of lectures/resources publically available.
+With the fundamentals of Python nailed down, you can move onto the good bit! There is an absolutely essential resource that will get you started with analysing football event data. Uppsala University (Sweden) run an online course called [Mathematical Modelling of Football](https://soccermatics.readthedocs.io/en/latest/). It is delivered by the author of Soccermatics, [David Sumpter](https://www.david-sumpter.com/), who has kindly made the majority of lectures/resources publically available.
 
 I would strongly recommend that you not only watch, but follow along with the course material. Prioritise the first three sections; event data, models and scouting. These sections will get you up to speed with crucial football data analytics topics, as well as provide invaluable guidance on producing effective visuals. The remaining sections; valuing actions, randomness & prediction, pitch control, positioning & movmement, and physical data, cover more advanced topics but are still well worth completing.  
 
@@ -34,17 +34,17 @@ I would strongly recommend that you not only watch, but follow along with the co
 
 Before going at it alone, it's important to understand what football data exists in the public domain, and equally what doesn't? What do you have to pay for, and what's available for free? 
 
-Throught taking the time to consider this, you can appropriately scope your future projects and ensure that the data required to complete them is actually available. If you have completed various sections of the [Mathematical Modelling of Football](https://soccermatics.readthedocs.io/en/latest/) course, then you will likely have at least some awareness of what data is available and accessible. 
+Through taking the time to consider this, you can appropriately scope your future projects and ensure that the data required to complete them is actually available. If you have completed various sections of the [Mathematical Modelling of Football](https://soccermatics.readthedocs.io/en/latest/) course, then you will likely have at least some awareness of what data is available and accessible. 
 
 In my experience, working with different types/formats of football data not only stretches you from a technical programming perspective, but encourages you to think about different ways to process and draw insight from football data. When getting started with football data analytics, I believe the following sources of free data are key.
 
 |Data Provider|Data Description|Data Format|
 |----------|-------------|:------:|
 |[Statsbomb Open Data](https://github.com/statsbomb/open-data)|Statsbomb match event data from a collection of games and competitions|[API](https://github.com/statsbomb/statsbombpy) or [.json](https://github.com/statsbomb/open-data)|
-|[Wyscout Free Data](https://figshare.com/collections/Soccer_match_event_dataset/4415000/2)|Wyscout match event data for all matches in Europe's top 5 leagues during 2017-18 season|.json|
-|[Understat](https://understat.com/)|Shot event data for all matches in Europe's top 5 leages (+ Russian Prem)|Web|
-|[FBref](https://fbref.com/en/)|Aggregated team and player data/performance metrics|Web, .xlsx or .csv|
-|[Transfermarkt](https://www.transfermarkt.co.uk/)|Team and player market value|Web|
+|[Wyscout Free Data](https://figshare.com/collections/Soccer_match_event_dataset/4415000/2)|Wyscout match event data for all matches in Europe's top 5 leagues during 2017-18 season|[.json](https://figshare.com/collections/Soccer_match_event_dataset/4415000/2)|
+|[Understat](https://understat.com/)|Shot event data for all matches in Europe's top 5 leages (+ Russian Prem)|[API](https://pypi.org/project/understatapi/) or [Web](https://understat.com/)|
+|[FBref](https://fbref.com/en/)|Aggregated team and player data/performance metrics|[Web](https://fbref.com/en/), .xlsx or .csv|
+|[Transfermarkt](https://www.transfermarkt.co.uk/)|Team and player market value|[Web](https://www.transfermarkt.co.uk/)|
 
 There are many more data sources, the majority of which are listed and explained within Edd Webster's brilliant [football analytics repository](https://github.com/eddwebster/football_analytics#data-sources). Given the number of web-based resources around, any time spent understanding the basics of web-scraping with Python is time well spent. 
 
@@ -62,7 +62,7 @@ If you are struggling, here's a list of ideas:
 - Build a tool to extract and visualise shot event data from Understat 
 - Develop a model that attempts to predict player market value from seasonal performance (for a specific player position)
 - Implement an expected threat model, and use it to determine the value of all actions during the 2017/18 season in Europe's top 5 leagues
-- Build a tool that quickly produces a scatter plot to compare a set of player against 2 FBref metrics
+- Build a tool that quickly produces a scatter plot to compare a set of players against 2 FBref metrics
 
 When you have completed a project and are happy with your work, post it! Whilst this might seem daunting, Twitter is a great place to share your work and obtain feedback. Feel free to send me your work directly and I'll take a look too.
 
