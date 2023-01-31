@@ -47,24 +47,24 @@ import analysis_tools.logos_and_badges as lab
 # %% Inputs
 
 # Player, league and year to analyse
-player_name = 'Lucas Digne'
+player_name = 'Boubacar Kamara'
 league = "EPL"
 year = '2022'
 
 # Players, leagues and years to compare
-comparison_players = [('Álex Moreno', 'La_Liga', '2022'),
-                      ('Ashley Young', 'EPL', '2022')]
+comparison_players = [('Thomas Partey', 'EPL', '2022'),
+                      ('Amadou Onana', 'EPL', '2022')]
 
 # %%
 # Full league and criteria to compare against
 comparison_league = ('EPL', '2022')
-comparison_pos = 'DL'
+comparison_pos = ['MC','DMC']
 comparison_min_mins = 450
 
 # Abbreviated league name for printing
 comparison_league_abbrev = 'EPL'
-player_pos_abbrev = 'LB'
-comparison_pos_abbrev = 'LB'
+player_pos_abbrev = 'CM'
+comparison_pos_abbrev = 'CM/CDM'
 
 # %% Load analysis and comparison data
 
@@ -79,7 +79,7 @@ all_data = pd.DataFrame()
 for idx, data in enumerate(data_to_load):
     
     # Determine file path
-    file_path = f"../../data_directory/whoscored_data/{data[2]}_{str(int(data[2].replace('20','')) + 1)}/{data[1]}"
+    file_path = f"../../data_directory/whoscored_data/{data[2]}_{str(int(data[2].replace('20','', 1)) + 1)}/{data[1]}"
     files = os.listdir(file_path)
     
     # Initialise storage dataframes
@@ -246,6 +246,7 @@ for idx, dataset in all_data.iterrows():
     # Retain plotted information
     if idx == 0:
         player_suc_passes = suc_pass
+        player_suc_passes_ip = player_suc_passes[player_suc_passes['satisfiedEventsTypes'].apply(lambda x: False if (5 in x or 31 in x or 34 in x or 212 in x) else True)]
         player_inplay_touches = inplay_touches
         player_hull = player_def_hull
         player_suc_prog_passes = suc_prog_pass
@@ -280,7 +281,7 @@ player_stats['recoveries_90'] = round(90*(player_stats['recoveries']/player_stat
 
 # %% Load league comparison data and analyse
 
-file_path = f"../../data_directory/whoscored_data/{comparison_league[1]}_{str(int(comparison_league[1].replace('20','')) + 1)}/{comparison_league[0]}"
+file_path = f"../../data_directory/whoscored_data/{comparison_league[1]}_{str(int(comparison_league[1].replace('20','', 1)) + 1)}/{comparison_league[0]}"
 files = os.listdir(file_path)
 
 # Initialise storage dataframes
@@ -397,7 +398,7 @@ playerinfo = wde.group_player_events(aerials_won, playerinfo, group_type='count'
 playerinfo = wde.group_player_events(recoveries, playerinfo, group_type='count', primary_event_name='recoveries')
 
 # Remove players
-playerinfo = playerinfo[(playerinfo['position'] == comparison_pos) & (playerinfo['mins_played'] >= comparison_min_mins)]
+playerinfo = playerinfo[(playerinfo['position'].isin(comparison_pos)) & (playerinfo['mins_played'] >= comparison_min_mins)]
 
 # %% Stats from comparison league
 
@@ -558,7 +559,7 @@ bar2.barh(0.5, player_stats.loc[0, 'suc_touch_opp3_90_percentile'] , height = 1,
 bar2.axis("off")
 fig.text(0.188, stat_start_y-0.545, f"Rank: {int(player_stats.loc[0, 'suc_touch_opp3_90_rank'])}/{int(player_stats.loc[0, 'comparison_pts'])}", fontsize=6, color='w', ha = "right", va = "center")
 
-fig.text(0.1, 0.08, f"Rankings and percentile bars against {comparison_pos_abbrev}s\nplaying over {comparison_min_mins} minutes in {comparison_league[0]} during\nthe {comparison_league[1]}/{int(comparison_league[1])+1} season. If not specified,\nrankings are calculated on stat per 90.", fontsize=8, fontweight="regular", color='w', va = "top", ha = "center")
+fig.text(0.1, 0.08, f"Rank & percentile bars against {comparison_pos_abbrev}s\nplaying over {comparison_min_mins} minutes in {comparison_league[0]} during\nthe {comparison_league[1]}/{int(comparison_league[1])+1} season. If not specified,\nrankings are calculated on stat per 90.", fontsize=8, fontweight="regular", color='w', va = "top", ha = "center")
 
 ## Heatmap of player touches
 
@@ -591,7 +592,7 @@ legend_ax.set_ylim(0,1)
     
 ## Convex hull plot
 
-pitch2.set_title("Defensive Territory &\nOpposition Actions (xT)", pad = -1, fontsize = 9, color = 'w', fontweight = "bold")
+pitch2.set_title("Defensive Territory &\nKey Opposition Actions (xT)", pad = -1, fontsize = 9, color = 'w', fontweight = "bold")
 # Player initials
 if len(player_name.split(' ')) == 1:
     player_initials = player_name.split(' ')[0][0:2]
@@ -609,7 +610,7 @@ pitch2.text(player_hull['hull_centre'][1], player_hull['hull_centre'][0], player
 # Passes into hull
 for single_pass in player_hull['suc_pass_into_hull']:
     pass_xt = single_pass[2]
-    if pass_xt < 0.01:
+    if pass_xt < 0.02:
         line_colour = 'w'
         line_alpha = 0
         zorder = 1
@@ -659,11 +660,11 @@ for _, single_carry in player_suc_prog_carries.iterrows():
                 alpha = line_alpha, color = line_colour, zorder=zorder, ax=pitch5)
  
 # Threat by pitch region
-player_suc_passes['xThreat_gen'] = player_suc_passes['xThreat'].apply(lambda x: x if x>0 else 0)
-pitch6.set_title("Threat Creation by\nPitch Region", pad = -1, fontsize = 9, color = 'w', fontweight = "bold")
+player_suc_passes_ip['xThreat_gen'] = player_suc_passes_ip['xThreat'].apply(lambda x: x if x>0 else 0)
+pitch6.set_title("In-Play Threat Creation by\nPitch Region", pad = -1, fontsize = 9, color = 'w', fontweight = "bold")
 
-bin_statistic_2 = full_pitch.bin_statistic(player_suc_passes['x'], player_suc_passes['y'],
-                                    statistic='sum', bins=(6, 5), normalize=True, values = player_suc_passes['xThreat_gen'])
+bin_statistic_2 = full_pitch.bin_statistic(player_suc_passes_ip['x'], player_suc_passes_ip['y'],
+                                    statistic='sum', bins=(6, 5), normalize=True, values = player_suc_passes_ip['xThreat_gen'])
 full_pitch.heatmap(bin_statistic_2, pitch6, cmap='cividis', edgecolor='w', lw=0.5, zorder=0, alpha=0.7)
 labels = full_pitch.label_heatmap(bin_statistic_2, color='w', fontsize=8, fontweight = 'bold',
                              ax=pitch6, ha='center', va='center', str_format='{:.0%}', path_effects=path_eff)
@@ -737,7 +738,7 @@ for idx in np.arange(0, num_cols+1):
     if idx != num_cols:
         xpos_txt = (column_indent+col_width/2) + (idx*col_width)
         plyr_name = player_stats.loc[idx, 'name'].split(' ')[0][0] + " " + player_stats.loc[idx, 'name'].split(' ')[1]
-        plyr_year = str(int(player_stats.loc[idx, 'year'].replace('20',''))) + "/" + str(1+int(player_stats.loc[idx, 'year'].replace('20','')))
+        plyr_year = str(int(player_stats.loc[idx, 'year'].replace('20','', 1))) + "/" + str(1+int(player_stats.loc[idx, 'year'].replace('20','', 1)))
         if len(plyr_name)>10:
             plyr_name = player_stats.loc[idx, 'name'].split(' ')[0][0] + " " + player_stats.loc[idx, 'name'].split(' ')[1][0:10] + "\n" + player_stats.loc[idx, 'name'].split(' ')[1][10:]                                                                                                                                                           
         tab_ax.text(xpos_txt, (1+header_start_height)/2, f"{plyr_name} {plyr_year}",
@@ -761,6 +762,6 @@ for idx in np.arange(0, num_rows+1):
 tab_ax.set_xlim(0,1)
 tab_ax.set_ylim(0,1)
 
-fig.text(0.535, 0.08, f"Adjacent table compares the players to a set of relevant\n{comparison_pos_abbrev}s. Performance metrics are provided, with each player\nranked against {comparison_pos_abbrev}s playing over {comparison_min_mins} minutes in {comparison_league[0]} during\nthe {comparison_league[1]}/{int(comparison_league[1])+1} season.", fontsize=8, fontweight="regular", color='w', va = "top", ha = "center")
+fig.text(0.535, 0.08, f"Adjacent table compares the players to a set of relevant\n{comparison_pos_abbrev}s. Performance metrics are provided, with each player\nranked against {comparison_pos_abbrev}s with over {comparison_min_mins} minutes in {comparison_league[0]} during\nthe {comparison_league[1]}/{int(comparison_league[1])+1} season.", fontsize=8, fontweight="regular", color='w', va = "top", ha = "center")
 
 fig.savefig(f"player_reports/{player_name}-{player_stats.loc[0, 'team']}-{player_stats.loc[0, 'league']}-{player_stats.loc[0, 'year']}-{player_stats.loc[0, 'position']}-report", dpi=600)

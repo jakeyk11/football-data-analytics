@@ -5,6 +5,9 @@ Functions
 get_recipient(events_df):
     Add pass recipient to whoscored-style event data.
 
+add_team_name(events_df, players_df):
+    Add team name to event data.
+
 cumulative_match_mins(events):
     Add cumulative minutes to event data and calculate true match minutes
 
@@ -28,6 +31,7 @@ find_offensive_actions(events_df):
 
 find_defensive_actions(events_df):
     Return dataframe of in-play defensive actions from event data.
+
 """
 
 import pandas as pd
@@ -55,14 +59,38 @@ def get_recipient(events_df):
     return events_out
 
 
-def cumulative_match_mins(events):
+def add_team_name(events_df, players_df):
+    """ Add team name to event data.
+
+    Function to add team name to whoscored event data, by extracting playerId and searching for team within whoscored
+    player data.
+
+    Args:
+        events_df (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
+        players_df (pandas.DataFrame): WhoScored-style dataframe of player information, can be from multiple matches.
+
+    Returns:
+        pandas.DataFrame: whoscored-style event dataframe with additional 'team_name' column.
+    """
+
+    # Initialise output dataframes
+    events_out = events_df.copy()
+    events_out['team_name'] = np.nan
+
+    # Get team name and add
+    events_out['team_name'] = events_out[['playerId', 'match_id']].apply(lambda x: players_df[players_df['match_id'] == x['match_id']].loc[x['playerId'], 'team'] if x['playerId'] == x['playerId'] else np.nan, axis=1)
+
+    return events_out
+
+
+def cumulative_match_mins(events_df):
     """ Add cumulative minutes to event data and calculate true match minutes.
 
     Function to calculate cumulative match minutes, accounting for extra time, and add the information to whoscored
     event data.
 
     Args:
-        events (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
+        events_df (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
 
     Returns:
         pandas.DataFrame: whoscored-style event dataframe with additional 'cumulative_mins' column.
@@ -72,8 +100,8 @@ def cumulative_match_mins(events):
     events_out = pd.DataFrame()
 
     # Add cumulative time to events data, resetting for each unique match
-    for match_id in events['match_id'].unique():
-        match_events = events[events['match_id'] == match_id].copy()
+    for match_id in events_df['match_id'].unique():
+        match_events = events_df[events_df['match_id'] == match_id].copy()
         match_events['cumulative_mins'] = match_events['minute'] + (1/60) * match_events['second']
 
         # Add time increment to cumulative minutes based on period of game.

@@ -4,6 +4,9 @@
 #           League to plot data from
 #           Date of run
 #           Selection of whether to include percentages on visual
+#           Selection of whether to brighten logo
+#
+# Output:   Heatmaps showing ball win zones for each team & mean ball win height
 
 # %% Imports and parameters
 
@@ -39,17 +42,25 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'World_Cup'
+league = 'EPL'
 
 # Input run-date
-run_date = '09/12/2022'
+run_date = '26/01/2023'
 
 # Select whether to label %
 label_pct = False
 
+# Select whether to brighten logo
+logo_brighten = True
+
 # %% Get competition logo
 
-comp_logo = lab.get_competition_logo(league, year) 
+if logo_brighten:
+    comp_logo = lab.get_competition_logo(league, year)
+    enhancer = ImageEnhance.Brightness(comp_logo)
+    comp_logo = enhancer.enhance(100)
+else:
+    comp_logo = lab.get_competition_logo(league, year)
 
 # %% Get data
 
@@ -81,10 +92,11 @@ for file in files:
 
 # %% Isolate ball wins
 
-interceptions = events_df[(events_df['eventType']=='Interception') & (events_df['outcomeType']=='Successful') ]
-tackles = events_df[(events_df['eventType']=='Tackle') & (events_df['outcomeType']=='Successful') ]
+interceptions = events_df[(events_df['eventType']=='Interception') & (events_df['outcomeType']=='Successful')]
+tackles = events_df[(events_df['eventType']=='Tackle') & (events_df['outcomeType']=='Successful')]
+pass_blocks = events_df[(events_df['eventType']=='BlockedPass') & (events_df['outcomeType']=='Successful') ]
 
-ball_wins_df = pd.concat([interceptions, tackles], axis=0)
+ball_wins_df = pd.concat([interceptions, tackles, pass_blocks], axis=0)
 
 # %% Get teams and order on mean height of ball recovery
 
@@ -132,16 +144,15 @@ for team in team_ball_win_height[0:20]:
     # Get team logo and colour
     team_logo, team_cmap = lab.get_team_badge_and_colour(team_name)
 
-    
     # Draw heatmap
     bin_statistic = pitch.bin_statistic(team_ball_wins['x'], team_ball_wins['y'],
-                                        statistic='count', bins=(6, 5))
+                                        statistic='count', bins=(6, 5), normalize=True)
     pitch.heatmap(bin_statistic, ax['pitch'][idx], cmap=team_cmap, edgecolor='w', lw=0.5, zorder=0, alpha=0.7)
     
     # Draw mean ball win pos
     pitch.lines(team[1], 0.5, team[1], 99.5, color=team_cmap(255), lw=3, zorder=2, ax=ax['pitch'][idx])
-    pitch.lines(team[1]-1, 0.5, team[1]-1, 99.5, color='k', lw=1, zorder=4, ax=ax['pitch'][idx])
-    pitch.lines(team[1]+1, 0.5, team[1]+1, 99.5, color='k', lw=1, zorder=4, ax=ax['pitch'][idx])
+    pitch.lines(team[1]-1, 0.5, team[1]-1, 99.5, color='k', lw=1.5, zorder=4, ax=ax['pitch'][idx])
+    pitch.lines(team[1]+1, 0.5, team[1]+1, 99.5, color='k', lw=1.5, zorder=4, ax=ax['pitch'][idx])
     path_eff = [path_effects.Stroke(linewidth=3, foreground='k'), path_effects.Normal()]
     ax['pitch'][idx].text(team[1]+3, 6, f"{round(team[1],1)}%\nup pitch", fontsize=13, color='w',path_effects = path_eff)
 
@@ -164,7 +175,7 @@ for team in team_ball_win_height[0:20]:
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
            'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
 
-title_text = f"{leagues[league]} {year} - Top 20 Teams Ranked by Average Ball Win Height"
+title_text = f"{leagues[league]} {year}/{int(year)+1} - Teams Ranked by Average Ball Win Height"
 subtitle_text = "Heatmaps showing Zones of <Frequent Ball Winning> and <Infrequent Ball Winning>"
 subsubtitle_text = f"Correct as of {run_date}"
 
@@ -194,4 +205,4 @@ ax.axis("off")
 badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
 ax.imshow(badge)    
 
-fig.savefig(f"team_threat_creation/{league}-{year}-team-ball-winning", dpi=300)
+fig.savefig(f"team_ball_winning/{league}-{year}-team-ball-winning", dpi=300)
