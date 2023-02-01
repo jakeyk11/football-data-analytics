@@ -23,11 +23,15 @@ This repository contains a collection of tools, projects and resources that enab
 </details>
 
 ## Introduction
-This repository contains a collection of tools, projects and resources that aim to support the generation of meaningful insight from football data. Python is used for extraction, processing, analysis and visualisation of event data, aggregated team data, market value data and more. The repository is broken down into mutliple projects and sub-projects, each of which aims to either perform a specific analysis, generate some specific insight, or introduce some level of automation to football data analytics. Using the contents of this repository, a number of novel & informative visuals and text threads have been created and shared with the football data analytics community via Twitter [(@_JKDS_)](https://twitter.com/_JKDS_).
+This repository contains a collection of tools, projects and resources that aim to support the generation of meaningful insight from football data. Python is used for extraction, processing, analysis and visualisation of event data, aggregated team data, market value data and more.
 
-To support others who are wishing to develop their data analytics skills within the context of football data, I have produced a Getting Started Guide
+The repository is broken down into mutliple projects and sub-projects, each of which aims to either perform a detailed analysis, generate some specific insight, or introduce some level of automation to football data analytics. Using the contents of this repository, a number of novel & informative visuals and text threads have been created and shared with the football data analytics community via Twitter ([@\_JKDS\_](https://twitter.com/_JKDS_)).
+
+To support others who are wishing to develop their data analytics skills within the context of football data, I have produced a [Getting Started Guide](https://github.com/jakeyk11/football-data-analytics/blob/main/Getting%20Started%20with%20Football%20Analytics.md).
 
 ## Folder Structure
+
+The tree below presents the folder structure of this git repository. Note that some individual files are omitted from the diagram for simplicity.
 
     football-data-analytics
     │
@@ -45,17 +49,14 @@ To support others who are wishing to develop their data analytics skills within 
     ├── data_directory
     │   ├── misc_data
     │   │   ├── images
-    │   │   │   ├── ___.png
-    │   │   ├── log_regression_xg_data.pbz2
-    │   │   ├── neural_net_xg_data.pbz2
-    │   │   ├── worldcup_2010_to_2018_distcovered.xlsx
-    │   ├── statsbomb_data [not included in git repo]
+    │   ├── statsbomb_data [contents not included in git repo]
     │   ├── transfermarkt_data
-    │   ├── whoscored_data [not included in git repo]
+    │   ├── whoscored_data [contents not included in git repo]
     │   ├── wyscout_data
     │
     ├── projects
     │   ├── 00_misc_work
+    │   │   ├── download_yt_video.py 
     │   │   ├── saudi_arabia_argentina_world_cup_def_actions.py 
     │   ├── 01_worldcup_b2b_midfielders
     │   │   ├── import_data_statsbomb.py
