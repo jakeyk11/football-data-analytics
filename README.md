@@ -55,38 +55,41 @@ The tree below presents the folder structure of this git repository. Note that s
     │   ├── wyscout_data
     │
     ├── projects
-    │   ├── 00_misc_work
+    │   ├── 00_data_import_and_misc_work
     │   │   ├── download_yt_video.py 
+    │   │   ├── import_data_whoscored.py
     │   │   ├── saudi_arabia_argentina_world_cup_def_actions.py 
-    │   ├── 01_worldcup_b2b_midfielders
-    │   │   ├── import_data_statsbomb.py
+    │   │   ├── scrape_data_transfermarkt.py
+    │   ├── 01_wc2018_box2box_mids_statsbomb
     │   │   ├── worldcup_b2b_mids.py
-    │   ├── 02_transfermarkt_scrape_and_analyse
+    │   ├── 02_player_team_valuation_transfermarkt
     │   │   ├── championship_forward_value_analysis.py
     │   │   ├── premierleague_forward_value_analysis.py
-    │   │   ├── scrape_data_transfermarkt.py
-    │   ├── 03_xg_model
+    │   ├── 03_xg_modelling_wyscout
     │   │   ├── shot_xg_plot.py
     │   │   ├── xg_log_regression_model.py
     │   │   ├── xg_neural_network.py  
-    │   ├── 04_match_reports
-    │   │   ├── import_data_whoscored.py
+    │   ├── 04_match_reports_opta
     │   │   ├── pass_report_ws.py
     │   │   ├── shot_report_understat.py     
-    │   ├── 05_competition_reports
+    │   ├── 05_competition_reports_top_players_opta
     │   │   ├── player_defensive_contribution.py
     │   │   ├── player_effective_carriers.py
     │   │   ├── player_effective_passers.py
     │   │   ├── player_high_defensive_actions.py    
     │   │   ├── player_penalty_takers.py
     │   │   ├── player_threat_creators.py
+    │   ├── 06_competition_reports_top_teams_opta
     │   │   ├── team_ball_winning.py
+    │   │   ├── team_cross_success.py    
     │   │   ├── team_fullback_combinations.py
     │   │   ├── team_threat_creation.py
-    │   ├── 06_player_reports
-    │   │   ├── ws_full_back_report.py
+    │   ├── 07_player_reports_opta
+    │   │   ├── player_report_fullback.py
     │ 
-    ├── .gitignore 
+    ├── .gitignore
+    |
+    ├── Getting Started with Football Analytics.md
     │     
     ├── LICENSE 
     │ 
@@ -100,14 +103,13 @@ As shown in the folder structure above, the repository contains three key folder
 - **projects**: Series of projects that cover various elements of football data analytics. Also contains any template scripts used to import raw data from various football data APIs, websites or data services.
 
 In general, each project follows a number of logical steps:
-1. Create a folder within the Projects area to store files associated with the project.
-2. Use analysis_tools package: get_football_data module [note this module is not available within the git repo] to import raw data from football data API, website or data service:
-    * If imported dataset is large, save to data_directory area in compressed BZ2 format and create a new script for analysis.
-    * If imported dataset is small, data import and analysis can be completed in the same script (without the need to store/save data).
-3. Within the analysis script, import any required modules from the analysis_tools package.
+1. Use analysis_tools package: get_football_data module [note this module is not available within the git repo] to import required data from football data API, website or data service:
+    * Save to data_directory area in compressed BZ2 format
+2. Create a folder within the Projects area to store files associated with the project.
+3. Create an analysis script within the new folder, and import any required modules from the analysis_tools package.
 4. Pre-process and format data using data_engineering modules within the analysis_tools package.
 5. Synthesise additional information using custom_events and pitch_zones modules within the analysis_tools package.
-6. With data formatted appropriately, create visuals and generate insight for end-consumer.
+6. With data formatted appropriately, create visuals and generate insight for end-consumer. Use logos_and_badges module to bring in team/compeition logos.
 
 ## Projects
 
