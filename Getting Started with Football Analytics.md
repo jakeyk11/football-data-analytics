@@ -74,4 +74,4 @@ There is a huge amount of research and development that is taking place in the f
 
 ## Summary
 
-And that's about it! Hopefully this resource has been useful. Please feel free to reach out to me ([@_JKDS_](https://twitter.com/_JKDS_)) if you have any questions or thoughts!
+And that's about it! Hopefully this resource has been useful. Please feel free to reach out to me ([@\_JKDS\_](https://twitter.com/_JKDS_)) if you have any questions or thoughts!
