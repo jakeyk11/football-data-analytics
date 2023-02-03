@@ -9,16 +9,7 @@ This repository contains a collection of tools, projects and resources that enab
     <li><a href="#introduction"> ➤ Introduction</a></li>
     <li><a href="#folder-structure"> ➤ Folder Structure</a></li>
     <li><a href="#workflow"> ➤ Workflow</a></li>
-    <li>
-      <a href="#projects"> ➤ Projects</a>
-      <ul>
-        <li><a href="#01---world-cup-2018-box-to-box-midfielder-analysis">01 - World Cup 2018 Box to Box Midfielder Analysis</a></li>
-        <li><a href="#02---transfermarkt-web-scrape-and-analyse">02 - Transfermarkt Web-Scrape and Analyse</a></li>
-        <li><a href="#03---expected-goals-modelling">03 - Expected Goals Modelling</a></li>
-        <li><a href="#04---automated-match-reporting">04 - Automated Match Reporting</a></li>
-        <li><a href="#05---automated-competition-reporting">05 - Automated Competition Reporting</a></li>
-      </ul>
-    </li>
+    <li><a href="#projects"> ➤ Projects</a></li>
   </ol>
 </details>
 
@@ -113,60 +104,157 @@ In general, each project follows a number of logical steps:
 
 ## Projects
 
-Project table of contents: <br>
-&nbsp; &nbsp; [01 - World Cup 2018 Box to Box Midfielder Analysis](#01---world-cup-2018-box-to-box-midfielder-analysis) <br>
-&nbsp; &nbsp; [02 - Transfermarkt Web-Scrape and Analyse](#02---transfermarkt-web-scrape-and-analyse) <br>
-&nbsp; &nbsp; [03 - Expected Goals Modelling](#03---expected-goals-modelling) <br>
-&nbsp; &nbsp; [04 - Automated Match Reporting](#04---automated-match-reporting) <br>
-&nbsp; &nbsp; [05 - Automated Competition Reporting](#05---automated-competition-reporting)
+Projects are numbered based on the numerical identifier of the project folder area in which they have been undertaken and stored. Decimals are used when more than one project/piece of work has been undertaken in the same folder area. For example, project 2.1 and 2.2 are two seperate pieces of work that exist with the project folder 02_player_team_valuation_transfermarkt. Select a project title to expand the drop-down and find out more.
 
-### 01 - World Cup 2018 Box to Box Midfielder Analysis
+<details>
+<summary><b>1 - World Cup 2018 Box to Box Midfielder Analysis</b></summary>
 
-**Summary**: Use Statsbomb data to define the most effective box to box midfielders at the 2018 World Cup. Throughout the work a number of custom metrics are used to score central midfielders in ball winning, ball retention & creativity, and mobility. A good box to box midfielder is defined as a central midfielder that excels in each of these areas. Of key interest in this work is the use of convex hulls as a proxy for player mobility / distance covered. The work also includes the development of a number of appealing visuals, as shown below.
+\
+**Data Source:** Statsbomb & FIFA Match Reports
 
-<p align="center">
-  <img width="29%" src="./data_directory/misc_data/images/top_12_progressive_passers.png"> &nbsp &nbsp 
-  <img width="29%" src="./data_directory/misc_data/images/top_12_pressers.png"> &nbsp &nbsp
-  <img width="29%" src="./data_directory/misc_data/images/top_12_action_distribution.png">
-</p>
+**Project Area:** [01_wc2018_box2box_mids_statsbomb](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/01_wc2018_box2box_mids_statsbomb)
 
-### 02 - Transfermarkt Web-Scrape and Analyse
+**Code:** [worldcup_b2b_mids.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/01_wc2018_box2box_mids_statsbomb/worldcup_b2b_mids.py)
 
-**Summary:** Scrape team and player market value information from transfermarkt.co.uk. This work includes the development of a "scouting tool" that highlights players from a given league that have a favourable combination of Age and Goal Contribution per £m market value. The work also explores the use of statistical models to predict market value based on player performance, as well as identifies teams that under and over-performed (league position) based on squad value.
+**Summary and Output:** An investigation of the most effective box to box midfielders at the 2018 World Cup. A number of custom metrics are used to score central midfielders in ball winning, ball retention & creativity, and mobility. A good box to box midfielder is defined as a central midfielder that excels in each of these areas.
 
 <p align="center">
-  <img width="25%" src="./data_directory/misc_data/images/GB2_player_value_regression.png"> &nbsp &nbsp
-  <img width="25%" src="./data_directory/misc_data/images/GB2_player_scouting.png"> &nbsp &nbsp
-  <img width="25%" src="./data_directory/misc_data/images/GB2_value_league_table.png">
-</p>
-
-### 03 - Expected Goals Modelling
-
-**Summary:** Implementation and testing of basic expected goals probabilistic models. This work includes development and comparison of a logistic regression expected goals model and a neural network expected goals model, each trained off over 40000 shots taken across Europe's 'big five' leagues during the 2017/2018 season. The models are used to calculated expected goals for specific players, clubs and leagues over a specified time period.
-
-<p align="center">
-  <img width="35%" src="./data_directory/misc_data/images/xg_log_regression_model.png"> &nbsp &nbsp
-  <img width="35%" src="./data_directory/misc_data/images/xg_neural_network.png"> &nbsp &nbsp
+  <img width="40%" src="./data_directory/misc_data/images/top_12_progressive_passers.png"> &nbsp &nbsp 
+  <img width="40%" src="./data_directory/misc_data/images/top_12_pressers.png"> &nbsp &nbsp
 </p>
 <p align="center">
-  <img width="25%" src="./data_directory/misc_data/images/EPL-2017-Salah-Shotmap.png"> &nbsp &nbsp
-  <img width="25%" src="./data_directory/misc_data/images/EPL-2017-Liverpool-Shotmap.png"> &nbsp &nbsp
-  <img width="25%" src="./data_directory/misc_data/images/Bundesliga-2017-All-Shotmap.png"> &nbsp &nbsp
+  <img width="40%" src="./data_directory/misc_data/images/top_12_action_distribution.png">
 </p>
 
+</details>
 
-### 04 - Automated Match Reporting
+<details>
+<summary><b>2.1 - Scouting Players on Goal Contribution per £m Market Value</b></summary>
 
-**Summary:** Development of automated scripts to produce match reports immediately after a match has concluded. This work includes collection and processing of public-domain match event data, and the production of multiple visuals that together constitute informative and appealing match reports. Visuals currently include shot maps, inter-zone passflows, pass plots and offensive action convex hulls.
+\
+**Data Source:** Transfermarkt
+
+**Project Area:** [00_data_import_and_misc_work](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/00_data_import_and_misc_work) & [02_player_team_valuation_transfermarkt](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/02_player_team_valuation_transfermarkt)
+
+**Code:** [scrape_data_transfermarkt.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/00_data_import_and_misc_work/scrape_data_transfermarkt.py), [premierleague_forward_value_analysis.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation_transfermarkt/premierleague_forward_value_analysis.py) & [championship_forward_value_analysis](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation_transfermarkt/championship_forward_value_analysis.py)
+
+**Summary and Output:** 
+Development of a tool to scrape team and player market value information from transfermarkt.co.uk. Generation of a "scouting visual" that highlights players from a given league with a favourable combination of Age and Goal Contribution per £m market value. The work also explores the use of statistical models to predict market value based on player performance.
 
 <p align="center">
-  <img width="35%" src="./data_directory/misc_data/images/EPL-2022-08-06-Tottenham-Southampton.png"> &nbsp &nbsp
-  <img width="35%" src="./data_directory/misc_data/images/EPL-2022-08-07-Manchester%20United-Brighton.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/GB1_player_value_regression.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/GB1_player_scouting.png">
 </p>
 <p align="center">
-  <img width="25%" src="./data_directory/misc_data/images/EPL-1640700-Manchester United-Liverpool-passhulls.png"> &nbsp &nbsp
-  <img width="29.55%" src="./data_directory/misc_data/images/EPL-1640709-Liverpool-Bournemouth-passreport_Liverpool.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/GB2_player_value_regression.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/GB2_player_scouting.png">
 </p>
+
+</details>
+
+<details>
+<summary><b>2.2 - Team Market Value League Table</b></summary>
+
+\
+**Data Source:** Transfermarkt
+
+**Project Area:** [00_data_import_and_misc_work](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/00_data_import_and_misc_work) & [02_player_team_valuation_transfermarkt](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/02_player_team_valuation_transfermarkt)
+
+**Code:** [scrape_data_transfermarkt.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/00_data_import_and_misc_work/scrape_data_transfermarkt.py), [premierleague_forward_value_analysis.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation_transfermarkt/premierleague_forward_value_analysis.py) & [championship_forward_value_analysis.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation_transfermarkt/championship_forward_value_analysis.py)
+
+**Summary and Output:** 
+Development of a tool to scrape team and player market value information from transfermarkt.co.uk. Investigation of team under/over-performance based on league ranking and total squad value ranking.
+
+<p align="center">
+  <img width="30%" src="./data_directory/misc_data/images/GB1_value_league_table.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/GB2_value_league_table.png">
+</p>
+
+</details>
+
+<details>
+<summary><b>3 - Expected Goals Modelling</b></summary>
+
+\
+**Data Source:** Wyscout
+
+**Project Area:** [03_xg_modelling_wyscout](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/03_xg_modelling_wyscout)
+
+**Code:** [xg_log_regression_model.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/03_xg_modelling_wyscout/xg_log_regression_model.py), [xg_neural_network.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/03_xg_modelling_wyscout/xg_neural_network.py) & [shot_xg_plot.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/03_xg_modelling_wyscout/shot_xg_plot.py)
+
+**Summary and Output:** 
+Implementation and testing of basic expected goals probabilistic models. This work includes development and comparison of a logistic regression expected goals model and a neural network expected goals model, each trained off over 40000 shots taken across Europe's 'big five' leagues during the 2017/2018 season. The models are used to calculate expected goals for specific players, clubs and leagues over a defined time period.
+
+<p align="center">
+  <img width="40%" src="./data_directory/misc_data/images/xg_log_regression_model.png"> &nbsp &nbsp
+  <img width="40%" src="./data_directory/misc_data/images/xg_neural_network.png"> &nbsp &nbsp
+</p>
+<p align="center">
+  <img width="30%" src="./data_directory/misc_data/images/EPL-2017-Salah-Shotmap.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/EPL-2017-Liverpool-Shotmap.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/Bundesliga-2017-All-Shotmap.png"> &nbsp &nbsp
+</p>
+
+</details>
+
+<details>
+<summary><b>4.1 - Automated Match Report - Shots</b></summary>
+
+\
+**Data Source:** Understat
+
+**Project Area:** [04_match_reports_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/04_match_reports_opta)
+
+**Code:** [shot_report_understat.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/04_match_reports_opta/shot_report_understat.py)
+
+**Summary and Output:** 
+Development of a script to extract shot data from understat and generate shot reports for a any selected match.
+
+<p align="center">
+  <img width="40%" src="./data_directory/misc_data/images/EPL-2022-08-06-Tottenham-Southampton.png"> &nbsp &nbsp
+  <img width="40%" src="./data_directory/misc_data/images/EPL-2022-08-07-Manchester%20United-Brighton.png">
+</p>
+
+</details>
+
+<details>
+<summary><b>4.2 - Automated Match Report - Inter-zone Pass Flows</b></summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [04_match_reports_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/04_match_reports_opta)
+
+**Code:** [pass_report_ws.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/04_match_reports_opta/pass_report_ws.py)
+
+**Summary and Output:** 
+Design and development of an algorithm that identifies and counts similar passes based on the area of the pitch in which they start and finish. Generation of inter-zone pass flow reports for any selected match. 
+
+<p align="center">
+  <img width="40%" src="./data_directory/misc_data/images/EPL-1640717-Leeds-Everton-passflows.png"> &nbsp &nbsp
+</p>
+
+</details>
+
+<details>
+<summary><b>4.3 - Automated Match Report - Player Territories</b></summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [04_match_reports_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/04_match_reports_opta)
+
+**Code:** [pass_report_ws.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/04_match_reports_opta/pass_report_ws.py)
+
+**Summary and Output:** 
+Design and development of an algorithm to calculate player territories based on the positions of all in-play actions throughout a match, including removal of outliers. Generation of territory reports for any selected match, including calculation of territory area as a proxy for pitch area covered.
+
+<p align="center">
+  <img width="40%" src="./data_directory/misc_data/images/EPL-1640700-Manchester United-Liverpool-passhulls.png"> &nbsp &nbsp
+</p>
+
+</details>
+
 
 ### 05 - Automated Competition Reporting
 
