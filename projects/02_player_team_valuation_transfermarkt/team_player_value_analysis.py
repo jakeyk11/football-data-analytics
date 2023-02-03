@@ -1,8 +1,9 @@
-# %% Analysis of transfermarkt data for EFL Championship players in 2021-22.
+# %% Analysis of transfermarkt data for user selected league and year
 #
 # Inputs:   Single dataframe of transfermarkt player information as .pbz2 compressed pickle
+#           League code and year
 #           League name string to appear in plot titles
-#           URL for logo of league to be plotted
+#           Highest position in which a team gets relegated
 #           Selection of whether to tag player names in plots or not
 #           Minimum goal contributions required to feature in plots.
 #
@@ -13,8 +14,6 @@
 #           assists, team position, etc.)
 #           Value league table - bar plot of league table, showing squad values and over/underperformance based on
 #           value.
-#
-# Notes: None
 
 # %% Imports
 
@@ -28,31 +27,56 @@ from sklearn.linear_model import LinearRegression
 from sklearn import model_selection
 from sklearn.preprocessing import StandardScaler
 from sklearn import metrics
-import requests
-from PIL import Image
-from io import BytesIO
 import pickle
 import bz2
 import adjustText
+import os
+import sys
+from PIL import ImageEnhance
 
 # %% User Inputs
 
-# CSV file name corresponding to chosen league
-filename = 'transfermarkt_GB2_2021-2022.pbz2'
-playerinfo_df = bz2.BZ2File(f"../../data_directory/transfermarkt_data/2021_22/{filename}", 'rb')
-playerinfo_df = pickle.load(playerinfo_df)
-
-# Manual league input for plot titles
+# League code, year and full name
+league_code = 'GB2'
+league_year = '2021'
 league = "EFL Championship"
 
-# Manual URL containing league logo for plot titles
-logo_url = 'https://b.fssta.com/uploads/application/soccer/competition-logos/EnglishChampionship.vresize.350.350.medium.0.png'
+# CSV file name corresponding to chosen league
+filename = f'transfermarkt_{league_code}_{league_year}-{1+int(league_year)}.pbz2'
+playerinfo_df = bz2.BZ2File(f"../../data_directory/transfermarkt_data/{league_year}_{int(league_year.replace('20','', 1)) + 1}/{filename}", 'rb')
+playerinfo_df = pickle.load(playerinfo_df)
 
 # Turn on or off manual player tags on plots (default off=False)
 player_tags = True
 
+# Select highest position in which a team gets relegated
+rel_position = 22
+
 # Set minimum number of goal contributions required from a player per season
 min_contributions = 10
+
+# Ratio between age and goal contribution to trigger player tag
+age_gc_rat = 0.3
+
+# Brighten logo
+logo_brighten = False
+
+# %% Add custom tools to path
+
+root_folder = os.path.abspath(os.path.dirname(
+    (os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+sys.path.append(root_folder)
+
+import analysis_tools.logos_and_badges as lab
+
+# %% Get logo
+
+if logo_brighten:
+    logo = lab.get_competition_logo(league, league_year)
+    enhancer = ImageEnhance.Brightness(logo)
+    logo = enhancer.enhance(100)
+else:
+    logo = lab.get_competition_logo(league, league_year)
 
 # %% Process player info and calculate additional parameters
 
@@ -139,8 +163,8 @@ primary = "red"
 # %% Use Case 1: Scouting tool - assessing cost per goal contribution against age
 
 # Find players belonging to relegated teams and players with expiring contracts
-rel_fwds = successforward_df[successforward_df['Team_Position'] >= 22]
-low_contract = successforward_df[successforward_df['Contract_End_YY'] <= 2022]
+rel_fwds = successforward_df[successforward_df['Team_Position'] >= rel_position]
+low_contract = successforward_df[successforward_df['Contract_End_YY'] <= int(league_year)+1]
 
 # Set-up scatter plot showing Goal_Contributions vs. Market_Value
 fig, ax = plt.subplots(figsize=(8.5, 8.5))
@@ -162,7 +186,7 @@ if player_tags:
     for player in successforward_df['Name'].values:
         xpos = successforward_df[successforward_df['Name'] == player]['Age']
         ypos = successforward_df[successforward_df['Name'] == player]['GC_per_mGBP']
-        if ypos.values[0]/xpos.values[0] >= 0.3: 
+        if ypos.values[0]/xpos.values[0] >= age_gc_rat: 
             if (player in rel_fwds['Name'].values) or (player in low_contract['Name'].values):
                 colour = text_color
             else:
@@ -182,6 +206,11 @@ x_max = successforward_df['Age'].max() + 1
 ax.set_xlim(x_min, x_max)
 plt.xticks(np.arange(x_min, x_max + 1, 2))
 
+ax.spines['bottom'].set_color('w')
+ax.spines['top'].set_visible(False) 
+ax.spines['right'].set_visible(False) 
+ax.spines['left'].set_color('w')
+
 # Create title
 title_text = f"{league} {filename.split('_')[2].replace('.pbz2', '')}"
 subtitle_text = "A view of Goal Contributions per £m player value"
@@ -196,15 +225,15 @@ fig.text(0.76, 0.865, side_text, fontweight="regular", fontsize=8, color='w')
 # Add Championship Logo
 ax2 = fig.add_axes([0.04, 0.87, 0.1, 0.1])
 ax2.axis("off")
-response = requests.get(logo_url)
-img = Image.open(BytesIO(response.content))
-ax2.imshow(img)
+ax2.imshow(logo)
 
 # Create footer
 fig.text(0.28, 0.02, "Created by Jake Kolliari. Data provided by Transfermarkt.co.uk",
          fontstyle="italic", fontsize=9, color=text_color)  # Credit text
 
 plt.tight_layout(rect=[0.03, 0.06, 0.95, 0.86])
+
+fig.savefig(f"forward_value_analysis/{league_code}-{league_year}-cost-per-goal-contribution", dpi=300)
 
 # %% Use Case 2: Create a simple set of linear regression models for visualisation of Goal Contributions vs. Market
 # Value
@@ -260,6 +289,11 @@ ylim = np.ceil(successforward_df['Market_Value'].max()) + 0.5
 ax.set_xlim(0, xlim)
 ax.set_ylim(0, ylim)
 
+ax.spines['bottom'].set_color('w')
+ax.spines['top'].set_visible(False) 
+ax.spines['right'].set_visible(False) 
+ax.spines['left'].set_color('w')
+
 # Create title
 title_text = f"{league} {filename.split('_')[2].replace('.pbz2', '')}"
 subtitle_text = "Goal Contributions vs. Market Value for <Attacking Midfielders>,\n   <Wingers> and <Centre Forwards>"
@@ -286,15 +320,15 @@ adjustText.adjust_text(text)
 # Add Championship Logo
 ax2 = fig.add_axes([0.04, 0.87, 0.1, 0.1])
 ax2.axis("off")
-response = requests.get(logo_url)
-img = Image.open(BytesIO(response.content))
-ax2.imshow(img)
+ax2.imshow(logo)
 
 # Create footer
 fig.text(0.28, 0.02, "Created by Jake Kolliari. Data provided by Transfermarkt.co.uk",
          fontstyle="italic", fontsize=9, color=text_color)
 
 fig.tight_layout(rect=[0.03, 0.06, 0.95, 0.86])
+
+fig.savefig(f"forward_value_analysis/{league_code}-{league_year}-goal-contribution-vs-value", dpi=300)
 
 # %% Use Case 3: Can we predict market value using simple metrics? Create a full model that models market value
 
@@ -377,12 +411,13 @@ for idx, plot_pos in enumerate(np.arange(0.2, teaminfo_df['League_Position'].max
 # Add Championship Logo
 ax2 = fig.add_axes([0.04, 0.87, 0.1, 0.1])
 ax2.axis("off")
-response = requests.get(logo_url)
-img = Image.open(BytesIO(response.content))
-ax2.imshow(img)
+ax2.imshow(logo)
 
 # Create footer
 fig.text(0.28, 0.02, "Created by Jake Kolliari. Data provided by Transfermarkt.co.uk",
          fontstyle="italic", fontsize=9, color=text_color)
 
 fig.tight_layout(rect=[0.03, 0.06, 0.95, 0.86])
+
+fig.savefig(f"market_value_league_table/{league_code}-{league_year}-market-value-league-table", dpi=300)
+

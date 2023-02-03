@@ -9,6 +9,9 @@
 /data_directory/whoscored_data/2018_19/
 /data_directory/whoscored_data/2017_18/
 /projects/00_data_import_and_misc_work/import_data_statsbomb.py
+/projects/01_wc2018_box2box_mids_statsbomb/worldcup_b2b_mids/
+/projects/02_player_team_valuation_transfermarkt/forward_value_analysis/
+/projects/02_player_team_valuation_transfermarkt/market_value_league_table/
 /projects/04_match_reports_opta/pass_reports/
 /projects/04_match_reports_opta/shot_reports/
 /projects/04_match_reports_opta/out_of_possession_reports/

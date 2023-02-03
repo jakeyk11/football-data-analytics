@@ -77,7 +77,7 @@ events = sce.xg_assisted(events)
 
 # %% Create player information dataframe
 
-playerinfo_df = sde.create_player_list(lineups, additional_cols='opp_pass')
+playerinfo_df = sde.create_player_list(lineups, additional_cols=['opp_pass'])
 
 # %% Filter dataframe
 
@@ -184,10 +184,10 @@ for player_choice in players_considered:
 
     player_def_hull = sce.create_convex_hull(
         defensive_actions_df[defensive_actions_df['player_nickname'] == player_choice], name=player_choice,
-        include_percent=75)
+        include_events='1std')
     player_off_hull = sce.create_convex_hull(
         offensive_actions_df[offensive_actions_df['player_nickname'] == player_choice], name=player_choice,
-        include_percent=75)
+        include_events='1std')
 
     # Include players with over 50 defensive actions 
     if len(player_def_hull['hull_x'].values[0]) >= 50:
@@ -319,6 +319,8 @@ ax.imshow(img)
 plt.tight_layout()
 plt.show()
 
+fig.savefig("worldcup_b2b_mids/worldcup-2018-top-progessive-passers", dpi=300)
+
 # %% Plot 2, plot pressure pass success vs. % pressure passes for all midfielders
 
 # Set-up scatter plot
@@ -376,6 +378,8 @@ ax.imshow(img)
 # Layout and show
 plt.tight_layout(rect=[0.05, 0.04, 0.93, 0.875])
 plt.show()
+
+fig.savefig("worldcup_b2b_mids/worldcup-2018-all-pass-success", dpi=300)
 
 # %% Plot 3, plot top 12 midfielders by number of pressures per 100 opposition passes.
 
@@ -445,6 +449,8 @@ ax.imshow(img)
 plt.tight_layout()
 plt.show()
 
+fig.savefig("worldcup_b2b_mids/worldcup-2018-top-pressures", dpi=300)
+
 # %% Plot 4, plot recoveries per 100 opposition passes vs. tackles and interceptions per 100 opposition passes
 
 # Set-up scatter plot
@@ -503,6 +509,8 @@ ax.imshow(img)
 plt.tight_layout(rect=[0.05, 0.04, 0.93, 0.875])
 plt.show()
 
+fig.savefig("worldcup_b2b_mids/worldcup-2018-all-defensive-actions", dpi=300)
+
 # %% Plot 5, plot top 12 midfielders by combined convex hull area
 
 hull_df.sort_values('hull_area_tot', inplace=True, ascending=False)
@@ -533,7 +541,7 @@ for hull_idx, hull_row in hull_df.head(12).iterrows():
 
 # Create title and subtitles, using highlighting as figure legend
 title_text = "Top 12 Midfielders, ranked by distribution of actions over competition"
-subtitle_text = f"{competition} {year} - <Defensive> and <Offensive> action convex hulls, enclosing 75% of all actions"
+subtitle_text = f"{competition} {year} - <Defensive> and <Offensive> action convex hulls, enclosing 1std of all actions"
 subsubtitle_text = "Players with total game time\nbelow 180 minutes, total number\nof defensive actions below 50,\nor total number of offensive actions\nbelow 100 are not considered."
 fig.text(0.11, 0.93, title_text, fontweight="bold", fontsize=16, color='w')
 htext.fig_text(0.11, 0.915, s=subtitle_text, fontweight="regular", fontsize=14, color='w',
@@ -562,6 +570,8 @@ ax.imshow(img)
 plt.tight_layout()
 plt.show()
 
+fig.savefig("worldcup_b2b_mids/worldcup-2018-top-territory-size", dpi=300)
+
 # %% Plot 6, plot top 12 midfielders by defensive convex hull area
 
 hull_df.sort_values('hull_area_def', inplace=True, ascending=False)
@@ -587,7 +597,7 @@ for hull_idx, hull_row in hull_df.head(12).iterrows():
 
 # Create title and subtitles, using highlighting as figure legend
 title_text = "Top 12 Midfielders, ranked by distribution of defensive actions over competition"
-subtitle_text = f"{competition} {year} - <Defensive> action convex hull, enclosing 75% of defensive actions"
+subtitle_text = f"{competition} {year} - <Defensive> action convex hull, enclosing 1std of defensive actions"
 subsubtitle_text = "Players with total game time\nbelow 180 minutes, or total\nnumber of defensive actions\nbelow 50 are not considered."
 fig.text(0.11, 0.93, title_text, fontweight="bold", fontsize=16, color='w')
 htext.fig_text(0.11, 0.915, s=subtitle_text, fontweight="regular", fontsize=14, color='w',
@@ -614,6 +624,8 @@ ax.imshow(img)
 # Layout and show
 plt.tight_layout()
 plt.show()
+
+fig.savefig("worldcup_b2b_mids/worldcup-2018-top-defensive-territory-size", dpi=300)
 
 # %% Plot 7, plot top 12 midfielders by offensive convex hull area
 
@@ -668,10 +680,12 @@ ax.imshow(img)
 plt.tight_layout()
 plt.show()
 
+fig.savefig("worldcup_b2b_mids/worldcup-2018-top-offensive-territory-size", dpi=300)
+
 # %% Plot 8, polar bar plot
 
 # Choose player    
-player = 'Toni Kroos'
+player = 'Granit Xhaka'
 
 # Create dataframe of normalised values to plot on polar bar graph
 radarNorm_df = pd.DataFrame({'Player': playerscore_df['player_nickname'],
@@ -796,3 +810,6 @@ fig.text(0.5, 0.03, "Created by Jake Kolliari. Data provided by Statsbomb",
 
 # Layout and show
 plt.show()
+
+fig.savefig(f"worldcup_b2b_mids/worldcup-2018-{player}-radar", dpi=300)
+
