@@ -119,11 +119,11 @@ Projects are numbered based on the numerical identifier of the project folder ar
 **Summary and Output:** An investigation of the most effective box to box midfielders at the 2018 World Cup. A number of custom metrics are used to score central midfielders in ball winning, ball retention & creativity, and mobility. A good box to box midfielder is defined as a central midfielder that excels in each of these areas.
 
 <p align="center">
-  <img width="40%" src="./data_directory/misc_data/images/top_12_progressive_passers.png"> &nbsp &nbsp 
-  <img width="40%" src="./data_directory/misc_data/images/top_12_pressers.png"> &nbsp &nbsp
+  <img width="40%" src="./data_directory/misc_data/images/example-1-0-1.png"> &nbsp &nbsp 
+  <img width="40%" src="./data_directory/misc_data/images/example-1-0-2.png">
 </p>
 <p align="center">
-  <img width="40%" src="./data_directory/misc_data/images/top_12_action_distribution.png">
+  <img width="40%" src="./data_directory/misc_data/images/example-1-0-3.png">
 </p>
 
 </details>
@@ -136,18 +136,18 @@ Projects are numbered based on the numerical identifier of the project folder ar
 
 **Project Area:** [00_data_import_and_misc_work](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/00_data_import_and_misc_work) & [02_player_team_valuation_transfermarkt](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/02_player_team_valuation_transfermarkt)
 
-**Code:** [scrape_data_transfermarkt.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/00_data_import_and_misc_work/scrape_data_transfermarkt.py), [premierleague_forward_value_analysis.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation_transfermarkt/premierleague_forward_value_analysis.py) & [championship_forward_value_analysis](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation_transfermarkt/championship_forward_value_analysis.py)
+**Code:** [scrape_data_transfermarkt.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/00_data_import_and_misc_work/scrape_data_transfermarkt.py) & [team_player_value_analysis.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation_transfermarkt/team_player_value_analysis.py)
 
 **Summary and Output:** 
 Development of a tool to scrape team and player market value information from transfermarkt.co.uk. Generation of a "scouting visual" that highlights players from a given league with a favourable combination of Age and Goal Contribution per £m market value. The work also explores the use of statistical models to predict market value based on player performance.
 
 <p align="center">
-  <img width="30%" src="./data_directory/misc_data/images/GB1_player_value_regression.png"> &nbsp &nbsp
-  <img width="30%" src="./data_directory/misc_data/images/GB1_player_scouting.png">
+  <img width="30%" src="./data_directory/misc_data/images/example-2-1-1.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/example-2-1-2.png">
 </p>
 <p align="center">
-  <img width="30%" src="./data_directory/misc_data/images/GB2_player_value_regression.png"> &nbsp &nbsp
-  <img width="30%" src="./data_directory/misc_data/images/GB2_player_scouting.png">
+  <img width="30%" src="./data_directory/misc_data/images/example-2-1-3.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/example-2-1-4.png">
 </p>
 
 </details>
@@ -160,14 +160,14 @@ Development of a tool to scrape team and player market value information from tr
 
 **Project Area:** [00_data_import_and_misc_work](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/00_data_import_and_misc_work) & [02_player_team_valuation_transfermarkt](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/02_player_team_valuation_transfermarkt)
 
-**Code:** [scrape_data_transfermarkt.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/00_data_import_and_misc_work/scrape_data_transfermarkt.py), [premierleague_forward_value_analysis.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation_transfermarkt/premierleague_forward_value_analysis.py) & [championship_forward_value_analysis.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation_transfermarkt/championship_forward_value_analysis.py)
+**Code:** [scrape_data_transfermarkt.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/00_data_import_and_misc_work/scrape_data_transfermarkt.py) & [team_player_value_analysis.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation_transfermarkt/team_player_value_analysis.py)
 
 **Summary and Output:** 
 Development of a tool to scrape team and player market value information from transfermarkt.co.uk. Investigation of team under/over-performance based on league ranking and total squad value ranking.
 
 <p align="center">
-  <img width="30%" src="./data_directory/misc_data/images/GB1_value_league_table.png"> &nbsp &nbsp
-  <img width="30%" src="./data_directory/misc_data/images/GB2_value_league_table.png">
+  <img width="30%" src="./data_directory/misc_data/images/example-2-2-1.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/example-2-2-2.png">
 </p>
 
 </details>
