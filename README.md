@@ -104,10 +104,12 @@ In general, each project follows a number of logical steps:
 
 ## Projects
 
-Projects are numbered based on the numerical identifier of the project folder area in which they have been undertaken and stored. Decimals are used when more than one project/piece of work has been undertaken in the same folder area. For example, project 2.1 and 2.2 are two seperate pieces of work that exist with the project folder 02_player_team_valuation_transfermarkt. Select a project title to expand the drop-down and find out more.
+Projects are numbered based on the numerical identifier of the project folder area in which they have been undertaken and stored. Decimals are used when more than one sub-project/piece of work has been undertaken in the same folder area. For example, sub-project 2.1 and 2.2 are two seperate pieces of work that exist within project 2, which is stored within folder area 02_player_team_valuation_transfermarkt. Select a project title to expand the drop-down and find out more.
+
+### 1 - Targeted Player & Team Performance Analysis
 
 <details>
-<summary><b>1 - World Cup 2018 Box to Box Midfielder Analysis</b></summary>
+<summary>1.1 - World Cup 2018 Box to Box Midfielder Analysis</summary>
 
 \
 **Data Source:** Statsbomb & FIFA Match Reports
@@ -128,8 +130,10 @@ Projects are numbered based on the numerical identifier of the project folder ar
 
 </details>
 
+### 2 - Player and Team Market Value Analysis
+
 <details>
-<summary><b>2.1 - Scouting Players on Goal Contribution per £m Market Value</b></summary>
+<summary>2.1 - Scouting Players on Goal Contribution per £m Market Value</summary>
 
 \
 **Data Source:** Transfermarkt
@@ -153,7 +157,7 @@ Development of a tool to scrape team and player market value information from tr
 </details>
 
 <details>
-<summary><b>2.2 - Team Market Value League Table</b></summary>
+<summary>2.2 - Team Market Value League Table</summary>
 
 \
 **Data Source:** Transfermarkt
@@ -172,8 +176,10 @@ Development of a tool to scrape team and player market value information from tr
 
 </details>
 
+### 3 - Model Development
+
 <details>
-<summary><b>3 - Expected Goals Modelling</b></summary>
+<summary>3.1 - Expected Goals Modelling</summary>
 
 \
 **Data Source:** Wyscout
@@ -197,8 +203,10 @@ Implementation and testing of basic expected goals probabilistic models. This wo
 
 </details>
 
+### 4 - Automated Match Reporting
+
 <details>
-<summary><b>4.1 - Automated Match Report - Shots</b></summary>
+<summary>4.1 - Automated Match Report - Shots</summary>
 
 \
 **Data Source:** Understat
@@ -218,7 +226,7 @@ Development of a script to extract shot data from understat and generate shot re
 </details>
 
 <details>
-<summary><b>4.2 - Automated Match Report - Inter-zone Pass Flows</b></summary>
+<summary>4.2 - Automated Match Report - Inter-zone Pass Flows</summary>
 
 \
 **Data Source:** Opta/Whoscored
@@ -238,7 +246,7 @@ Design and development of an algorithm that identifies and counts similar passes
 </details>
 
 <details>
-<summary><b>4.3 - Automated Match Report - Player Territories</b></summary>
+<summary>4.3 - Automated Match Report - Player Territories</summary>
 
 \
 **Data Source:** Opta/Whoscored
@@ -257,8 +265,10 @@ Design and development of an algorithm to calculate player territories based on 
 
 </details>
 
+### 5 - Player Ranking over a Competition
+
 <details>
-<summary><b>5.1 - Top Players throughout Competition - Defensive Contribution</b></summary>
+<summary>5.1 - Top Players throughout Competition - Defensive Contribution</summary>
 
 \
 **Data Source:** Opta/Whoscored
@@ -278,7 +288,7 @@ Assessment of all players' defensive contribution over the duration of a competi
 </details>
 
 <details>
-<summary><b>5.2 - Top Players throughout Competition - Forward Pressing</b></summary>
+<summary>5.2 - Top Players throughout Competition - Forward Pressing</summary>
 
 \
 **Data Source:** Opta/Whoscored
@@ -298,7 +308,7 @@ Assessment of the number of defensive actions completed in the opposition third 
 </details>
 
 <details>
-<summary><b>5.3 - Top Players throughout Competition - Effective Passers</b></summary>
+<summary>5.3 - Top Players throughout Competition - Effective Passers</summary>
 
 \
 **Data Source:** Opta/Whoscored
@@ -319,3 +329,9 @@ Identification of effective passers through assessment of all in-play passes com
 </p>
 
 </details>
+
+### 6 - Team Ranking over a Competition
+
+### 7 - Automated Player Reports
+
+
