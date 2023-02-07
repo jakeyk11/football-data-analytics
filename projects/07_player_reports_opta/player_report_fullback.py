@@ -47,24 +47,24 @@ import analysis_tools.logos_and_badges as lab
 # %% Inputs
 
 # Player, league and year to analyse
-player_name = 'Boubacar Kamara'
-league = "EPL"
-year = '2022'
+player_name = 'Layvin Kurzawa'
+league = "Ligue_1"
+year = '2020'
 
 # Players, leagues and years to compare
-comparison_players = [('Thomas Partey', 'EPL', '2022'),
-                      ('Amadou Onana', 'EPL', '2022')]
+comparison_players = [('Lucas Digne', 'EPL', '2022'),
+                      ('Andrew Robertson', 'EPL', '2022')]
 
 # %%
 # Full league and criteria to compare against
 comparison_league = ('EPL', '2022')
-comparison_pos = ['MC','DMC']
+comparison_pos = ['DL']
 comparison_min_mins = 450
 
 # Abbreviated league name for printing
 comparison_league_abbrev = 'EPL'
-player_pos_abbrev = 'CM'
-comparison_pos_abbrev = 'CM/CDM'
+player_pos_abbrev = 'LB'
+comparison_pos_abbrev = 'LB'
 
 # %% Load analysis and comparison data
 

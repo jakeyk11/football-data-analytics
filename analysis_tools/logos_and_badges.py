@@ -9,13 +9,13 @@ get_team_badge_and_colour(team, hoa='home' )
     Get team colourmap and get URL of badge image for team of choice, and format image ready for printing.
 """
 
-from PIL import Image
+from PIL import Image, ImageEnhance
 import requests
 from io import BytesIO
 import matplotlib.cm as cm
 
 
-def get_competition_logo(competition, year=None):
+def get_competition_logo(competition, year=None, logo_brighten=False):
     """ Get URL of competition logo for competition of choice, and format image ready for printing.
 
     Function to return the image PIL object for the competition of choice. The function ensures that images are
@@ -23,7 +23,8 @@ def get_competition_logo(competition, year=None):
 
     Args:
         competition (string):  competition logo to obtain.
-        year (string, optional): statr year of competition, none by default
+        year (string, optional): start year of competition, none by default
+        logo_brighten (bool, optional): selection of whether to brighten logo. Recommended for dark logos
 
     Returns:
         PIL Image: Formatted competition badge image.
@@ -72,6 +73,12 @@ def get_competition_logo(competition, year=None):
         result = img
 
     result = result.resize((300, 300))
+
+    if logo_brighten:
+        enhancer = ImageEnhance.Brightness(result)
+        result = enhancer.enhance(100)
+    else:
+        comp_logo = lab.get_competition_logo(league, year)
 
     return result
 
@@ -175,7 +182,7 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Chelsea', 'Chelsea FC']:
         url = "https://logos-world.net/wp-content/uploads/2020/05/Chelsea-Logo.png"
-        cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('Yellows')
+        cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('YlOrBr')
 
     if team in ['Costa Rica']:
         url = "https://cdn.countryflags.com/thumbs/costa-rica/flag-round-250.png"

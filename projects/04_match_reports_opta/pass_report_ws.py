@@ -45,17 +45,17 @@ import analysis_tools.logos_and_badges as lab
 # %% User inputs
 
 # Input WhoScored match id
-match_id = '1632093'
+match_id = '1640902'
 
 # Select year
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'World_Cup'
+league = 'EPL'
 
 # Select team codes
-home_team = 'England'
-away_team = 'Iran'
+home_team = 'Chelsea'
+away_team = 'Fulham'
 
 # Team name to print
 home_team_print = None
@@ -65,12 +65,12 @@ away_team_print = None
 zone_type = 'jdp_custom'
 
 # Pass hull inclusion
-central_pct = 75
+central_pct = 50
 
 # %% Logos, colours and printed names
 
-home_logo, home_colourmap = lab.get_team_badge_and_colour(home_team, 'away')
-away_logo, away_colourmap = lab.get_team_badge_and_colour(away_team, 'home')
+home_logo, home_colourmap = lab.get_team_badge_and_colour(home_team, 'home')
+away_logo, away_colourmap = lab.get_team_badge_and_colour(away_team, 'away')
 
 if home_team_print is None:
     home_team_print = home_team
@@ -216,7 +216,7 @@ for player_id in players_df[players_df['longest_xi']==True].index:
     player_def_hull = wce.create_convex_hull(defensive_actions_df[defensive_actions_df['playerId'] == player_id], name=players_df.loc[player_id,'name'],
         min_events=5, include_events=central_pct, pitch_area = 10000)
     player_off_hull = wce.create_convex_hull(offensive_actions_df[offensive_actions_df['playerId'] == player_id], name=players_df.loc[player_id,'name'],
-        min_events=5, include_events=40)
+        min_events=5, include_events=central_pct, pitch_area = 10000)
     offensive_hull_df = pd.concat([offensive_hull_df, player_off_hull])
     defensive_hull_df = pd.concat([defensive_hull_df, player_def_hull])
 
@@ -439,24 +439,28 @@ for idx in np.arange(0,3):
     ax.text(0.71, 0.71-0.22*idx, f"{idx+1}.     {away_short_name}", color='w')
     ax.text(0.91, 0.71-0.22*idx, f"{round(away_top_area.iloc[idx:idx+1]['hull_area_%'].values[0],1)}%", color='w')
  
+# Label based on include parameter
+hull_include = central_pct.replace('std','') + ' Std. Dev' if 'std' in str(central_pct) else str(central_pct) + '%'
+hull_include_s = central_pct.replace('std','') + ' SD' if 'std' in str(central_pct) else str(central_pct) + '%'
+
 # Label top three text
 ax.plot([0.38, 0.38], [0.22 ,0.87], lw=0.5, color='w')
 ax.plot([0.62, 0.62], [0.22 ,0.87], lw=0.5, color='w')
-ax.text(0.5, 0.55, f"Top players by area of\nregion containing central\n{central_pct}% passes (as % of total\npitch area)", ha = 'center', va = 'center', color='w', fontsize=9)
+ax.text(0.5, 0.55, f"Top players by area of\nregion containing central\n{hull_include_s} passes (as % of\ntotal pitch area)", ha = 'center', va = 'center', color='w', fontsize=9)
 ax.arrow(0.375, 0.55, -0.05, 0, color="w", width=0.001, head_width = 0.05, head_length = 0.01, lw=0.5)
 ax.arrow(0.625, 0.55, 0.05, 0, color="w", width=0.001, head_width = 0.05, head_length = 0.01, lw=0.5)
 
 # Title text
 title_text = f"{leagues[league]} - {year}/{int(year) + 1}" if not league in ['World_Cup'] else f"{leagues[league]} - {year}"
 subtitle_text = f"{home_team_print} {home_score}-{away_score} {away_team_print}"
-subsubtitle_text = f"Variation in start position of player passes. Central {central_pct}%\n of passes shown per player, represented by a shaded region"
+subsubtitle_text = f"Variation in start position of player passes. Central {hull_include}\nof passes shown per player, represented by a shaded region"
 
 fig.text(0.5, 0.93, title_text, ha='center',
          fontweight="bold", fontsize=20, color='w')
 fig.text(0.5, 0.882, subtitle_text, ha='center',
          fontweight="bold", fontsize=18, color='w')
 fig.text(0.5, 0.82, subsubtitle_text, ha='center',
-         fontweight="regular", fontsize=12, color='w')
+         fontweight="regular", fontsize=11, color='w')
 
 # Add home team Logo
 ax = fig.add_axes([0.07, 0.825, 0.14, 0.14])
@@ -531,12 +535,12 @@ half_pitch.draw(ax=ax23)
 half_pitch.draw(ax=ax24)
 
 ax11.set_title('Pass Flow - Most frequent\ninter-zone passes', color='w', fontsize = 10, fontweight = 'bold')
-ax12.set_title(f'Variation in start position of player passes\nCentral {central_pct}% passes shown per player', color='w', fontsize = 10, fontweight = 'bold')
+ax12.set_title(f'Variation in start position of player passes\nCentral {hull_include} passes shown per player', color='w', fontsize = 10, fontweight = 'bold')
 ax13.set_title('\nHalf-space passes', color='w', fontsize = 10, fontweight = 'bold')
 ax14.set_title('Zone 14 passes', color='w', fontsize = 10, fontweight = 'bold')
 
 ax21.set_title('Pass Flow - Most frequent\ninter-zone passes', color='w', fontsize = 10, fontweight = 'bold')
-ax22.set_title(f'Variation in start position of player passes\nCentral {central_pct}% passes shown per player', color='w', fontsize = 10, fontweight = 'bold')
+ax22.set_title(f'Variation in start position of player passes\nCentral {hull_include} passes shown per player', color='w', fontsize = 10, fontweight = 'bold')
 ax23.set_title('\nHalf-space passes', color='w', fontsize = 10, fontweight = 'bold')
 ax24.set_title('Zone 14 passes', color='w', fontsize = 10, fontweight = 'bold')
 
@@ -774,9 +778,9 @@ for idx in np.arange(0,5):
     ax2.text(0.91, 0.81-0.16*idx, f"{round(away_top_area.iloc[idx:idx+1]['hull_area_%'].values[0],1)}%", color='w')
  
 ax1.plot([0.35, 0.35], [0.15 ,0.92], lw=0.5, color='w')
-ax1.text(0.01, 0.52, f"Top players\nby area\ncontaining\ncentral {central_pct}%\npasses (% tot.\npitch area)", va = 'center', color='w', fontsize=9)
+ax1.text(0.01, 0.52, f"Top players\nby area\ncontaining\ncentral {hull_include_s}\npasses (% tot.\npitch area)", va = 'center', color='w', fontsize=9)
 ax2.plot([0.35, 0.35], [0.15 ,0.92], lw=0.5, color='w')
-ax2.text(0.01, 0.52, f"Top players\nby area\ncontaining\ncentral {central_pct}%\npasses (% tot.\npitch area)", va = 'center', color='w', fontsize=9)
+ax2.text(0.01, 0.52, f"Top players\nby area\ncontaining\ncentral {hull_include_s}\npasses (% tot.\npitch area)", va = 'center', color='w', fontsize=9)
 
 # Zone 14 and half-space passes
 for idx, team in enumerate(players_df['teamId'].unique()):

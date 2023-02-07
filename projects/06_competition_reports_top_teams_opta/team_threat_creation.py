@@ -39,17 +39,17 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'World_Cup'
+league = 'EPL'
 
 # Input run-date
-run_date = '06/12/2022'
+run_date = '06/02/2023'
 
 # Select whether to label %
 label_pct = False
 
 # %% Get competition logo
 
-comp_logo = lab.get_competition_logo(league, year) 
+comp_logo = lab.get_competition_logo(league, year, logo_brighten=True) 
 
 # %% Get data
 
@@ -85,10 +85,10 @@ events_df = wde.cumulative_match_mins(events_df)
 events_df = wce.insert_ball_carries(events_df)
 events_df = wce.get_xthreat(events_df, interpolate = True)
 
-# %% Isolate events of choice
+# %% Isolate events of choice (in play only)
 
 threat_creating_events_df = events_df[events_df['xThreat']==events_df['xThreat']]
-threat_creating_events_df['xThreat'] = threat_creating_events_df['xThreat'].apply(lambda x: x if x > 0 else 0)
+threat_creating_events_df = threat_creating_events_df[~threat_creating_events_df['satisfiedEventsTypes'].apply(lambda x: True if (31 in x or 34 in x or 212 in x) else False)]
 
 # %% Get teams and order on total threat created
 
@@ -109,14 +109,13 @@ for team in teams:
     team_matches = set(team_threat_creating_events['match_id'])
     team_mins = 0
     for match in team_matches:
-        team_mins += events_df[events_df['match_id']==1638012]['cumulative_mins'].max()
+        team_mins += events_df[events_df['match_id']==match]['cumulative_mins'].max()
       
     # Team xT created per 90
-    team_xt_90[team] = 90*(team_threat_creating_events['xThreat'].sum() / team_mins)
+    team_xt_90[team] = 90*(team_threat_creating_events['xThreat_gen'].sum() / team_mins)
 
 # Sort dictionary by xT/90
 team_xt_90 = sorted(team_xt_90.items(), key=lambda x: x[1], reverse=True)
-
 
 # %% Create visual
 
@@ -136,14 +135,17 @@ idx = 0
 for team in team_xt_90[0:20]:
     
     # Get team name and events
-    team = team[0]
-    team_id = players_df[players_df['team']==team]['teamId'].values[0]
+    team_name = team[0]
+    team_id = players_df[players_df['team']==team_name]['teamId'].values[0]
     team_threat_creating_events = threat_creating_events_df[threat_creating_events_df['teamId']==team_id]
-    
+
+    # Get team logo and colour
+    team_logo, team_cmap = lab.get_team_badge_and_colour(team[0])
+
     # Draw heatmap
     bin_statistic = pitch.bin_statistic(team_threat_creating_events['x'], team_threat_creating_events['y'],
                                         statistic='sum', bins=(6, 5), normalize=True, values = team_threat_creating_events['xThreat'])
-    pitch.heatmap(bin_statistic, ax['pitch'][idx], cmap='cividis', edgecolor='w', lw=0.5, zorder=0, alpha=0.7)
+    pitch.heatmap(bin_statistic, ax['pitch'][idx], cmap=team_cmap, edgecolor='w', lw=0.5, zorder=0, alpha=0.7)
 
     # Label heatmap zones with pressure count if selected
     path_eff = [path_effects.Stroke(linewidth=1.5, foreground='#313332'), path_effects.Normal()]
@@ -151,10 +153,12 @@ for team in team_xt_90[0:20]:
         labels = pitch.label_heatmap(bin_statistic, color='w', fontsize=10, fontweight = 'bold',
                                      ax=ax['pitch'][idx], ha='center', va='center', str_format='{:.0%}', path_effects=path_eff)
     
-    ax['pitch'][idx].set_title(f"  {idx + 1}:  {team}", loc = "left", color='w', fontsize = 16)
+    # Label xt
+    ax['pitch'][idx].text(2, 2, "xT/90:", fontsize=10, fontweight='bold', color='#313332', zorder=3)
+    ax['pitch'][idx].text(20, 2, round(team[1],2), fontsize=10, color='#313332', zorder=3) 
     
-    # Add team logo
-    team_logo, _ = lab.get_team_badge_and_colour(team)
+    # Set title
+    ax['pitch'][idx].set_title(f"  {idx + 1}:  {team[0]}", loc = "left", color='w', fontsize = 16)
             
     ax_pos = ax['pitch'][idx].get_position()
     
@@ -168,13 +172,13 @@ for team in team_xt_90[0:20]:
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
            'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
 
-title_text = f"{leagues[league]} {year} - Top 20 Teams Ranked by Total Threat Creation per 90"
+title_text = f"{leagues[league]} {year}/{int(year)+1} - Teams Ranked by In-Play Threat Creation"
 subtitle_text = "Heatmaps showing Zones of <High Threat Creation> and <Low Threat Creation>"
-subsubtitle_text = f"Correct as of {run_date}"
+subsubtitle_text = f"Pass, Carry and Dribble events included. Negative threat events excluded. Correct as of {run_date}"
 
 fig.text(0.12, 0.945, title_text, fontweight="bold", fontsize=20, color='w')
 htext.fig_text(0.12, 0.934, s=subtitle_text, fontweight="bold", fontsize=18, color='w',
-               highlight_textprops=[{"color": 'yellow', "fontweight": 'bold'}, {"color": 'royalblue', "fontweight": 'bold'}])
+               highlight_textprops=[{"color": 'yellow', "fontweight": 'bold'}, {"color": 'grey', "fontweight": 'bold'}])
 fig.text(0.12, 0.9, subsubtitle_text, fontweight="regular", fontsize=16, color='w')
     
 # Add direction of play arrow
