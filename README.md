@@ -119,11 +119,11 @@ Projects are numbered based on the numerical identifier of the project folder ar
 **Summary and Output:** An investigation of the most effective box to box midfielders at the 2018 World Cup. A number of custom metrics are used to score central midfielders in ball winning, ball retention & creativity, and mobility. A good box to box midfielder is defined as a central midfielder that excels in each of these areas.
 
 <p align="center">
-  <img width="40%" src="./data_directory/misc_data/images/example-1-0-1.png"> &nbsp &nbsp 
-  <img width="40%" src="./data_directory/misc_data/images/example-1-0-2.png">
+  <img width="40%" src="./data_directory/misc_data/images/example-1-1-1.png"> &nbsp &nbsp 
+  <img width="40%" src="./data_directory/misc_data/images/example-1-1-2.png">
 </p>
 <p align="center">
-  <img width="40%" src="./data_directory/misc_data/images/example-1-0-3.png">
+  <img width="40%" src="./data_directory/misc_data/images/example-1-1-3.png">
 </p>
 
 </details>
@@ -186,13 +186,13 @@ Development of a tool to scrape team and player market value information from tr
 Implementation and testing of basic expected goals probabilistic models. This work includes development and comparison of a logistic regression expected goals model and a neural network expected goals model, each trained off over 40000 shots taken across Europe's 'big five' leagues during the 2017/2018 season. The models are used to calculate expected goals for specific players, clubs and leagues over a defined time period.
 
 <p align="center">
-  <img width="40%" src="./data_directory/misc_data/images/xg_log_regression_model.png"> &nbsp &nbsp
-  <img width="40%" src="./data_directory/misc_data/images/xg_neural_network.png"> &nbsp &nbsp
+  <img width="40%" src="./data_directory/misc_data/images/example-3-1-1.png"> &nbsp &nbsp
+  <img width="40%" src="./data_directory/misc_data/images/example-3-1-2.png">
 </p>
 <p align="center">
-  <img width="30%" src="./data_directory/misc_data/images/EPL-2017-Salah-Shotmap.png"> &nbsp &nbsp
-  <img width="30%" src="./data_directory/misc_data/images/EPL-2017-Liverpool-Shotmap.png"> &nbsp &nbsp
-  <img width="30%" src="./data_directory/misc_data/images/Bundesliga-2017-All-Shotmap.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/example-3-1-3.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/example-3-1-4.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/example-3-1-5.png">
 </p>
 
 </details>
@@ -211,8 +211,8 @@ Implementation and testing of basic expected goals probabilistic models. This wo
 Development of a script to extract shot data from understat and generate shot reports for a any selected match.
 
 <p align="center">
-  <img width="40%" src="./data_directory/misc_data/images/EPL-2022-08-06-Tottenham-Southampton.png"> &nbsp &nbsp
-  <img width="40%" src="./data_directory/misc_data/images/EPL-2022-08-07-Manchester%20United-Brighton.png">
+  <img width="40%" src="./data_directory/misc_data/images/example-4-1-1.png"> &nbsp &nbsp
+  <img width="40%" src="./data_directory/misc_data/images/example-4-1-2.png">
 </p>
 
 </details>
@@ -231,7 +231,8 @@ Development of a script to extract shot data from understat and generate shot re
 Design and development of an algorithm that identifies and counts similar passes based on the area of the pitch in which they start and finish. Generation of inter-zone pass flow reports for any selected match. 
 
 <p align="center">
-  <img width="40%" src="./data_directory/misc_data/images/EPL-1640717-Leeds-Everton-passflows.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/example-4-2-1.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/example-4-2-2.png"> 
 </p>
 
 </details>
@@ -250,21 +251,71 @@ Design and development of an algorithm that identifies and counts similar passes
 Design and development of an algorithm to calculate player territories based on the positions of all in-play actions throughout a match, including removal of outliers. Generation of territory reports for any selected match, including calculation of territory area as a proxy for pitch area covered.
 
 <p align="center">
-  <img width="40%" src="./data_directory/misc_data/images/EPL-1640700-Manchester United-Liverpool-passhulls.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/example-4-3-1.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/example-4-3-2.png"> 
 </p>
 
 </details>
 
+<details>
+<summary><b>5.1 - Top Players throughout Competition - Defensive Contribution</b></summary>
 
-### 05 - Automated Competition Reporting
+\
+**Data Source:** Opta/Whoscored
 
-**Summary:** Development of automated scripts to produce competition reports and multi-match player evaluations at any point throughout a competition. This work includes collection and processing of public-domain match event data, and the production of multiple visuals that generate novel and meaningful insight at a team and player level. Visuals currently include an assessment of progressive passes, defensive actions and penalty placement.
+**Project Area:** [05_competition_reports_top_players_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players_opta)
+
+**Code:** [player_defensive_contribution.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_defensive_contribution.py)
+
+**Summary and Output:** 
+Assessment of all players' defensive contribution over the duration of a competition, with identification of top players by metrics such as Recoveries and Ball Wins per 100 opposition touches. Work includes implentation of a diamond scatter diagram that can be re-used for any 2D scatter plot.
 
 <p align="center">
-  <img width="32%" src="./data_directory/misc_data/images/EPL-2021-top-defensive-actions-per-100-opposition-passes-in-that-third.png"> &nbsp &nbsp 
-  <img width="32%" src="./data_directory/misc_data/images/europe5-top-pen-takers-2019-2022.png">
+  <img width="25%" src="./data_directory/misc_data/images/example-5-1-1.png"> &nbsp &nbsp
+  <img width="25%" src="./data_directory/misc_data/images/example-5-1-2.png"> 
+</p>
+
+</details>
+
+<details>
+<summary><b>5.2 - Top Players throughout Competition - Forward Pressing</b></summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [05_competition_reports_top_players_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players_opta)
+
+**Code:** [player_defensive_contribution.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_defensive_contribution.py)
+
+**Summary and Output:** 
+Assessment of the number of defensive actions completed in the opposition third by all players' over the duration of a competition, giving an indication at who has a tendency to defend from the front.
+
+<p align="center">
+  <img width="37%" src="./data_directory/misc_data/images/example-5-2-1.png"> &nbsp &nbsp
+  <img width="37%" src="./data_directory/misc_data/images/example-5-2-2.png"> 
+</p>
+
+</details>
+
+<details>
+<summary><b>5.3 - Top Players throughout Competition - Effective Passers</b></summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [05_competition_reports_top_players_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players_opta)
+
+**Code:** [player_effective_passers.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_effective_passers.pyy)
+
+**Summary and Output:** 
+Identification of effective passers through assessment of all in-play passes completed over the duration of a competition. Metrics such as progressive passes, cumulative expected threat and passes into opposition box per 90 are used to identify top players. This work involves the implementation of an [expected threat model](https://karun.in/blog/data/open_xt_12x8_v1.json) developed by Karun Singh.
+
+<p align="center">
+  <img width="37%" src="./data_directory/misc_data/images/example-5-3-1.png"> &nbsp &nbsp
+  <img width="22.5%" src="./data_directory/misc_data/images/example-5-3-3.png">
 </p>
 <p align="center">
-  <img width="24%" src="./data_directory/misc_data/images/EPL-2022-defensive-contributions-player-variant.png"> &nbsp &nbsp 
-  <img width="24%" src="./data_directory/misc_data/images/EPL-2022-opposition-half-passers-player-variant.png">
+  <img width="37%" src="./data_directory/misc_data/images/example-5-3-2.png"> &nbsp &nbsp
 </p>
+
+</details>
