@@ -122,11 +122,11 @@ Projects are numbered based on the numerical identifier of the project folder ar
 **Summary and Output:** An investigation of the most effective box to box midfielders at the 2018 World Cup. A number of custom metrics are used to score central midfielders in ball winning, ball retention & creativity, and mobility. A good box to box midfielder is defined as a central midfielder that excels in each of these areas.
 
 <p align="center">
-  <img width="40%" src="./data_directory/misc_data/images/example-1-1-1.png"> &nbsp &nbsp 
-  <img width="40%" src="./data_directory/misc_data/images/example-1-1-2.png">
+  <img width="45%" src="./data_directory/misc_data/images/example-1-1-1.png"> &nbsp &nbsp 
+  <img width="45%" src="./data_directory/misc_data/images/example-1-1-2.png">
 </p>
 <p align="center">
-  <img width="40%" src="./data_directory/misc_data/images/example-1-1-3.png">
+  <img width="45%" src="./data_directory/misc_data/images/example-1-1-3.png">
 </p>
 
 </details>
@@ -282,8 +282,8 @@ Design and development of an algorithm to calculate player territories based on 
 Assessment of all players' defensive contribution over the duration of a competition, with identification of top players by metrics such as Recoveries and Ball Wins per 100 opposition touches. Work includes implentation of a diamond scatter diagram that can be re-used for any 2D scatter plot.
 
 <p align="center">
-  <img width="25%" src="./data_directory/misc_data/images/example-5-1-1.png"> &nbsp &nbsp
-  <img width="25%" src="./data_directory/misc_data/images/example-5-1-2.png"> 
+  <img width="27.3%" src="./data_directory/misc_data/images/example-5-1-1.png"> &nbsp &nbsp
+  <img width="27.3%" src="./data_directory/misc_data/images/example-5-1-2.png"> 
 </p>
 
 </details>
@@ -302,8 +302,8 @@ Assessment of all players' defensive contribution over the duration of a competi
 Assessment of the number of defensive actions completed in the opposition third by all players' over the duration of a competition, giving an indication at who has a tendency to defend from the front.
 
 <p align="center">
-  <img width="37%" src="./data_directory/misc_data/images/example-5-2-1.png"> &nbsp &nbsp
-  <img width="37%" src="./data_directory/misc_data/images/example-5-2-2.png"> 
+  <img width="45%" src="./data_directory/misc_data/images/example-5-2-1.png"> &nbsp &nbsp
+  <img width="45%" src="./data_directory/misc_data/images/example-5-2-2.png"> 
 </p>
 
 </details>
@@ -322,11 +322,11 @@ Assessment of the number of defensive actions completed in the opposition third 
 Identification of effective passers through assessment of all in-play passes completed over the duration of a competition. Metrics such as progressive passes, cumulative expected threat and passes into opposition box per 90 are used to identify top players. This work involves the implementation of an [expected threat model](https://karun.in/blog/data/open_xt_12x8_v1.json) developed by Karun Singh.
 
 <p align="center">
-  <img width="37%" src="./data_directory/misc_data/images/example-5-3-1.png"> &nbsp &nbsp
-  <img width="22.5%" src="./data_directory/misc_data/images/example-5-3-3.png">
+  <img width="45%" src="./data_directory/misc_data/images/example-5-3-1.png"> &nbsp &nbsp
+  <img width="27.3%" src="./data_directory/misc_data/images/example-5-3-3.png">
 </p>
 <p align="center">
-  <img width="37%" src="./data_directory/misc_data/images/example-5-3-2.png"> &nbsp &nbsp
+  <img width="45%" src="./data_directory/misc_data/images/example-5-3-2.png"> &nbsp &nbsp
 </p>
 
 </details>
@@ -345,7 +345,8 @@ Identification of effective passers through assessment of all in-play passes com
 Identification of effective carriers through assessment of carries completed over the duration of a competition. This work involves the development of a module to infer carry events from opta event data (as carries are not recorded).
 
 <p align="center">
-  <img width="37%" src="./data_directory/misc_data/images/example-5-4-1.png">
+  <img width="45%" src="./data_directory/misc_data/images/example-5-4-1.png"> &nbsp &nbsp
+  <img width="45%" src="./data_directory/misc_data/images/example-5-4-2.png">
 </p>
 
 </details>
@@ -364,7 +365,8 @@ Identification of effective carriers through assessment of carries completed ove
 Identification of top threat creators through assessment of various events/actions completed over the duration of a competition. This work involves the implementation of an [expected threat model](https://karun.in/blog/data/open_xt_12x8_v1.json) developed by Karun Singh.
 
 <p align="center">
-  <img width="22.5%" src="./data_directory/misc_data/images/example-5-4-2.png">
+  <img width="27.3%" src="./data_directory/misc_data/images/example-5-5-1.png"> &nbsp &nbsp
+  <img width="27.3%" src="./data_directory/misc_data/images/example-5-5-2.png">
 </p>
 
 </details>
@@ -383,7 +385,8 @@ Identification of top threat creators through assessment of various events/actio
 Identification of top penalty takers across multiple competitions. Penalty quality is assessed my mean distance of on-target penalty from goalkeeper midriff, with off-target penalties assigned a distance of zero. This work includes implementation of "3D projections" within 2D subplots.
 
 <p align="center">
-  <img width="37%" src="./data_directory/misc_data/images/example-5-5-1.png">
+  <img width="45%" src="./data_directory/misc_data/images/example-5-6-1.png"> &nbsp &nbsp
+  <img width="45%" src="./data_directory/misc_data/images/example-5-6-2.png">
 </p>
 
 </details>
@@ -404,7 +407,8 @@ Identification of top penalty takers across multiple competitions. Penalty quali
 Ranking of teams by total threat created through in-play passes and carries per 90, including identification of the zones in which each team generates threat.
 
 <p align="center">
-  <img width="37%" src="./data_directory/misc_data/images/example-6-1-1.png">
+  <img width="37%" src="./data_directory/misc_data/images/example-6-1-1.png"> &nbsp &nbsp
+  <img width="37%" src="./data_directory/misc_data/images/example-6-1-2.png">
 </p>
 
 </details>
@@ -423,11 +427,69 @@ Ranking of teams by total threat created through in-play passes and carries per 
 Ranking of teams by the mean height up the pitch that they win the ball back, including identification of the zones in which they gain possession of the ball from the opposition.
 
 <p align="center">
-  <img width="37%" src="./data_directory/misc_data/images/example-6-2-1.png">
+  <img width="37%" src="./data_directory/misc_data/images/example-6-2-1.png"> &nbsp &nbsp
+  <img width="37%" src="./data_directory/misc_data/images/example-6-2-2.png">
 </p>
+  
+</details>
 
+<details>
+<summary>6.3 - Effective Crossing Teams</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [06_competition_reports_top_teams_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams_opta)
+
+**Code:** [team_cross_success.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams_opta/team_cross_success.py)
+
+**Summary and Output:** 
+Ranking of teams by in-play cross success rate. This work includes a custom definition of an effective (or successful) cross, where an effective cross is one that is followed by either a shot or key pass within 5 seconds of play (irrespective of the inital cross outcome).
+
+<p align="center">
+  <img width="37%" src="./data_directory/misc_data/images/example-6-3-1.png">
+</p>
+  
+</details>
+
+<details>
+<summary>6.4 - Full-back Combinations</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [06_competition_reports_top_teams_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams_opta)
+
+**Code:** [team_fullback_combinations.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams_opta/team_fullback_combinations.py)
+
+**Summary and Output:** 
+Ranking of teams by the frequency in which their full backs combine. Passes between full-backs of each team are identified and highlighted based on whether the pass leads to a shot on goal.
+  
+<p align="center">
+  <img width="37%" src="./data_directory/misc_data/images/example-6-4-1.png">
+</p>
+  
 </details>
 
 ### 7 - Automated Player Reports
 
+<details>
+<summary>7.1 - Full-back Reports</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [07_player_reports_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/07_player_reports_opta)
+
+**Code:** [player_report_fullback.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/07_player_reports_opta/player_report_fullback.py)
+
+**Summary and Output:** 
+Player report specific to full-backs, including development of a flexible/robust mechanism to compare the report subject to similar players, and then rank the set of players against all full-backs within a chosen league.
+  
+<p align="center">
+  <img width="45%" src="./data_directory/misc_data/images/example-7-1-1.png"> &nbsp &nbsp
+  <img width="45%" src="./data_directory/misc_data/images/example-7-1-2.png">
+</p>
+  
+</details>
 
