@@ -45,16 +45,11 @@ import analysis_tools.logos_and_badges as lab
 
 # %% User inputs
 
-# Input WhoScored range of match id
-match_id_start = 1640674
-match_id_end = 1640833
-match_ids = np.arange(match_id_start, match_id_end+1)
-
 # Select year
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'EFLC'
 
 # Select position to exclude
 pos_exclude=[]
@@ -63,48 +58,49 @@ pos_exclude=[]
 pos_input = ''
 
 # Input run-date
-run_date = '17/11/2022'
+run_date = '12/02/2023'
 
 # Normalisation (None, '_90', '_100opp_pass')
 norm_mode = '_100opp_pass'
 #norm_mode = '_90'
 
 # Min minutes played
-min_mins = 450
+min_mins = 900
+
+# Brighten logo
+logo_brighten = False
 
 # %% League logo
 
-comp_logo = lab.get_competition_logo(league) 
-enhancer = ImageEnhance.Brightness(comp_logo)
-comp_logo = enhancer.enhance(100)
-    
-# %% Read in data
+comp_logo = lab.get_competition_logo(league, year=year, logo_brighten=logo_brighten)     
 
-# Opta data
+# %% Get data
+
+file_path = f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}"
+files = os.listdir(file_path)
+
+# Initialise storage dataframes
 events_df = pd.DataFrame()
 players_df = pd.DataFrame()
-for match_id in match_ids:
-    match_event_path = f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/match-eventdata-{match_id}-*.pbz2"
-    match_players_path = f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/match-playerdata-{match_id}-*.pbz2"
-    try:
-        match_events = bz2.BZ2File(glob.glob(match_event_path)[0], 'rb')
-        match_events = pickle.load(match_events)
-    except:
-        match_events = pd.DataFrame()
-    try:
-        match_players = bz2.BZ2File(glob.glob(match_players_path)[0], 'rb')
-        match_players = pickle.load(match_players)
-    except:
-        match_players = pd.DataFrame()
-    try:
-        events_df = pd.concat([events_df, match_events])
-        players_df = pd.concat([players_df, match_players])
-    except IndexError:
-        events_df = match_events
-        players_df = match_players
 
-event_types = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/event-types.pbz2", 'rb')
-event_types = pickle.load(event_types)
+# Load data
+for file in files:
+    if file == 'event-types.pbz2':
+        event_types = bz2.BZ2File(f"{file_path}/{file}", 'rb')
+        event_types = pickle.load(event_types)
+    elif file == 'formation-mapping.pbz2':
+        formation_mapping = bz2.BZ2File(f"{file_path}/{file}", 'rb')
+        formation_mapping = pickle.load(formation_mapping)
+    elif '-eventdata-' in file:
+        match_events = bz2.BZ2File(f"{file_path}/{file}", 'rb')
+        match_events = pickle.load(match_events)
+        events_df = pd.concat([events_df, match_events])
+    elif '-playerdata-' in file:
+        match_players = bz2.BZ2File(f"{file_path}/{file}", 'rb')
+        match_players = pickle.load(match_players)
+        players_df = pd.concat([players_df, match_players])
+    else:
+        pass
 
 # %% Pre-process data
 
@@ -117,11 +113,12 @@ players_df = wde.minutes_played(players_df, events_df)
 # Calculate longest consistent xi
 players_df = wde.longest_xi(players_df)
 
+# Calculate opposition half pass events that each player faces per game
+players_df =  wde.events_while_playing(events_df[events_df['x']<= 34], players_df, event_name = 'Pass', event_team = 'opposition')#['opp_pass']
+players_df['oppthird_opp_pass'] = players_df['opp_pass']
+
 # Calculate pass events that each player faces per game
 players_df = wde.events_while_playing(events_df, players_df, event_name = 'Pass', event_team = 'opposition')
-
-# Calculate opposition half pass events that each player faces per game
-players_df['oppthird_opp_pass'] = wde.events_while_playing(events_df[events_df['x']<= 34], players_df, event_name = 'Pass', event_team = 'opposition')['opp_pass']
 
 # %% Aggregate data per player
 
@@ -230,15 +227,13 @@ leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesl
            'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship'}
 
 title_text = f"{leagues[league]} {year}/{int(year) + 1} - Top 12 {title_pos_str} by Tendency to Defend from the Front"
-subtitle_text = f"Players ranked by total number of defensive actions in opposition third, {title_addition}"
-subsubtitle_text = "Heatmaps of defensive actions, including ball recoveries, blocks, clearances, interceptions and tackles shown"
-subsubsubtitle_text = f"Correct as of {run_date}.\nPlayers with less than {min_mins}\nmins play-time omitted."
+subtitle_text = f"Heatmaps of defensive actions shown. Players ranked by total number of defensive actions in opposition third, {title_addition}"
+subsubtitle_text = f"Ball recoveries, blocks, clearances, interceptions and tackles included. Correct as of {run_date}. Players with less than {min_mins} mins play-time omitted."
 
 # Title
 fig.text(0.1, 0.945, title_text, fontweight="bold", fontsize=15, color='w')
-fig.text(0.1, 0.915, subtitle_text, fontweight="regular", fontsize=13, color='w')
-fig.text(0.1, 0.8875, subsubtitle_text, fontweight="regular", fontsize=10, color='w')
-fig.text(0.847, 0.902, subsubsubtitle_text, fontweight="regular", fontsize=9, color='w')
+fig.text(0.1, 0.92, subtitle_text, fontweight="regular", fontsize=13, color='w')
+fig.text(0.1, 0.8975, subsubtitle_text, fontweight="regular", fontsize=10, color='w')
 
 # Add direction of play arrow
 ax = fig.add_axes([0.042, 0.05, 0.18, 0.01])

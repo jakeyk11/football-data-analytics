@@ -39,17 +39,20 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'EFLC'
 
 # Input run-date
-run_date = '06/02/2023'
+run_date = '12/02/2023'
 
 # Select whether to label %
 label_pct = False
 
+# Logo brighten
+logo_brighten = False
+
 # %% Get competition logo
 
-comp_logo = lab.get_competition_logo(league, year, logo_brighten=True) 
+comp_logo = lab.get_competition_logo(league, year, logo_brighten=logo_brighten) 
 
 # %% Get data
 
@@ -123,16 +126,23 @@ team_xt_90 = sorted(team_xt_90.items(), key=lambda x: x[1], reverse=True)
 mpl.rcParams['xtick.color'] = 'w'
 mpl.rcParams['ytick.color'] = 'w'
 
+# Path effects
+path_eff = [path_effects.Stroke(linewidth=4, foreground='#313332'), path_effects.Normal()]
+
+# Define grid dimensions
+ncols = 4
+nrows = int(np.ceil(len(team_xt_90)/ncols))
+
 # Set-up pitch subplots
 pitch = Pitch(pitch_color='#313332', pitch_type='opta', line_color='white', linewidth=1, stripe=False)
-fig, ax = pitch.grid(nrows=5, ncols=4, grid_height=0.8, title_height = 0.13, endnote_height = 0.04, space=0.12, axis=False)
+fig, ax = pitch.grid(nrows=nrows, ncols=ncols, grid_height=0.8, title_height = 0.13, endnote_height = 0.04, space=0.12, axis=False)
 fig.set_size_inches(14, 15)
 fig.set_facecolor('#313332')
 ax['pitch'] = ax['pitch'].reshape(-1)
 idx = 0
 
 # Loop through each team
-for team in team_xt_90[0:20]:
+for team in team_xt_90:
     
     # Get team name and events
     team_name = team[0]
@@ -154,15 +164,15 @@ for team in team_xt_90[0:20]:
                                      ax=ax['pitch'][idx], ha='center', va='center', str_format='{:.0%}', path_effects=path_eff)
     
     # Label xt
-    ax['pitch'][idx].text(2, 2, "xT/90:", fontsize=10, fontweight='bold', color='#313332', zorder=3)
-    ax['pitch'][idx].text(20, 2, round(team[1],2), fontsize=10, color='#313332', zorder=3) 
+    ax['pitch'][idx].text(2, 2, "xT/90:", fontsize=10, fontweight='bold', color='w', zorder=3, path_effects = path_eff)
+    ax['pitch'][idx].text(24, 2, round(team[1],2), fontsize=10, color='w', zorder=3, path_effects = path_eff)
     
     # Set title
     ax['pitch'][idx].set_title(f"  {idx + 1}:  {team[0]}", loc = "left", color='w', fontsize = 16)
             
     ax_pos = ax['pitch'][idx].get_position()
     
-    logo_ax = fig.add_axes([ax_pos.x1-0.025, ax_pos.y1, 0.025, 0.025])
+    logo_ax = fig.add_axes([ax_pos.x1-0.02, ax_pos.y1, 0.02, 0.02])
     logo_ax.axis("off")
     logo_ax.imshow(team_logo)
     
@@ -178,7 +188,7 @@ subsubtitle_text = f"Pass, Carry and Dribble events included. Negative threat ev
 
 fig.text(0.12, 0.945, title_text, fontweight="bold", fontsize=20, color='w')
 htext.fig_text(0.12, 0.934, s=subtitle_text, fontweight="bold", fontsize=18, color='w',
-               highlight_textprops=[{"color": 'yellow', "fontweight": 'bold'}, {"color": 'grey', "fontweight": 'bold'}])
+               highlight_textprops=[{"color": 'orange', "fontweight": 'bold'}, {"color": 'grey', "fontweight": 'bold'}])
 fig.text(0.12, 0.9, subsubtitle_text, fontweight="regular", fontsize=16, color='w')
     
 # Add direction of play arrow

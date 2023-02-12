@@ -38,7 +38,7 @@ from PIL import ImageEnhance
 
 # League code, year and full name
 league_code = 'GB2'
-league_year = '2021'
+league_year = '2022'
 league = "EFL Championship"
 
 # CSV file name corresponding to chosen league

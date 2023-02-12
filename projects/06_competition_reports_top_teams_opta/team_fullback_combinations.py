@@ -100,7 +100,6 @@ players_df_test = wde.minutes_played(players_df, events_df)
 events_df = wde.cumulative_match_mins(events_df)
 
 # xThreat
-
 events_df = wce.get_xthreat(events_df, interpolate = True)
 
 # %% Create dictionary of teams, and store full back pass combinations against each team

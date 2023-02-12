@@ -42,16 +42,16 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'EFLC'
 
 # Input run-date
-run_date = '26/01/2023'
+run_date = '12/02/2023'
 
 # Select whether to label %
 label_pct = False
 
 # Select whether to brighten logo
-logo_brighten = True
+logo_brighten = False
 
 # %% Get competition logo
 
@@ -125,16 +125,20 @@ team_ball_win_height = sorted(team_ball_win_height.items(), key=lambda x: x[1], 
 mpl.rcParams['xtick.color'] = 'w'
 mpl.rcParams['ytick.color'] = 'w'
 
+# Define grid dimensions
+ncols = 4
+nrows = int(np.ceil(len(team_ball_win_height)/ncols))  
+
 # Set-up pitch subplots
 pitch = Pitch(pitch_color='#313332', pitch_type='opta', line_color='white', linewidth=1, stripe=False)
-fig, ax = pitch.grid(nrows=5, ncols=4, grid_height=0.8, title_height = 0.13, endnote_height = 0.04, space=0.12, axis=False)
+fig, ax = pitch.grid(nrows=nrows, ncols=ncols, grid_height=0.8, title_height = 0.13, endnote_height = 0.04, space=0.12, axis=False)
 fig.set_size_inches(14, 15)
 fig.set_facecolor('#313332')
 ax['pitch'] = ax['pitch'].reshape(-1)
 idx = 0
 
 # Loop through each team
-for team in team_ball_win_height[0:20]:
+for team in team_ball_win_height:
     
     # Get team name and events
     team_name = team[0]
@@ -165,7 +169,7 @@ for team in team_ball_win_height[0:20]:
     
     # Add team logo
     ax_pos = ax['pitch'][idx].get_position()    
-    logo_ax = fig.add_axes([ax_pos.x1-0.025, ax_pos.y1, 0.025, 0.025])
+    logo_ax = fig.add_axes([ax_pos.x1-0.02, ax_pos.y1, 0.02, 0.02])
     logo_ax.axis("off")
     logo_ax.imshow(team_logo)
     

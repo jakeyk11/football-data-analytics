@@ -50,7 +50,7 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'EFLC'
 
 # Select position to exclude
 pos_exclude=['GK']
@@ -59,25 +59,20 @@ pos_exclude=['GK']
 pos_input = 'outfield players'
 
 # Input run-date
-run_date = '28/12/2022'
+run_date = '12/02/2023'
 
 # Normalisation (None, '_90', '_100pass', '_100teampass')
-norm_mode = None
+norm_mode = '_90'
 
 # Min minutes played (only used if normalising)
-min_mins = 450
+min_mins = 900
 
 # Brighten logo
-logo_brighten = True
+logo_brighten = False
 
 # %% League logo and league naming
 
-if logo_brighten:
-    comp_logo = lab.get_competition_logo(league, year)
-    enhancer = ImageEnhance.Brightness(comp_logo)
-    comp_logo = enhancer.enhance(100)
-else:
-    comp_logo = lab.get_competition_logo(league, year)
+comp_logo = lab.get_competition_logo(league, year, logo_brighten)
     
 # Create title and subtitles
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
@@ -320,7 +315,7 @@ mpl.rcParams['text.color'] = 'w'
 # %% ------- VISUAL 1 - DIAMOND PLOT X VS Y METRIC -------
 
 # Plotting metrics
-left_metric = 'box_passes_90'
+left_metric = 'suc_box_passes_90'
 right_metric = 'opphalf_prog_passes_90'
 left_ax_plot = playerinfo_df[left_metric]
 right_ax_plot = playerinfo_df[right_metric]
@@ -423,7 +418,7 @@ path_eff = [path_effects.Stroke(linewidth=1.5, foreground='#313332'), path_effec
 for i, player in plot_player.iterrows():
     format_name =  player['name'].split(' ')[0][0] + " " + player['name'].split(' ')[len(player['name'].split(' '))-1] if len(player['name'].split(' '))>1 else player['name']
     text.append(aux_ax.text(right_ax_norm_plot[i]+0.01, left_ax_norm_plot[i], format_name, color='w', fontsize=7, zorder=3, path_effects = path_eff))
-adjustText.adjust_text(text, ax = ax)
+adjustText.adjust_text(text, ax = aux_ax)
 
 # Add axis shading
 aux_ax.fill([right_ax_quantile[0], right_ax_quantile[0], right_ax_quantile[2], right_ax_quantile[2]], [0, 100, 100, 0], color='grey', alpha = 0.15, zorder=0)

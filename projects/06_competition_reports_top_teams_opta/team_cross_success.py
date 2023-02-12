@@ -42,16 +42,16 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'EFLC'
 
 # Input run-date
-run_date = '31/01/2023'
+run_date = '12/02/2023'
 
 # Select whether to label %
 label_pct = False
 
 # Select whether to brighten logo
-logo_brighten = True
+logo_brighten = False
 
 # %% Get competition logo
 
@@ -147,9 +147,13 @@ team_effective_cross = sorted(team_effective_cross.items(), key=lambda x: x[1], 
 mpl.rcParams['xtick.color'] = 'w'
 mpl.rcParams['ytick.color'] = 'w'
 
+# Define grid dimensions
+ncols = 5
+nrows = int(np.ceil(len(team_effective_cross)/ncols))
+
 # Set-up pitch subplots
 pitch = VerticalPitch(pitch_color='#313332', pitch_type='opta', line_color='white', linewidth=1, half=True, stripe=False)
-fig, ax = pitch.grid(nrows=4, ncols=5, grid_height=0.79, title_height = 0.15, endnote_height = 0.04, space=0.1, axis=False)
+fig, ax = pitch.grid(nrows=nrows, ncols=ncols, grid_height=0.79, title_height = 0.15, endnote_height = 0.04, space=0.1, axis=False)
 fig.set_size_inches(12, 9.5)
 fig.set_facecolor('#313332')
 ax['pitch'] = ax['pitch'].reshape(-1)
@@ -162,7 +166,7 @@ assist_col = 'yellow'
 
 
 # Plot crosses for each team
-for team in team_effective_cross[0:20]:
+for team in team_effective_cross:
     
     # Get team name and events
     team_name = team[0]
@@ -239,9 +243,9 @@ for team in team_effective_cross[0:20]:
         
     # Add axis text
     ax['pitch'][idx].text(98, 56, "Crosses:", color = "w", fontsize = 6, fontweight = "bold", va = "center")
-    ax['pitch'][idx].text(73, 56, len(team_crosses), color = "w", fontsize = 6, va = "center")    
+    ax['pitch'][idx].text(68, 56, len(team_crosses), color = "w", fontsize = 6, va = "center")    
     ax['pitch'][idx].text(98, 52, "Effective:", color = "w", fontsize = 6, fontweight = "bold", va = "center")
-    ax['pitch'][idx].text(73, 52, len(team_key_crosses) + len(team_goal_crosses), color = "w", fontsize = 6, va = "center")  
+    ax['pitch'][idx].text(68, 52, len(team_key_crosses) + len(team_goal_crosses), color = "w", fontsize = 6, va = "center")  
     ax['pitch'][idx].text(2, 54, str(round(100*(len(team_key_crosses)+len(team_goal_crosses))/len(team_crosses),1)) + "%", color = "w", fontsize = 12, ha = "right", va = "center")  
     
     # Add team rank and title

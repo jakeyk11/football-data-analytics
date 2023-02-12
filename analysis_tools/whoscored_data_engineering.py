@@ -314,6 +314,7 @@ def create_player_list(lineups, additional_cols=None):
     # Resolve data integrity issues
     lineups.loc[lineups['name'] == 'Vitalii Mykolenko', 'name'] = 'Vitaliy Mykolenko'
     lineups.loc[lineups['name'] == 'Alexander Iwobi', 'name'] = 'Alex Iwobi'
+    lineups.loc[lineups['name'] == 'Robert Brady', 'name'] = 'Robbie Brady'
 
     # Dataframe of player names and team
     playerinfo_df = lineups[['name', 'position', 'team']].drop_duplicates()

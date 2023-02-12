@@ -44,16 +44,11 @@ import analysis_tools.logos_and_badges as lab
 
 # %% User inputs
 
-# Input WhoScored range of match id
-match_id_start = 1640674
-match_id_end = 1640833
-match_ids = np.arange(match_id_start, match_id_end+1)
-
 # Select year
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'EFLC'
 
 # Select position to exclude
 pos_exclude=['GK']
@@ -62,48 +57,50 @@ pos_exclude=['GK']
 pos_input = ''
 
 # Input run-date
-run_date = '17/11/2022'
+run_date = '12/12/2023'
 
 # Normalisation (None, '_90', '_100opp_pass')
 norm_mode = '_100opp_pass'
 #norm_mode = '_90'
 
 # Min minutes played
-min_mins = 450
+min_mins = 900
+
+# Brighten logo
+logo_brighten = False
 
 # %% League logo
 
-comp_logo = lab.get_competition_logo(league)
-enhancer = ImageEnhance.Brightness(comp_logo)
-comp_logo = enhancer.enhance(100)
+comp_logo = lab.get_competition_logo(league, year=year, logo_brighten=logo_brighten)     
 
-# %% Read in data
+# %% Get data
 
-# Opta data
+file_path = f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}"
+files = os.listdir(file_path)
+
+# Initialise storage dataframes
 events_df = pd.DataFrame()
 players_df = pd.DataFrame()
-for match_id in match_ids:
-    match_event_path = f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/match-eventdata-{match_id}-*.pbz2"
-    match_players_path = f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/match-playerdata-{match_id}-*.pbz2"
-    try:
-        match_events = bz2.BZ2File(glob.glob(match_event_path)[0], 'rb')
+
+# Load data
+for file in files:
+    if file == 'event-types.pbz2':
+        event_types = bz2.BZ2File(f"{file_path}/{file}", 'rb')
+        event_types = pickle.load(event_types)
+    elif file == 'formation-mapping.pbz2':
+        formation_mapping = bz2.BZ2File(f"{file_path}/{file}", 'rb')
+        formation_mapping = pickle.load(formation_mapping)
+    elif '-eventdata-' in file:
+        match_events = bz2.BZ2File(f"{file_path}/{file}", 'rb')
         match_events = pickle.load(match_events)
-    except:
-        match_events = pd.DataFrame()
-    try:
-        match_players = bz2.BZ2File(glob.glob(match_players_path)[0], 'rb')
-        match_players = pickle.load(match_players)
-    except:
-        match_players = pd.DataFrame()
-    try:
         events_df = pd.concat([events_df, match_events])
+    elif '-playerdata-' in file:
+        match_players = bz2.BZ2File(f"{file_path}/{file}", 'rb')
+        match_players = pickle.load(match_players)
         players_df = pd.concat([players_df, match_players])
-    except IndexError:
-        events_df = match_events
-        players_df = match_players
-    
-event_types = bz2.BZ2File(f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}/event-types.pbz2", 'rb')
-event_types = pickle.load(event_types)
+    else:
+        pass
+
 
 # %% Pre-process data
 
@@ -179,10 +176,13 @@ right_ax_plot.replace(np.nan, 0, inplace=True)
 left_ax_norm_plot = 0.99 * left_ax_plot / max(left_ax_plot)
 right_ax_norm_plot = 0.99 * right_ax_plot / max(right_ax_plot)
 
-left_ax_quantile = left_ax_norm_plot.quantile([0.05,0.5,0.9]).tolist()
-right_ax_quantile = right_ax_norm_plot.quantile([0.05,0.5,0.9]).tolist()
+left_ax_quantile = left_ax_norm_plot.quantile([0.2,0.5,0.8]).tolist()
+right_ax_quantile = right_ax_norm_plot.quantile([0.2,0.5,0.8]).tolist()
 
-plot_player = playerinfo_df[(left_ax_norm_plot>left_ax_quantile[2]) | (right_ax_norm_plot>right_ax_quantile[2])] #| ((left_ax_norm_plot<left_ax_quantile[0]) | (right_ax_norm_plot<right_ax_quantile[0]))]
+plot_quantile_left = left_ax_norm_plot.quantile([0,0.5,0.9]).tolist()
+plot_quantile_right = right_ax_norm_plot.quantile([0,0.5,0.9]).tolist()
+
+plot_player = playerinfo_df[(left_ax_norm_plot>plot_quantile_left[2]) | (right_ax_norm_plot>plot_quantile_right[2])] #| ((left_ax_norm_plot<plot_quantile_left[0]) | (right_ax_norm_plot<plot_quantile_right[0]))]
 
 # %% Add custom player identification / data point selection if desired
 
@@ -281,7 +281,7 @@ path_eff = [path_effects.Stroke(linewidth=1.5, foreground='#313332'), path_effec
 for i, player in plot_player.iterrows():
     format_name =  player['name'].split(' ')[0][0] + " " + player['name'].split(' ')[len(player['name'].split(' '))-1] if len(player['name'].split(' '))>1 else player['name']
     text.append(aux_ax.text(right_ax_norm_plot[i]+0.01, left_ax_norm_plot[i]+0.01, format_name, color='w', fontsize=7, zorder=3, path_effects = path_eff))
-adjustText.adjust_text(text, ax = ax)
+adjustText.adjust_text(text, ax = aux_ax)
 
 # Add axis shading
 aux_ax.fill([right_ax_quantile[0], right_ax_quantile[0], right_ax_quantile[2], right_ax_quantile[2]], [0, 100, 100, 0], color='grey', alpha = 0.15, zorder=0)

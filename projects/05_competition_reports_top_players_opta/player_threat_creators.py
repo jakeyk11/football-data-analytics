@@ -49,7 +49,7 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'EFLC'
 
 # Select position to exclude
 pos_exclude=['GK']
@@ -58,16 +58,16 @@ pos_exclude=['GK']
 pos_input = 'outfield players'
 
 # Input run-date
-run_date = '30/12/2022'
+run_date = '12/02/2022'
 
 # Normalisation mode
 norm_mode = '_90'
 
 # Min minutes played (only used if normalising)
-min_mins = 450
+min_mins = 900
 
 # Brighten logo
-logo_brighten = True
+logo_brighten = False
 
 # %% League logo and league naming
 
@@ -181,9 +181,9 @@ right_ax_quantile = right_ax_norm_plot.quantile([0.2,0.5,0.8]).tolist()
 
 plot_quantile_left = left_ax_norm_plot.quantile([0,0.5,0.9]).tolist()
 plot_quantile_right = right_ax_norm_plot.quantile([0,0.5,0.9]).tolist()
-plot_player = playerinfo_df#[(left_ax_norm_plot>plot_quantile_left[2]) | (right_ax_norm_plot>plot_quantile_right[2])]
+plot_player = playerinfo_df[(left_ax_norm_plot>plot_quantile_left[2]) | (right_ax_norm_plot>plot_quantile_right[2])]
 
-plot_player = playerinfo_df[playerinfo_df['team']=='Man Utd']
+#plot_player = playerinfo_df[playerinfo_df['team']=='Man Utd']
 
 # Set-up figure
 fig = plt.figure(figsize = (8.5,9), facecolor = '#313332')

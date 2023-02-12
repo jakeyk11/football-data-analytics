@@ -49,7 +49,7 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'EFLC'
 
 # Select position to exclude
 pos_exclude=['GK']
@@ -58,25 +58,20 @@ pos_exclude=['GK']
 pos_input = 'outfield players'
 
 # Input run-date
-run_date = '27/12/2022'
+run_date = '09/02/2023'
 
 # Normalisation mode
 norm_mode = '_90'
 
 # Min minutes played (only used if normalising)
-min_mins = 350
+min_mins = 900
 
 # Brighten logo
-logo_brighten = True
+logo_brighten = False
 
 # %% League logo and league naming
 
-if logo_brighten:
-    comp_logo = lab.get_competition_logo(league, year)
-    enhancer = ImageEnhance.Brightness(comp_logo)
-    comp_logo = enhancer.enhance(100)
-else:
-    comp_logo = lab.get_competition_logo(league, year)
+comp_logo = lab.get_competition_logo(league, year, logo_brighten)
     
 # Create title and subtitles
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',

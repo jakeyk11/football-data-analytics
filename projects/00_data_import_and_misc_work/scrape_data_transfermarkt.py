@@ -18,10 +18,10 @@ import analysis_tools.get_football_data as gfd
 country_code = 'GB'
 
 # Input league number (for example Premier League = 1, Championship = 2, League One = 3, etc.)
-division_num = '1'
+division_num = '2'
 
 # Input year that season started
-start_year = '2021'
+start_year = '2022'
 
 # Choose whether to obtains stats from all competitions (False = League comp. only, True = All comps.)
 all_comps = False

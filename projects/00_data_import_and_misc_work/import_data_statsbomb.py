@@ -26,8 +26,8 @@ available_matches = sb.matches(competition_id=3, season_id=108, creds = {"user":
 # %% User inputs
 
 # Input competition name (Statsbomb convention)
-nation = 'Scotland'
-competition = 'Premier League'
+nation = 'England'
+competition = 'Championship'
 
 # Input competition year(s)
 year = '2022/2023'

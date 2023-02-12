@@ -77,8 +77,6 @@ def get_competition_logo(competition, year=None, logo_brighten=False):
     if logo_brighten:
         enhancer = ImageEnhance.Brightness(result)
         result = enhancer.enhance(100)
-    else:
-        comp_logo = lab.get_competition_logo(league, year)
 
     return result
 
@@ -136,12 +134,15 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Birmingham', 'Birmingham FC', 'Birmingham City', 'Birmingham City FC']:
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/6/68/Birmingham_City_FC_logo.svg/302px-Birmingham_City_FC_logo.svg.png"
+        cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Blackburn', 'Blackburn Rovers', 'Blackburn FC', 'Blackburn Rovers FC']:
         url = "https://seeklogo.com/images/B/blackburn-rovers-logo-410B37A022-seeklogo.com.png"
+        cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Blackpool', 'Blackpool FC']:
         url = "https://seeklogo.com/images/B/blackpool-fc-logo-9897552227-seeklogo.com.png"
+        cmap = cm.get_cmap('YlOrBr') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Bournemouth', 'AFC Bournemouth']:
         url = "https://1000logos.net/wp-content/uploads/2018/06/AFC-Bournemouth-Logo-768x432.png"
@@ -164,7 +165,8 @@ def get_team_badge_and_colour(team, hoa='home'):
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('gray')
 
     if team in ['Burnley FC', 'Burnley']:
-        url = "https://upload.wikimedia.org/wikipedia/en/thumb/6/62/Burnley_F.C._Logo.svg/225px-Burnley_F.C._Logo.svg.png"
+        url = "https://1000logos.net/wp-content/uploads/2018/06/Burnley-logo-768x432.png"
+        cmap = cm.get_cmap('BuPu') if hoa == 'home' else cm.get_cmap('Blues')
 
     if team in ['Cadiz', 'Cadiz CF', 'Cádiz CF', 'Cádiz']:
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/5/58/C%C3%A1diz_CF_logo.svg/180px-C%C3%A1diz_CF_logo.svg.png"
@@ -178,7 +180,8 @@ def get_team_badge_and_colour(team, hoa='home'):
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Cardiff City', 'Cardiff', 'Cardiff FC', 'Cardiff City FC']:
-        url = "https://upload.wikimedia.org/wikipedia/en/thumb/3/3c/Cardiff_City_crest.svg/800px-Cardiff_City_crest.svg.png"
+        url = "https://cdn.cardiffcityfc.co.uk/icons/team/dark/1x/id/594.png"
+        cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('RdPu')
 
     if team in ['Chelsea', 'Chelsea FC']:
         url = "https://logos-world.net/wp-content/uploads/2020/05/Chelsea-Logo.png"
@@ -190,6 +193,7 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Coventry', 'Coventry City', 'Coventry FC', 'Coventry City FC']:
         url = "https://ssl.gstatic.com/onebox/media/sports/logos/KHpmY4tIwqiutl8Cfl0MAw_96x96.png"
+        cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('Purples')
 
     if team in ['Croatia']:
         url = "https://cdn.countryflags.com/thumbs/croatia/flag-round-250.png"
@@ -239,10 +243,11 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Huddersfield Town', 'Huddersfield Town FC', 'Huddersfield']:
         url = "https://upload.wikimedia.org/wikipedia/en/7/7d/Huddersfield_Town_A.F.C._logo.png"
+        cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Hull', 'Hull City FC', 'Hull City']:
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/5/54/Hull_City_A.F.C._logo.svg/379px-Hull_City_A.F.C._logo.svg.png"
-        cmap = cm.get_cmap('Oranges') if hoa == 'home' else cm.get_cmap('gray')
+        cmap = cm.get_cmap('Oranges') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Ibiza', 'Unión Deportiva Ibiza', 'UD Ibiza']:
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/a/a8/Shield_of_UD_Ibiza.png/285px-Shield_of_UD_Ibiza.png"
@@ -291,6 +296,7 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Middlesbrough', 'Middlesbrough FC']:
         url = "https://images.webapi.gc.middlesbroughfcservices.co.uk/fit-in/200x200/7af04870-d2d4-11ec-93d3-b732dfcf0a3b.png"
+        cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Millwall', 'Millwall FC']:
         url = "https://www.millwallfc.co.uk/logo.png"
@@ -310,6 +316,7 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Norwich', 'Norwich FC', 'Norwich City', 'Norwich City FC']:
         url = "https://assets.stickpng.com/images/580b57fcd9996e24bc43c4e9.png"
+        cmap = cm.get_cmap('YlOrBr') if hoa == 'home' else cm.get_cmap('Reds')
 
     if team in ['Nottingham Forest', 'Nottingham Forest FC', 'Notts Forest']:
         url = "https://d2zywfiolv4f83.cloudfront.net/img/teams/174.png"
@@ -333,7 +340,8 @@ def get_team_badge_and_colour(team, hoa='home'):
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Preston', 'Preston North End', 'Preston FC', 'Preston North End FC', 'PNE', 'PNE FC']:
-        url = "https://upload.wikimedia.org/wikipedia/en/thumb/8/82/Preston_North_End_FC.svg/300px-Preston_North_End_FC.svg.png"
+        url = "https://s27807.pcdn.co/wp-content/uploads/Preston-North-End-LT800-1.png"
+        cmap = cm.get_cmap('Greys') if hoa == 'home' else cm.get_cmap('YlOrBr')
 
     if team in ['Qatar']:
         url = "https://cdn.countryflags.com/thumbs/qatar/flag-round-250.png"
@@ -347,7 +355,8 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://seeklogo.com/images/R/Rayo_Vallecano-logo-83EC841FE5-seeklogo.com.png"
 
     if team in ['Reading', 'Reading FC']:
-        url = "https://upload.wikimedia.org/wikipedia/en/thumb/1/11/Reading_FC.svg/270px-Reading_FC.svg.png"
+        url = "https://seeklogo.com/images/R/reading-fc-logo-E95E21532B-seeklogo.com.png"
+        cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Real Betis', 'Real Betis Balompié']:
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/1/13/Real_betis_logo.svg/300px-Real_betis_logo.svg.png"
@@ -365,7 +374,8 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://tickets.rbleipzig.com/light_custom/lightTheme/RBLogo_Shop06.png"
 
     if team in ['Rotherham', 'Rotherham United', 'Rotherham FC', 'Rotherham Utd', 'Rotherham United FC']:
-        url = "https://upload.wikimedia.org/wikipedia/en/thumb/c/c0/Rotherham_United_FC.svg/210px-Rotherham_United_FC.svg.png"
+        url = "https://seeklogo.com/images/R/rotherham-united-fc-logo-9087864424-seeklogo.com.png"
+        cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('YlOrBr')
 
     if team in ['AS Saint-Étienne', 'Saint-Etienne', 'Saint-Étienne']:
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/2/25/AS_Saint-%C3%89tienne_logo.svg/225px-AS_Saint-%C3%89tienne_logo.svg.png"
@@ -387,6 +397,7 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Sheffield United', 'Sheffield United FC', 'Sheffield Utd', 'Sheff Utd']:
         url = "https://www.sufc.co.uk/logo.png"
+        cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Southampton', 'Southampton FC']:
         url = "https://1000logos.net/wp-content/uploads/2018/07/Southampton-Logo-640x400.png"
@@ -402,16 +413,18 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Stoke City', 'Stoke City FC', 'Stoke', 'Stoke FC']:
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/2/29/Stoke_City_FC.svg/415px-Stoke_City_FC.svg.png"
+        cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Sunderland', 'Sunderland FC', 'Sunderland AFC']:
-        url = "https://upload.wikimedia.org/wikipedia/en/thumb/7/77/Logo_Sunderland.svg/922px-Logo_Sunderland.svg.png"
+        url = "https://logos-world.net/wp-content/uploads/2020/06/Sunderland-Logo.png"
+        cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Strasbourg', 'RC Strasbourg Alsace FC', 'RC Strasbourg']:
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Racing_Club_de_Strasbourg_logo.svg/255px-Racing_Club_de_Strasbourg_logo.svg.png"
 
     if team in ['Swansea City', 'Swansea City FC', 'Swansea']:
         url = "https://logos-download.com/wp-content/uploads/2016/05/Swansea_City_AFC_logo_logotype_crest.png"
-        cmap = cm.get_cmap('gray') if hoa == 'home' else cm.get_cmap('Reds')
+        cmap = cm.get_cmap('Greys') if hoa == 'home' else cm.get_cmap('Reds')
 
     if team in ['Switzerland']:
         url = "https://cdn.countryflags.com/thumbs/switzerland/flag-round-250.png"
@@ -440,7 +453,8 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://cdn.soccerwiki.org/images/logos/clubs/174.png"
 
     if team in ['Watford', 'Watford FC']:
-        url = "https://upload.wikimedia.org/wikipedia/en/thumb/e/e2/Watford.svg/687px-Watford.svg.png"
+        url = "https://www.watfordfc.com/img/logo.png"
+        cmap = cm.get_cmap('YlOrBr') if hoa == 'home' else cm.get_cmap('Blues')
 
     if team in ['Wales']:
         url = "https://cdn.countryflags.com/thumbs/wales/flag-round-250.png"
@@ -448,13 +462,15 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['West Bromwich Albion', 'West Bromwich Albion FC', 'West Brom']:
         url = "https://s.yimg.com/cv/apiv2/default/soccer/20181205/500x500/WestBrom_wbg.png"
+        cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['West Ham United', 'West Ham United FC', 'West Ham', 'West Ham Utd']:
         url = "https://logos-world.net/wp-content/uploads/2020/06/West-Ham-Logo.png"
         cmap = cm.get_cmap('BuPu') if hoa == 'home' else cm.get_cmap('Blues')
 
     if team in ['Wigan', 'Wigan Athletic', 'Wigan FC', 'Wigan Athletic FC']:
-        url = "https://upload.wikimedia.org/wikipedia/en/thumb/4/43/Wigan_Athletic.svg/800px-Wigan_Athletic.svg.png"
+        url = "https://cdn.freebiesupply.com/logos/large/2x/wigan-athletic-logo-png-transparent.png"
+        cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Wolverhampton Wanderers', 'Wolverhampton Wanderers FC', 'Wolves']:
         url = "https://logos-download.com/wp-content/uploads/2018/09/FC_Wolverhampton_Wanderers_Logo-700x606.png"

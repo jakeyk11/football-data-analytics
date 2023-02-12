@@ -111,7 +111,7 @@ def progressive_pass(single_event, inplay=True, successful_only=True):
 
         # Check pass made in-play (if inplay = True)
         if inplay:
-            check_inplay = not any(item in single_event['satisfiedEventsTypes'] for item in [48, 50, 51, 42, 44, 45, 31, 34])
+            check_inplay = not any(item in single_event['satisfiedEventsTypes'] for item in [48, 50, 51, 42, 44, 45, 31, 34, 212])
         else:
             check_inplay = True
 
@@ -221,7 +221,7 @@ def pass_into_box(single_event, inplay=True, successful_only=True):
 
         # Check pass made in-play (if inplay = True)
         if inplay:
-            check_inplay = not any(item in single_event['satisfiedEventsTypes'] for item in [48, 50, 51, 42, 44, 45, 31, 34])
+            check_inplay = not any(item in single_event['satisfiedEventsTypes'] for item in [48, 50, 51, 42, 44, 45, 31, 34, 212])
         else:
             check_inplay = True
 
