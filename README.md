@@ -47,6 +47,7 @@ The tree below presents the folder structure of this git repository. Note that s
     │
     ├── projects
     │   ├── 00_data_import_and_misc_work
+    │   │   ├── check_whoscored_data_volume.py     
     │   │   ├── download_yt_video.py 
     │   │   ├── import_data_whoscored.py
     │   │   ├── saudi_arabia_argentina_world_cup_def_actions.py 
@@ -206,7 +207,7 @@ Implementation and testing of basic expected goals probabilistic models. This wo
 ### 4 - Automated Match Reporting
 
 <details>
-<summary>4.1 - Automated Match Report - Shots</summary>
+<summary>4.1 - Shot Report</summary>
 
 \
 **Data Source:** Understat
@@ -226,7 +227,7 @@ Development of a script to extract shot data from understat and generate shot re
 </details>
 
 <details>
-<summary>4.2 - Automated Match Report - Inter-zone Pass Flows</summary>
+<summary>4.2 - Inter-zone Pass Flow Report</summary>
 
 \
 **Data Source:** Opta/Whoscored
@@ -246,7 +247,7 @@ Design and development of an algorithm that identifies and counts similar passes
 </details>
 
 <details>
-<summary>4.3 - Automated Match Report - Player Territories</summary>
+<summary>4.3 - Offensive Territory Report</summary>
 
 \
 **Data Source:** Opta/Whoscored
@@ -268,7 +269,7 @@ Design and development of an algorithm to calculate player territories based on 
 ### 5 - Player Ranking over a Competition
 
 <details>
-<summary>5.1 - Top Players throughout Competition - Defensive Contribution</summary>
+<summary>5.1 - Top Defensive Contributors</summary>
 
 \
 **Data Source:** Opta/Whoscored
@@ -288,7 +289,7 @@ Assessment of all players' defensive contribution over the duration of a competi
 </details>
 
 <details>
-<summary>5.2 - Top Players throughout Competition - Forward Pressing</summary>
+<summary>5.2 - Top Forward Pressers</summary>
 
 \
 **Data Source:** Opta/Whoscored
@@ -308,14 +309,14 @@ Assessment of the number of defensive actions completed in the opposition third 
 </details>
 
 <details>
-<summary>5.3 - Top Players throughout Competition - Effective Passers</summary>
+<summary>5.3 - Top Passers</summary>
 
 \
 **Data Source:** Opta/Whoscored
 
 **Project Area:** [05_competition_reports_top_players_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players_opta)
 
-**Code:** [player_effective_passers.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_effective_passers.pyy)
+**Code:** [player_effective_passers.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_effective_passers.py)
 
 **Summary and Output:** 
 Identification of effective passers through assessment of all in-play passes completed over the duration of a competition. Metrics such as progressive passes, cumulative expected threat and passes into opposition box per 90 are used to identify top players. This work involves the implementation of an [expected threat model](https://karun.in/blog/data/open_xt_12x8_v1.json) developed by Karun Singh.
@@ -330,7 +331,102 @@ Identification of effective passers through assessment of all in-play passes com
 
 </details>
 
+<details>
+<summary>5.4 - Top Ball Carriers</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [05_competition_reports_top_players_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players_opta)
+
+**Code:** [player_effective_carriers.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_effective_carriers.py)
+
+**Summary and Output:** 
+Identification of effective carriers through assessment of carries completed over the duration of a competition. This work involves the development of a module to infer carry events from opta event data (as carries are not recorded).
+
+<p align="center">
+  <img width="37%" src="./data_directory/misc_data/images/example-5-4-1.png">
+</p>
+
+</details>
+
+<details>
+<summary>5.5 - Top Threat Creators</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [05_competition_reports_top_players_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players_opta)
+
+**Code:** [player_effective_carriers.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_threat_creators.py)
+
+**Summary and Output:** 
+Identification of top threat creators through assessment of various events/actions completed over the duration of a competition. This work involves the implementation of an [expected threat model](https://karun.in/blog/data/open_xt_12x8_v1.json) developed by Karun Singh.
+
+<p align="center">
+  <img width="22.5%" src="./data_directory/misc_data/images/example-5-4-2.png">
+</p>
+
+</details>
+
+<details>
+<summary>5.6 - Top Penalty Takers</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [05_competition_reports_top_players_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players_opta)
+
+**Code:** [player_threat_creators.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_penalty_takers.py)
+
+**Summary and Output:** 
+Identification of top penalty takers across multiple competitions. Penalty quality is assessed my mean distance of on-target penalty from goalkeeper midriff, with off-target penalties assigned a distance of zero. This work includes implementation of "3D projections" within 2D subplots.
+
+<p align="center">
+  <img width="37%" src="./data_directory/misc_data/images/example-5-5-1.png">
+</p>
+
+</details>
+
 ### 6 - Team Ranking over a Competition
+
+<details>
+<summary>6.1 - Zones of Threat Creation</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [06_competition_reports_top_teams_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams_opta)
+
+**Code:** [team_threat_creation.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams_opta/team_threat_creation.py)
+
+**Summary and Output:** 
+Ranking of teams by total threat created through in-play passes and carries per 90, including identification of the zones in which each team generates threat.
+
+<p align="center">
+  <img width="37%" src="./data_directory/misc_data/images/example-6-1-1.png">
+</p>
+
+</details>
+
+<details>
+<summary>6.2 - Zones of Possession Gain</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [06_competition_reports_top_teams_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams_opta)
+
+**Code:** [team_ball_winning.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams_opta/team_ball_winning.py)
+
+**Summary and Output:** 
+Ranking of teams by the mean height up the pitch that they win the ball back, including identification of the zones in which they gain possession of the ball from the opposition.
+
+<p align="center">
+  <img width="37%" src="./data_directory/misc_data/images/example-6-2-1.png">
+</p>
+
+</details>
 
 ### 7 - Automated Player Reports
 
