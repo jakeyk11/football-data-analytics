@@ -49,7 +49,7 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EFLC'
+league = 'EPL'
 
 # Select position to exclude
 pos_exclude=['GK']
@@ -58,7 +58,7 @@ pos_exclude=['GK']
 pos_input = 'outfield players'
 
 # Input run-date
-run_date = '12/02/2022'
+run_date = '13/01/2022'
 
 # Normalisation mode
 norm_mode = '_90'
@@ -179,8 +179,8 @@ right_ax_norm_plot = 0.99 * right_ax_plot / max(right_ax_plot)
 left_ax_quantile = left_ax_norm_plot.quantile([0.2,0.5,0.8]).tolist()
 right_ax_quantile = right_ax_norm_plot.quantile([0.2,0.5,0.8]).tolist()
 
-plot_quantile_left = left_ax_norm_plot.quantile([0,0.5,0.9]).tolist()
-plot_quantile_right = right_ax_norm_plot.quantile([0,0.5,0.9]).tolist()
+plot_quantile_left = left_ax_norm_plot.quantile([0,0.5,0.95]).tolist()
+plot_quantile_right = right_ax_norm_plot.quantile([0,0.5,0.95]).tolist()
 plot_player = playerinfo_df[(left_ax_norm_plot>plot_quantile_left[2]) | (right_ax_norm_plot>plot_quantile_right[2])]
 
 #plot_player = playerinfo_df[playerinfo_df['team']=='Man Utd']
@@ -269,7 +269,7 @@ path_eff = [path_effects.Stroke(linewidth=1.5, foreground='#313332'), path_effec
 for i, player in plot_player.iterrows():
     format_name =  player['name'].split(' ')[0][0] + " " + player['name'].split(' ')[len(player['name'].split(' '))-1] if len(player['name'].split(' '))>1 else player['name']
     text.append(aux_ax.text(right_ax_norm_plot[i]+0.01, left_ax_norm_plot[i], format_name, color='w', fontsize=7, zorder=3, path_effects = path_eff))
-adjustText.adjust_text(text, ax = aux_ax)
+adjustText.adjust_text(text, ax = ax)
 
 # Add axis shading
 aux_ax.fill([right_ax_quantile[0], right_ax_quantile[0], right_ax_quantile[2], right_ax_quantile[2]], [0, 100, 100, 0], color='grey', alpha = 0.15, zorder=0)
