@@ -67,16 +67,11 @@ norm_mode = '_90'
 min_mins = 900
 
 # Brighten logo
-logo_brighten = False
+logo_brighten = True
 
 # %% League logo and league naming
 
-if logo_brighten:
-    comp_logo = lab.get_competition_logo(league, year)
-    enhancer = ImageEnhance.Brightness(comp_logo)
-    comp_logo = enhancer.enhance(100)
-else:
-    comp_logo = lab.get_competition_logo(league, year)
+comp_logo = lab.get_competition_logo(league, year, logo_brighten)
     
 # Create title and subtitles
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',

@@ -42,25 +42,20 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EFLC'
+league = 'EPL'
 
 # Input run-date
-run_date = '12/02/2023'
+run_date = '13/01/2023'
 
 # Select whether to label %
 label_pct = False
 
 # Select whether to brighten logo
-logo_brighten = False
+logo_brighten = True
 
 # %% Get competition logo
 
-if logo_brighten:
-    comp_logo = lab.get_competition_logo(league, year)
-    enhancer = ImageEnhance.Brightness(comp_logo)
-    comp_logo = enhancer.enhance(100)
-else:
-    comp_logo = lab.get_competition_logo(league, year)
+comp_logo = lab.get_competition_logo(league, year, logo_brighten=True)
 
 # %% Get data
 
