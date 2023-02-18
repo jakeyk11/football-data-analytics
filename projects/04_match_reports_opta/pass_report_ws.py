@@ -8,7 +8,7 @@
 #           JDP zone type
 #
 # Outputs:  Pass flow diagrams
-#           Pass convex hulls 
+#           Pass convex hulls
 #           Home and away team pass reports
 
 # %% Imports and parameters
@@ -77,7 +77,7 @@ if home_team_print is None:
 
 if away_team_print is None:
     away_team_print = away_team
-    
+
 cmaps = [home_colourmap, away_colourmap]
 
 # %% Read in data
@@ -178,7 +178,7 @@ key_zones = pz.get_key_zones(zone_type=zone_type, halfspace = True, zone_14 = Tr
 z14_passes = events_df[(events_df['eventType']=='Pass') & (events_df['start_zone'].isin(key_zones['zone_14']))]
 z14_suc_passes = z14_passes[z14_passes['outcomeType']=='Successful']
 z14_prog_passes = z14_suc_passes[z14_passes['progressive_pass']==True]
-z14_assists = z14_passes[z14_passes['satisfiedEventsTypes'].apply(lambda x: 92 in x)]  
+z14_assists = z14_passes[z14_passes['satisfiedEventsTypes'].apply(lambda x: 92 in x)]
 z14_touch_assists = events_df[(events_df['start_zone'].isin(key_zones['zone_14'])) & (events_df['eventType']!='Pass') & (events_df['satisfiedEventsTypes'].apply(lambda x: 92 in x))]
 z14_pre_assists = z14_passes[z14_passes['pre_assist'] == True]
 z14_touch_pre_assists = events_df[(events_df['start_zone'].isin(key_zones['zone_14'])) & (events_df['eventType']!='Pass') & (events_df['pre_assist'] == True)]
@@ -232,29 +232,29 @@ fig.set_facecolor('#313332')
 # Plot progressive passes
 for idx, team in enumerate(players_df['teamId'].unique()):
     pz.add_pitch_zones(ax['pitch'][idx], zone_type = zone_type)
-    
+
     # For each zone apart from opp. penalty area
     for start_pos in zz_pass_popularity[team]:
         if start_pos != (91.5, 50):
-            
+
             # Calculate most common zone position from Counter object of end zones
             end_pos = zz_pass_popularity[team][start_pos]
             rank1_end_pos = orig_rank1_end_pos = end_pos.most_common()[0][0]
-            rank1_count = end_pos.most_common()[0][1] 
-            
+            rank1_count = end_pos.most_common()[0][1]
+
             # Prevent start zone and zone being identical (no line)
             if rank1_end_pos == start_pos and len(end_pos)>1:
                 rank1_end_pos = end_pos.most_common()[1][0]
                 rank1_count = end_pos.most_common()[1][1]
-            
+
             # Use pass count to manually define plot colour
             color = cmaps[idx](int(255*min(1,rank1_count/15)))
-            hex_color = '#%02x%02x%02x' % (int(255*color[0]), int(255*color[1]), int(255*color[2]))                     
-            
+            hex_color = '#%02x%02x%02x' % (int(255*color[0]), int(255*color[1]), int(255*color[2]))
+
             # Plot comet
             pitch.lines(start_pos[0], start_pos[1], rank1_end_pos[0], rank1_end_pos[1], lw=10, comet = True, ax=ax['pitch'][idx],
                         color = hex_color, transparent=True, alpha =0.3, zorder=rank1_count)
-            
+
             # Plot comet end point (but only if start and end zones differ)
             if len(end_pos)==1 and orig_rank1_end_pos == start_pos:
                 pass
@@ -322,7 +322,7 @@ for idx, pass_count in enumerate(np.arange(1,16,2)):
     legend_ax_2.scatter(xpos, ypos, marker='H', s=550, color=color_2, edgecolors=None)
     legend_ax_2.text(xpos, ypos, pass_count, color=text_color, fontsize=10, ha = "center", va = "center")
     legend_ax_2.text(4, -0.2, "Pass Count", color=text_color, fontsize=10, ha = "center", va = "center")
-    
+
 # Footer text
 fig.text(0.5, 0.035, "Created by Jake Kolliari (@_JKDS_). Data provided by Opta.",
          fontstyle="italic", ha="center", fontsize=9, color="white")
@@ -353,19 +353,19 @@ last_idx = 0
 
 # Plot convex hulls
 for hull_idx, hull_row in offensive_hull_df.iterrows():
-    
+
     # Determine team the hull applies to
     if players_df[players_df['name']==hull_idx]['teamId'].values[0] == players_df['teamId'].unique()[0]:
         idx = 0
     elif players_df[players_df['name']==hull_idx]['teamId'].values[0] == players_df['teamId'].unique()[1]:
         idx = 1
-    
+
     # Reset player position counts when changing team
     if idx - last_idx > 0:
         cf_count = 0
         cm_count = 0
         cb_count = 0
-        
+
     # Get player position and assign colour based on position
     position = players_df[players_df['name']==hull_idx]['position'].values
     if position in ['DR', 'DL', '']:
@@ -383,19 +383,19 @@ for hull_idx, hull_row in offensive_hull_df.iterrows():
         cb_count+=1
     else:
         hull_colour = 'lightpink'
-        
+
     # Define text colour based on marker colour
     if hull_colour in ['snow', 'white']:
         text_colour = 'k'
     else:
         text_colour = 'w'
-    
+
     # Player initials
     if len(hull_idx.split(' ')) == 1:
         initials = hull_idx.split(' ')[0][0:2]
     else:
         initials = hull_idx.split(' ')[0][0].upper() + hull_idx.split(' ')[1][0].upper()
-    
+
     # Plot
     ax['pitch'][idx].scatter(hull_row['hull_reduced_y'], hull_row['hull_reduced_x'], color=hull_colour, s=20, alpha = 0.3, zorder=2)
     plot_hull = pitch.convexhull(hull_row['hull_reduced_x'], hull_row['hull_reduced_y'])
@@ -404,7 +404,7 @@ for hull_idx, hull_row in offensive_hull_df.iterrows():
     ax['pitch'][idx].scatter(hull_row['hull_centre'][1], hull_row['hull_centre'][0], marker ='H', color = hull_colour, alpha = 0.6, s = 400, zorder = 3)
     ax['pitch'][idx].scatter(hull_row['hull_centre'][1], hull_row['hull_centre'][0], marker ='H', edgecolor = hull_colour, facecolor = 'none', alpha = 1, lw = 2, s = 400, zorder = 3)
     ax['pitch'][idx].text(hull_row['hull_centre'][1], hull_row['hull_centre'][0], initials, fontsize = 8, fontweight = 'bold', va = 'center', ha = 'center', color = text_colour, zorder = 4)
-    
+
     # Remember last team
     last_idx = idx
 
@@ -420,13 +420,13 @@ ax.axis("off")
 for idx in np.arange(0,3):
 
     if len(home_top_area.iloc[idx:idx+1].index[0].split(' ')) == 1:
-        home_short_name = f"{home_top_area.iloc[idx:idx+1].index[0]}" 
+        home_short_name = f"{home_top_area.iloc[idx:idx+1].index[0]}"
     else:
-        home_short_name = f"{home_top_area.iloc[idx:idx+1].index[0][0]}. {home_top_area.iloc[idx:idx+1].index[0].split(' ')[-1]}" 
+        home_short_name = f"{home_top_area.iloc[idx:idx+1].index[0][0]}. {home_top_area.iloc[idx:idx+1].index[0].split(' ')[-1]}"
     if len(away_top_area.iloc[idx:idx+1].index[0].split(' ')) == 1:
-        away_short_name = f"{home_top_area.iloc[idx:idx+1].index[0]}"   
+        away_short_name = f"{away_top_area.iloc[idx:idx+1].index[0]}"
     else:
-        away_short_name = f"{away_top_area.iloc[idx:idx+1].index[0][0]}. {away_top_area.iloc[idx:idx+1].index[0].split(' ')[-1]}" 
+        away_short_name = f"{away_top_area.iloc[idx:idx+1].index[0][0]}. {away_top_area.iloc[idx:idx+1].index[0].split(' ')[-1]}"
 
     if len(home_short_name)>= 15:
         home_short_name = home_short_name[0:16] + '...'
@@ -438,7 +438,7 @@ for idx in np.arange(0,3):
     ax.text(0.24, 0.71-0.22*idx, f"{round(home_top_area.iloc[idx:idx+1]['hull_area_%'].values[0],1)}%", color='w')
     ax.text(0.71, 0.71-0.22*idx, f"{idx+1}.     {away_short_name}", color='w')
     ax.text(0.91, 0.71-0.22*idx, f"{round(away_top_area.iloc[idx:idx+1]['hull_area_%'].values[0],1)}%", color='w')
- 
+
 # Label based on include parameter
 hull_include = central_pct.replace('std','') + ' Std. Dev' if 'std' in str(central_pct) else str(central_pct) + '%'
 hull_include_s = central_pct.replace('std','') + ' SD' if 'std' in str(central_pct) else str(central_pct) + '%'
@@ -574,35 +574,35 @@ pz.add_pitch_zones(ax24, zone_type = zone_type)
 
 # Pass flows
 for idx, team in enumerate(players_df['teamId'].unique()):
-    
+
     # For each zone apart from opp. penalty area
     for start_pos in zz_pass_popularity[team]:
         if start_pos != (91.5, 50):
-            
+
             # Choose axis based on idx
             if idx == 0:
                 ax_to_plot = ax11
             else:
                 ax_to_plot = ax21
-            
+
             # Calculate most common zone position from Counter object of end zones
             end_pos = zz_pass_popularity[team][start_pos]
             rank1_end_pos = orig_rank1_end_pos = end_pos.most_common()[0][0]
-            rank1_count = end_pos.most_common()[0][1] 
-            
+            rank1_count = end_pos.most_common()[0][1]
+
             # Prevent start zone and zone being identical (no line)
             if rank1_end_pos == start_pos and len(end_pos)>1:
                 rank1_end_pos = end_pos.most_common()[1][0]
                 rank1_count = end_pos.most_common()[1][1]
-            
+
             # Use pass count to manually define plot colour
             color = cmaps[idx](int(255*min(1,rank1_count/15)))
-            hex_color = '#%02x%02x%02x' % (int(255*color[0]), int(255*color[1]), int(255*color[2]))                     
-            
+            hex_color = '#%02x%02x%02x' % (int(255*color[0]), int(255*color[1]), int(255*color[2]))
+
             # Plot comet
             pitch.lines(start_pos[0], start_pos[1], rank1_end_pos[0], rank1_end_pos[1], lw=10, comet = True, ax=ax_to_plot,
                         color = hex_color, transparent=True, alpha =0.3, zorder=rank1_count)
-            
+
             # Plot comet end point (but only if start and end zones differ)
             if len(end_pos)==1 and orig_rank1_end_pos == start_pos:
                 pass
@@ -621,23 +621,23 @@ ax2.axis("off")
 
 top_suc_passers = playerinfo_df.sort_values('suc_passes', ascending=False)
 for idx in np.arange(0,5):
-    
+
     home_player = top_suc_passers[top_suc_passers['team']==home_team].iloc[idx]
     away_player = top_suc_passers[top_suc_passers['team']==away_team].iloc[idx]
 
     if len(home_player['name'].split(' ')) == 1:
-        home_short_name = f"{home_player['name']}" 
+        home_short_name = f"{home_player['name']}"
     else:
-        home_short_name = f"{home_player['name'][0]}. {home_player['name'].split(' ')[-1]}" 
+        home_short_name = f"{home_player['name'][0]}. {home_player['name'].split(' ')[-1]}"
     if len(away_player['name'].split(' ')) == 1:
-        away_short_name = f"{away_player['name']}" 
+        away_short_name = f"{away_player['name']}"
     else:
         away_short_name = f"{away_player['name'][0]}. {away_player['name'].split(' ')[-1]}"
     if len(home_short_name)>= 16:
         home_short_name = home_short_name[0:16] + '...'
     if len(away_short_name)>= 16:
         away_short_name = away_short_name[0:16] + '...'
-        
+
     ax1.text(0.4, 0.81-0.16*idx, f"{idx+1}.   {home_short_name}", color='w')
     ax1.text(0.95, 0.81-0.16*idx, f"{int(home_player['suc_passes'])}", color='w')
     ax2.text(0.4, 0.81-0.16*idx, f"{idx+1}.   {away_short_name}", color='w')
@@ -684,19 +684,19 @@ cb_count = 0
 last_idx = 0
 
 for hull_idx, hull_row in offensive_hull_df.iterrows():
-    
+
     # Determine team the hull applies to
     if players_df[players_df['name']==hull_idx]['teamId'].values[0] == players_df['teamId'].unique()[0]:
         idx = 0
     elif players_df[players_df['name']==hull_idx]['teamId'].values[0] == players_df['teamId'].unique()[1]:
         idx = 1
-    
+
     # Reset player position counts when changing team
     if idx - last_idx > 0:
         cf_count = 0
         cm_count = 0
         cb_count = 0
-        
+
     # Get player position and assign colour based on position
     position = players_df[players_df['name']==hull_idx]['position'].values
     if position in ['DR', 'DL', '']:
@@ -714,19 +714,19 @@ for hull_idx, hull_row in offensive_hull_df.iterrows():
         cb_count+=1
     else:
         hull_colour = 'lightpink'
-        
+
     # Define text colour based on marker colour
     if hull_colour in ['snow', 'white']:
         text_colour = 'k'
     else:
         text_colour = 'w'
-    
+
     # Player initials
     if len(hull_idx.split(' ')) == 1:
         initials = hull_idx.split(' ')[0][0:2]
     else:
         initials = hull_idx.split(' ')[0][0].upper() + hull_idx.split(' ')[1][0].upper()
-    
+
     # Plot
     if idx == 0:
         ax12.scatter(hull_row['hull_reduced_y'], hull_row['hull_reduced_x'], color=hull_colour, s=20, alpha = 0.3, zorder=2)
@@ -744,7 +744,7 @@ for hull_idx, hull_row in offensive_hull_df.iterrows():
         ax22.scatter(hull_row['hull_centre'][1], hull_row['hull_centre'][0], marker ='H', color = hull_colour, alpha = 0.6, s = 400, zorder = 3)
         ax22.scatter(hull_row['hull_centre'][1], hull_row['hull_centre'][0], marker ='H', edgecolor = hull_colour, facecolor = 'none', alpha = 1, lw = 2, s = 400, zorder = 3)
         ax22.text(hull_row['hull_centre'][1], hull_row['hull_centre'][0], initials, fontsize = 8, fontweight = 'bold', va = 'center', ha = 'center', color = text_colour, zorder = 4)
-        
+
     # Remember last team
     last_idx = idx
 
@@ -760,13 +760,13 @@ ax2.axis("off")
 
 for idx in np.arange(0,5):
     if len(home_top_area.iloc[idx:idx+1].index[0].split(' ')) == 1:
-        home_short_name = f"{home_top_area.iloc[idx:idx+1].index[0]}" 
+        home_short_name = f"{home_top_area.iloc[idx:idx+1].index[0]}"
     else:
-        home_short_name = f"{home_top_area.iloc[idx:idx+1].index[0][0]}. {home_top_area.iloc[idx:idx+1].index[0].split(' ')[-1]}" 
+        home_short_name = f"{home_top_area.iloc[idx:idx+1].index[0][0]}. {home_top_area.iloc[idx:idx+1].index[0].split(' ')[-1]}"
     if len(away_top_area.iloc[idx:idx+1].index[0].split(' ')) == 1:
-        away_short_name = f"{home_top_area.iloc[idx:idx+1].index[0]}"   
+        away_short_name = f"{home_top_area.iloc[idx:idx+1].index[0]}"
     else:
-        away_short_name = f"{away_top_area.iloc[idx:idx+1].index[0][0]}. {away_top_area.iloc[idx:idx+1].index[0].split(' ')[-1]}" 
+        away_short_name = f"{away_top_area.iloc[idx:idx+1].index[0][0]}. {away_top_area.iloc[idx:idx+1].index[0].split(' ')[-1]}"
     if len(home_short_name)> 16:
         home_short_name = home_short_name[0:16] + '...'
     if len(away_short_name)> 16:
@@ -776,7 +776,7 @@ for idx in np.arange(0,5):
     ax1.text(0.91, 0.81-0.16*idx, f"{round(home_top_area.iloc[idx:idx+1]['hull_area_%'].values[0],1)}%", color='w')
     ax2.text(0.4, 0.81-0.16*idx, f"{idx+1}.   {away_short_name}", color='w')
     ax2.text(0.91, 0.81-0.16*idx, f"{round(away_top_area.iloc[idx:idx+1]['hull_area_%'].values[0],1)}%", color='w')
- 
+
 ax1.plot([0.35, 0.35], [0.15 ,0.92], lw=0.5, color='w')
 ax1.text(0.01, 0.52, f"Top players\nby area\ncontaining\ncentral {hull_include_s}\npasses (% tot.\npitch area)", va = 'center', color='w', fontsize=9)
 ax2.plot([0.35, 0.35], [0.15 ,0.92], lw=0.5, color='w')
@@ -784,14 +784,14 @@ ax2.text(0.01, 0.52, f"Top players\nby area\ncontaining\ncentral {hull_include_s
 
 # Zone 14 and half-space passes
 for idx, team in enumerate(players_df['teamId'].unique()):
-    
+
     if idx == 0:
         z14_ax_to_plot = ax14
         hs_ax_to_plot = ax13
     if idx == 1:
         z14_ax_to_plot = ax24
-        hs_ax_to_plot = ax23 
-        
+        hs_ax_to_plot = ax23
+
     plot_z14_passes = z14_passes[z14_passes['teamId'] == team]
     plot_z14_suc_passes = z14_suc_passes[z14_suc_passes['teamId'] == team]
     plot_z14_prog_passes = z14_prog_passes[z14_prog_passes['teamId'] == team]
@@ -833,8 +833,8 @@ for idx, team in enumerate(players_df['teamId'].unique()):
     pitch.scatter(plot_hs_touch_assists['x'], plot_hs_touch_assists['y'], color = 'magenta', alpha = 0.8, s = 15, zorder=5, ax=hs_ax_to_plot)
     pitch.scatter(plot_hs_touch_pre_assists['x'], plot_hs_touch_pre_assists['y'], color = 'lime', alpha = 0.8, s = 15, zorder=5, ax=hs_ax_to_plot)
 
-ax14.legend(facecolor='#313332', edgecolor='None', fontsize=8, loc='lower center', labelcolor = 'w', ncol = 2, handlelength=3)    
-ax24.legend(facecolor='#313332', edgecolor='None', fontsize=8, loc='lower center', labelcolor = 'w', ncol = 2, handlelength=3)    
+ax14.legend(facecolor='#313332', edgecolor='None', fontsize=8, loc='lower center', labelcolor = 'w', ncol = 2, handlelength=3)
+ax24.legend(facecolor='#313332', edgecolor='None', fontsize=8, loc='lower center', labelcolor = 'w', ncol = 2, handlelength=3)
 
 # Prog Pass text
 ax1 = fig1.add_axes([0.7, 0.09, 0.28, 0.14])
@@ -848,28 +848,28 @@ ax2.axis("off")
 
 top_prog_passers = playerinfo_df.sort_values('prog_passes', ascending=False)
 for idx in np.arange(0,5):
-    
+
     home_player = top_prog_passers[top_prog_passers['team']==home_team].iloc[idx]
     away_player = top_prog_passers[top_prog_passers['team']==away_team].iloc[idx]
 
     if len(home_player['name'].split(' ')) == 1:
-        home_short_name = f"{home_player['name']}" 
+        home_short_name = f"{home_player['name']}"
     else:
-        home_short_name = f"{home_player['name'][0]}. {home_player['name'].split(' ')[-1]}" 
+        home_short_name = f"{home_player['name'][0]}. {home_player['name'].split(' ')[-1]}"
     if len(away_player['name'].split(' ')) == 1:
-        away_short_name = f"{away_player['name']}" 
+        away_short_name = f"{away_player['name']}"
     else:
         away_short_name = f"{away_player['name'][0]}. {away_player['name'].split(' ')[-1]}"
     if len(home_short_name)>= 16:
         home_short_name = home_short_name[0:16] + '...'
     if len(away_short_name)>= 16:
         away_short_name = away_short_name[0:16] + '...'
-                
+
     ax1.text(0.38, 0.81-0.16*idx, f"{idx+1}.   {home_short_name}", color='w')
     ax1.text(0.9, 0.81-0.16*idx, f"{int(home_player['prog_passes'] if home_player['prog_passes'] == home_player['prog_passes'] else 0)}", color='w')
     ax2.text(0.38, 0.81-0.16*idx, f"{idx+1}.   {away_short_name}", color='w')
     ax2.text(0.9, 0.81-0.16*idx, f"{int(away_player['prog_passes'] if away_player['prog_passes'] == away_player['prog_passes'] else 0)}", color='w')
- 
+
 ax1.plot([0.33, 0.33], [0.15 ,0.92], lw=0.5, color='w')
 ax1.text(0.05, 0.52, "Top players\nby # of\nprogressive\npasses", va = 'center', color='w', fontsize=9)
 ax2.plot([0.33, 0.33], [0.15 ,0.92], lw=0.5, color='w')
