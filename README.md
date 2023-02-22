@@ -72,7 +72,8 @@ The tree below presents the folder structure of this git repository. Note that s
     │   │   ├── player_threat_creators.py
     │   ├── 06_competition_reports_top_teams_opta
     │   │   ├── team_ball_winning.py
-    │   │   ├── team_cross_success.py    
+    │   │   ├── team_cross_success.py   
+    │   │   ├── team_delta_threat_creation.py
     │   │   ├── team_fullback_combinations.py
     │   │   ├── team_threat_creation.py
     │   ├── 07_player_reports_opta
@@ -467,6 +468,27 @@ Ranking of teams by the frequency in which their full backs combine. Passes betw
 <p align="center">
   <img width="37%" src="./data_directory/misc_data/images/example-6-4-1.png">
 </p>
+  
+</details>
+
+<details>
+<summary>6.5 - Change in Threat Creation by Zone</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [06_competition_reports_top_teams_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams_opta)
+
+**Code:** [team_delta_threat_creation.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams_opta/team_delta_threat_creation.py)
+
+**Summary and Output:** 
+Ranking of teams by improvement in total threat created through in-play passes and carries per 90 - current season vs. last season. Includes accounting for teams that were in division above or below in previous year. Change in threat creation is also broken down by pitch zone
+  
+<p align="center">
+  <img width="37%" src="./data_directory/misc_data/images/example-6-5-1.png"> &nbsp &nbsp
+  <img width="37%" src="./data_directory/misc_data/images/example-6-5-2.png">
+</p>
+  
   
 </details>
 
