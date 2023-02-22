@@ -47,7 +47,6 @@ The tree below presents the folder structure of this git repository. Note that s
     │
     ├── projects
     │   ├── 00_data_import_and_misc_work
-    │   │   ├── check_whoscored_data_volume.py     
     │   │   ├── download_yt_video.py 
     │   │   ├── import_data_whoscored.py
     │   │   ├── saudi_arabia_argentina_world_cup_def_actions.py 
