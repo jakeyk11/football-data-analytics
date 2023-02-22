@@ -295,7 +295,7 @@ def events_while_playing(events_df, players_df, event_name='Pass', event_team='o
     return players_df_out
 
 
-def create_player_list(lineups, additional_cols=None):
+def create_player_list(lineups, additional_cols=None, pass_extra=None):
     """ Create a list of players from whoscored-style lineups dataframe. This requires minutes played information.
 
     Function to read a whoscored-style lineups dataframe (single or multiple matches) and return a dataframe of
@@ -306,6 +306,7 @@ def create_player_list(lineups, additional_cols=None):
     Args:
         lineups (pandas.DataFrame): statsbomb-style dataframe of lineups, including mins played, can be from multiple matches.
         additional_cols (list): list of column names to be aggregated and included in output dataframe.
+        pass_extra (list, optional): list of extra columns within lineups to include in output dataframe.
 
     Returns:
         pandas.DataFrame: players that feature in one or more lineup entries, including most popular position played
@@ -317,7 +318,10 @@ def create_player_list(lineups, additional_cols=None):
     lineups.loc[lineups['name'] == 'Robert Brady', 'name'] = 'Robbie Brady'
 
     # Dataframe of player names and team
-    playerinfo_df = lineups[['name', 'position', 'team']].drop_duplicates()
+    if pass_extra is None:
+        playerinfo_df = lineups[['name', 'position', 'team']].drop_duplicates()
+    else:
+        playerinfo_df = lineups[['name', 'position', 'team'] + pass_extra].drop_duplicates()
 
     # Calculate total playing minutes for each player and add to dataframe
     if additional_cols is None:

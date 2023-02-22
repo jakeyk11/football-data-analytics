@@ -4,6 +4,7 @@
 #           League to plot data from
 #           Date of run
 #           Selection of whether to include percentages on visual
+#           Selection of whether to brighten logo
 
 # %% Imports and parameters
 
@@ -54,7 +55,7 @@ logo_brighten = True
 
 comp_logo = lab.get_competition_logo(league, year, logo_brighten=logo_brighten) 
 
-# %% Get data
+# %% Get data for current year
 
 file_path = f"../../data_directory/whoscored_data/{year}_{str(int(year.replace('20','')) + 1)}/{league}"
 files = os.listdir(file_path)
@@ -154,7 +155,7 @@ for team in team_xt_90:
 
     # Draw heatmap
     bin_statistic = pitch.bin_statistic(team_threat_creating_events['x'], team_threat_creating_events['y'],
-                                        statistic='sum', bins=(6, 5), normalize=True, values = team_threat_creating_events['xThreat'])
+                                        statistic='sum', bins=(6, 5), normalize=True, values = team_threat_creating_events['xThreat_gen'])
     pitch.heatmap(bin_statistic, ax['pitch'][idx], cmap=team_cmap, edgecolor='w', lw=0.5, zorder=0, alpha=0.7)
 
     # Label heatmap zones with pressure count if selected
@@ -213,3 +214,5 @@ badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
 ax.imshow(badge)    
 
 fig.savefig(f"team_threat_creation/{league}-{year}-team-threat-creation", dpi=300)
+
+# %%

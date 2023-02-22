@@ -161,7 +161,7 @@ def get_team_badge_and_colour(team, hoa='home'):
         cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Bristol City', 'Bristol']:
-        url = "https://upload.wikimedia.org/wikipedia/en/thumb/f/f5/Bristol_City_crest.svg/480px-Bristol_City_crest.svg.png"
+        url = "https://www.aca-creative.co.uk/wp-content/uploads/2023/02/Bristol-City-980x980.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('gray')
 
     if team in ['Burnley FC', 'Burnley']:
