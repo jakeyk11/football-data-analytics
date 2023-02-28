@@ -124,7 +124,7 @@ for idx, cross in open_play_crosses.iterrows():
 # Sort alphabetically initially
 teams = sorted(set(players_df['team']))
 
-# Set up dictionary to store xt per 90 per team
+# Set up dictionary to cross count per team
 team_effective_cross = dict.fromkeys(teams, 0)
 team_count = len(teams)
 
@@ -135,10 +135,10 @@ for team in teams:
     team_crosses = open_play_crosses[open_play_crosses['teamId']==team_id]
     team_effective_crosses = team_crosses[team_crosses['cross_outcome'].isin(['Goal', 'Shot', 'Key Pass'])]
     
-    # Get mean recovery height
+    # Get cross pct
     team_effective_cross[team] = 100*(len(team_effective_crosses)/len(team_crosses))
       
-# Sort dictionary by xT/90
+# Sort cross count
 team_effective_cross = sorted(team_effective_cross.items(), key=lambda x: x[1], reverse=True)        
 
 # %% Create visual

@@ -2,6 +2,8 @@
 #
 # Inputs:   Year to plot data from
 #           League to plot data from
+#           League above core league (accounting for relegated teams)
+#           League below core league (accounting for promoted teams)
 #           Date of run
 #           Selection of whether to include percentages on visual
 #           Selection of whether to brighten logo
@@ -47,7 +49,7 @@ league_below = 'EFL1'
 league_above = 'EPL'
 
 # Input run-date
-run_date = '19/02/2023'
+run_date = '23/02/2023'
 
 # Select whether to label %
 label_pct = False

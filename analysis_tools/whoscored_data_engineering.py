@@ -6,7 +6,7 @@ get_recipient(events_df):
     Add pass recipient to whoscored-style event data.
 
 add_team_name(events_df, players_df):
-    Add team name to event data.
+    Add team name and opposition team name to event data.
 
 cumulative_match_mins(events):
     Add cumulative minutes to event data and calculate true match minutes
@@ -60,25 +60,36 @@ def get_recipient(events_df):
 
 
 def add_team_name(events_df, players_df):
-    """ Add team name to event data.
+    """ Add team name and opposition team name to event data.
 
-    Function to add team name to whoscored event data, by extracting playerId and searching for team within whoscored
-    player data.
+    Function to add team name and opposition team name to whoscored event data, by extracting playerId and searching
+    for team within whoscored player data.
 
     Args:
         events_df (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
         players_df (pandas.DataFrame): WhoScored-style dataframe of player information, can be from multiple matches.
 
     Returns:
-        pandas.DataFrame: whoscored-style event dataframe with additional 'team_name' column.
+        pandas.DataFrame: whoscored-style event dataframe with additional 'team_name' and 'opp_team_name' column.
     """
 
     # Initialise output dataframes
-    events_out = events_df.copy()
-    events_out['team_name'] = np.nan
+    events_out = pd.DataFrame()
 
-    # Get team name and add
-    events_out['team_name'] = events_out[['playerId', 'match_id']].apply(lambda x: players_df[players_df['match_id'] == x['match_id']].loc[x['playerId'], 'team'] if x['playerId'] == x['playerId'] else np.nan, axis=1)
+    # Add cumulative time to events data, resetting for each unique match
+    for match_id in events_df['match_id'].unique():
+        team_name_and_id = players_df[players_df['match_id'] == match_id][['teamId', 'team']].values
+        team_dict = dict.fromkeys([team_name_and_id[0][0], team_name_and_id[-1][0]])
+        team_dict[team_name_and_id[0][0]] = team_name_and_id[0][1]
+        team_dict[team_name_and_id[-1][0]] = team_name_and_id[-1][1]
+
+        match_events = events_df[events_df['match_id'] == match_id].copy()
+        match_events['team_name'] = match_events['teamId'].apply(lambda x: team_dict[x] if x == x else np.nan)
+        match_events['opp_team_name'] = match_events['teamId'].apply(
+            lambda x: "".join(dict((k, v) for k, v in team_dict.items() if k != x).values()) if x == x else np.nan)
+
+        # Rebuild events dataframe
+        events_out = pd.concat([events_out, match_events])
 
     return events_out
 
