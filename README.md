@@ -75,6 +75,7 @@ The tree below presents the folder structure of this git repository. Note that s
     │   │   ├── team_cross_success.py   
     │   │   ├── team_delta_threat_creation.py
     │   │   ├── team_fullback_combinations.py
+    │   │   ├── team_setpiece_shot_concession.py
     │   │   ├── team_threat_creation.py
     │   ├── 07_player_reports_opta
     │   │   ├── player_report_fullback.py
@@ -489,6 +490,25 @@ Ranking of teams by improvement in total threat created through in-play passes a
   <img width="37%" src="./data_directory/misc_data/images/example-6-5-2.png">
 </p>
   
+</details>
+
+<details>
+<summary>6.6 - Set-piece Chance Concession</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [06_competition_reports_top_teams_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams_opta)
+
+**Code:** [team_setpiece_shot_concession.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams_opta/team_setpiece_shot_concession.py)
+
+**Summary and Output:** 
+Investigation of team's ability to defend set-pieces through aggregating chances conceded within 5 seconds of an opposition "indirect" set-piece. "Indirect" set-pieces refer to corner and free-kicks where the ball remains in play after the set-piece is taken, therefore off-target free-kicks and direct goals from set-pieces are excluded from the analysis.
+  
+<p align="center">
+  <img width="30%" src="./data_directory/misc_data/images/example-6-6-1.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/example-6-6-2.png">
+</p>
   
 </details>
 
