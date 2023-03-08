@@ -22,7 +22,11 @@ To support others who are wishing to develop their data analytics skills within 
 
 ## Folder Structure
 
-The tree below presents the folder structure of this git repository. Note that some individual files are omitted from the diagram for simplicity.
+The tree below (click drop-down to expand) presents the folder structure of this git repository. Note that some individual files are omitted from the diagram for simplicity.
+
+<details>
+<summary>Show folder structure</summary>
+
 
     football-data-analytics
     │
@@ -87,6 +91,8 @@ The tree below presents the folder structure of this git repository. Note that s
     ├── LICENSE 
     │ 
     ├── README.md 
+
+</details>
 
 ## Workflow
 
