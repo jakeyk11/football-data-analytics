@@ -363,11 +363,15 @@ Identification of effective carriers through assessment of carries completed ove
 **Code:** [player_effective_carriers.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_threat_creators.py)
 
 **Summary and Output:** 
-Identification of top threat creators through assessment of various events/actions completed over the duration of a competition. This work involves the implementation of an [expected threat model](https://karun.in/blog/data/open_xt_12x8_v1.json) developed by Karun Singh.
+Identification of top threat creators through assessment of various events/actions completed over the duration of a competition within different areas of the pitch. This work involves the implementation of an [expected threat model](https://karun.in/blog/data/open_xt_12x8_v1.json) developed by Karun Singh.
 
 <p align="center">
   <img width="27.3%" src="./data_directory/misc_data/images/example-5-5-1.png"> &nbsp &nbsp
   <img width="27.3%" src="./data_directory/misc_data/images/example-5-5-2.png">
+</p>
+<p align="center">
+  <img width="27.3%" src="./data_directory/misc_data/images/example-5-5-3.png"> &nbsp &nbsp
+  <img width="27.3%" src="./data_directory/misc_data/images/example-5-5-4.png">
 </p>
 
 </details>
