@@ -83,7 +83,7 @@ for file in files:
 events_df = wde.cumulative_match_mins(events_df)
 events_df = wde.add_team_name(events_df, players_df)
 
-# %% Get free-kicks and corners
+# %% Get free-kicks and corners (Selecting "indirect" only for purpose of this work)
 
 all_fks_and_corners = events_df[events_df['satisfiedEventsTypes'].apply(lambda x: True if (31 in x or 34 in x or 6 in x or 5 in x) else False)]
 
@@ -91,7 +91,7 @@ fks_and_corners = all_fks_and_corners[(all_fks_and_corners['eventType']=='Pass')
                                       (all_fks_and_corners['eventType']=='SavedShot') |
                                       ((all_fks_and_corners['eventType']=='MissedShots') & (all_fks_and_corners['blockedX']=='blockedX'))]
 
-# %% Calculate set piece outcome
+# %% Determine set piece outcome (over 5s) and add to dataframe
 
 # Add new column to categorise cross
 fks_and_corners['set_piece_outcome'] = np.nan
@@ -107,22 +107,22 @@ for idx, set_piece in fks_and_corners.iterrows():
     elif set_piece['isShot']==True:
         fks_and_corners.loc[idx, 'set_piece_outcome'] = 'Direct Shot Only'
 
-# %% Get teams and order on set piece shots conceded
+# %% Get teams and create a dataframe of set piece information
 
 # Sort alphabetically initially
 teams = sorted(set(players_df['team']))
 
-# Set up dictionary to cross count per team
+# Set up dataframe to store set piece concession per team
 team_sp_concede_df = pd.DataFrame(columns = ['team','matches_played','sp_concede', 'sp_chance_concede', 'sp_goal_concede'])
 
 for idx, team in enumerate(teams):
     
-    # Get team events
+    # Get team set pieces against
     team_sp_concede = fks_and_corners[fks_and_corners['opp_team_name']==team]
     team_sp_chance_concede = team_sp_concede[team_sp_concede['set_piece_outcome'].isin(['Goal', 'Chance'])]                           
     team_sp_goal_concede = team_sp_concede[team_sp_concede['set_piece_outcome'].isin(['Goal', 'Direct Goal'])]                           
     
-    # Add to df
+    # Add information to df
     team_sp_concede_df.loc[idx, 'team'] = team
     team_sp_concede_df.loc[idx, 'matches_played'] = len(set(events_df[events_df['team_name']==team]['match_id']))
     team_sp_concede_df.loc[idx, 'sp_concede'] = len(team_sp_concede)
@@ -136,23 +136,24 @@ team_sp_concede_df['sp_goal_concede_per_match'] = team_sp_concede_df['sp_goal_co
 team_sp_concede_df['sp_chance_concede_pct'] = 100*team_sp_concede_df['sp_chance_concede']/team_sp_concede_df['sp_concede']
 team_sp_concede_df['sp_goal_concede_pct'] = 100*team_sp_concede_df['sp_goal_concede']/team_sp_concede_df['sp_concede']
 
-# %% Set-up bar graph
+# %% VISUAL 1: Ranked bar graph by percentage of opposition set pieces resulting in chance
 
+# Order dataframe and reindex
 team_sp_concede_df.sort_values('sp_chance_concede_pct', ascending = True, inplace = True)
 team_sp_concede_df.reset_index(drop=True, inplace=True)
 
-# Set-up bar plot showing team position vs. total value
+# Set-up bar plot
 fig, ax = plt.subplots(figsize=(8.5, 8.5))
 fig.set_facecolor('#313332')
 ax.patch.set_alpha(0)
 
-# Define and add colour
+# Define colour scale
 my_cmap = plt.get_cmap("viridis_r")
 my_cmap = my_cmap(np.linspace(0.06,0.8,256))
 color_scale = 255*(team_sp_concede_df['sp_chance_concede_pct'] - team_sp_concede_df['sp_chance_concede_pct'].min())/(team_sp_concede_df['sp_chance_concede_pct'].max() - team_sp_concede_df['sp_chance_concede_pct'].min())
 color_scale = [int(color) for color in color_scale.values.tolist()]
 
-# Team rank
+# List of team rank text
 team_rank = [str(i) + ": " for i in team_sp_concede_df.index.values+1] + team_sp_concede_df["team"]
 
 # Plot data
@@ -182,14 +183,13 @@ plt.gca().invert_yaxis()
 
 # Add axes labels
 path_eff = [path_effects.Stroke(linewidth=3, foreground='#313332'), path_effects.Normal()]
-
 for idx, plot_pos in enumerate(np.arange(0.2, len(team_sp_concede_df))):
     goal_text = ' goal' if team_sp_concede_df.loc[idx,"sp_goal_concede"] == 1 else ' goals'
     chance_text = ' chance' if team_sp_concede_df.loc[idx,"sp_chance_concede"] == 1 else ' chances'
     ax.text(team_sp_concede_df.loc[idx,"sp_goal_concede_pct"], plot_pos, " " + str(team_sp_concede_df.loc[idx,"sp_goal_concede"])+ goal_text, fontsize = 8, path_effects = path_eff)
     ax.text(team_sp_concede_df.loc[idx,"sp_chance_concede_pct"], plot_pos, " " + str(team_sp_concede_df.loc[idx,"sp_chance_concede"])+ chance_text, fontsize = 8, path_effects = path_eff)
     
-# Add Championship Logo
+# Add competition Logo
 ax2 = fig.add_axes([0.035, 0.87, 0.1, 0.1])
 ax2.axis("off")
 ax2.imshow(comp_logo)
@@ -204,27 +204,30 @@ ax.axis("off")
 badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
 ax.imshow(badge)    
 
+# Tight layout
 fig.tight_layout(rect=[0.03, 0.06, 0.95, 0.86])
 
-fig.savefig(f"team_setpiece_shot_concession/{league}-{year}-team_setpiece_chance_concession_pct", dpi=300)
+# Save image to file
+fig.savefig(f"team_setpiece_chance_concession/{league}-{year}-team_setpiece_chance_concession_pct", dpi=300)
 
-# %% Set-up bar graph
+# %% VISUAL 2: Ranked bar graph by count of opposition set pieces resulting in chance per match
 
+# Order dataframe and reindex
 team_sp_concede_df.sort_values('sp_chance_concede_per_match', ascending = True, inplace = True)
 team_sp_concede_df.reset_index(drop=True, inplace=True)
 
-# Set-up bar plot showing team position vs. total value
+# Set-up bar plot
 fig, ax = plt.subplots(figsize=(8.5, 8.5))
 fig.set_facecolor('#313332')
 ax.patch.set_alpha(0)
 
-# Define and add colour
+# Define colour scale
 my_cmap = plt.get_cmap("viridis_r")
 my_cmap = my_cmap(np.linspace(0.06,0.8,256))
 color_scale = 255*(team_sp_concede_df['sp_chance_concede_per_match'] - team_sp_concede_df['sp_chance_concede_per_match'].min())/(team_sp_concede_df['sp_chance_concede_per_match'].max() - team_sp_concede_df['sp_chance_concede_per_match'].min())
 color_scale = [int(color) for color in color_scale.values.tolist()]
 
-# Team rank
+# List of team rank text
 team_rank = [str(i) + ": " for i in team_sp_concede_df.index.values+1] + team_sp_concede_df["team"]
 
 # Plot data
@@ -254,14 +257,13 @@ plt.gca().invert_yaxis()
 
 # Add axes labels
 path_eff = [path_effects.Stroke(linewidth=3, foreground='#313332'), path_effects.Normal()]
-
 for idx, plot_pos in enumerate(np.arange(0.2, len(team_sp_concede_df))):
     goal_text = ' goal' if team_sp_concede_df.loc[idx,"sp_goal_concede"] == 1 else ' goals'
     chance_text = ' chance' if team_sp_concede_df.loc[idx,"sp_chance_concede"] == 1 else ' chances'
     ax.text(team_sp_concede_df.loc[idx,"sp_goal_concede_per_match"], plot_pos, " " + str(team_sp_concede_df.loc[idx,"sp_goal_concede"])+ goal_text, fontsize = 8, path_effects = path_eff)
     ax.text(team_sp_concede_df.loc[idx,"sp_chance_concede_per_match"], plot_pos, " " + str(team_sp_concede_df.loc[idx,"sp_chance_concede"])+ chance_text, fontsize = 8, path_effects = path_eff)
     
-# Add Championship Logo
+# Add competition Logo
 ax2 = fig.add_axes([0.035, 0.87, 0.1, 0.1])
 ax2.axis("off")
 ax2.imshow(comp_logo)
@@ -276,6 +278,8 @@ ax.axis("off")
 badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
 ax.imshow(badge)    
 
+# Tight layout
 fig.tight_layout(rect=[0.03, 0.06, 0.95, 0.86])
 
-fig.savefig(f"team_setpiece_shot_concession/{league}-{year}-team_setpiece_chance_concession_per_match", dpi=300)
+# Save image to file 
+fig.savefig(f"team_setpiece_chance_concession/{league}-{year}-team_setpiece_chance_concession_per_match", dpi=300)

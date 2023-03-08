@@ -2,14 +2,16 @@
 #
 # Inputs:   Year to plot data from
 #           League to plot data from
-#           Whoscored match ids
-#           Positions not to include
+#           Positions not to include, and position title formatting 
 #           Normalisation mode
-#           Date of run
 #           Minimum play time
+#           Date of run
+#           Brighten logo
+#           Threat grid pitch mode
+#           Threat grid density
 #
-# Outputs:  Top 12 Progressive Carriers
-#           Top 12 threat creators
+# Outputs:  Top threat creators (scatter)
+#           Top threat creators by pitch zone
 
 # %% Imports and parameters
 
@@ -31,7 +33,10 @@ import pickle
 import numpy as np
 import highlight_text as htext
 import glob
-from mplsoccer.pitch import Pitch
+from mplsoccer.pitch import Pitch, VerticalPitch
+from mplsoccer import add_image
+from matplotlib.colors import ListedColormap
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 
 # %% Add custom tools to path
 
@@ -58,7 +63,7 @@ pos_exclude=['GK']
 pos_input = 'outfield players'
 
 # Input run-date
-run_date = '13/01/2022'
+run_date = '07/03/2023'
 
 # Normalisation mode
 norm_mode = '_90'
@@ -68,6 +73,10 @@ min_mins = 900
 
 # Brighten logo
 logo_brighten = True
+
+# Threat pitch grid mode (3 = top 3, else = top 1. dense = dense grid, else = sparse grid)
+pitch_mode = '1'
+grid_density = ''
 
 # %% League logo and league naming
 
@@ -133,8 +142,6 @@ playerinfo_df = wde.group_player_events(all_passes, playerinfo_df, primary_event
 playerinfo_df = wde.group_player_events(all_passes, playerinfo_df, group_type='sum', event_types = ['xThreat', 'xThreat_gen'])
 playerinfo_df.rename(columns = {'xThreat':'xThreat_pass','xThreat_gen':'xThreat_gen_pass'}, inplace=True)
 
-# %% Calculate statistics per 90 mins
-
 # Carries and xT generated
 playerinfo_df['carries_90'] = round(90*playerinfo_df['carries']/playerinfo_df['mins_played'],2)
 playerinfo_df['xThreat_carry_90'] = round(90*playerinfo_df['xThreat_carry']/playerinfo_df['mins_played'],3)
@@ -144,6 +151,22 @@ playerinfo_df['xThreat_gen_carry_90'] = round(90*playerinfo_df['xThreat_gen_carr
 playerinfo_df['passes_90'] =  round(90*playerinfo_df['passes']/playerinfo_df['mins_played'],2)
 playerinfo_df['xThreat_pass_90'] =  round(90*playerinfo_df['xThreat_pass']/playerinfo_df['mins_played'],3)
 playerinfo_df['xThreat_gen_pass_90'] =  round(90*playerinfo_df['xThreat_gen_pass']/playerinfo_df['mins_played'],3)
+
+# Threat creating events
+all_threat_events = pd.concat([all_carries, all_passes], axis = 0)
+
+# %% Calculate player threat creation per zone
+
+pitch = VerticalPitch(pitch_color='#313332', pitch_type='opta', line_color='white', linewidth=1, stripe=False)
+
+for player_id, player_details in playerinfo_df.iterrows():
+    player_events = all_threat_events[all_threat_events['playerId']==player_id]
+    bin_statistic = pitch.bin_statistic(player_events['x'], player_events['y'],
+                                        statistic='sum', bins=(12, 10) if grid_density == 'dense' else (6, 5) , normalize=False, values = player_events['xThreat_gen'])
+    bin_statistic['statistic'] = 90*(bin_statistic['statistic']/player_details['mins_played'])
+    
+    for idx, zone_threat in enumerate(bin_statistic['statistic'].reshape(-1, order = 'F')):
+        playerinfo_df.loc[player_id, f'zone_{idx}_xT' ] = zone_threat
 
 # %% Filter playerinfo
 
@@ -341,3 +364,83 @@ logo_ax.imshow(badge)
 
 # Save image
 fig.savefig(f"player_threat_creators/{league}-{year}-diamond-{run_date.replace('/','_')}-{left_metric}-vs-{right_metric}-player-variant", dpi=300)
+
+# %% ------- VISUAL 2 - TOP THREAT CREATORS BY ZONE -------
+
+fig, ax = pitch.grid(endnote_height=0.05, endnote_space=0, title_height=0.12, axis=False, grid_height=0.79)
+fig.set_size_inches(7, 9)
+fig.set_facecolor('#313332')
+
+# Draw Pitch Zones
+pitch.heatmap(bin_statistic, ax=ax['pitch'], cmap = ListedColormap(['#313332']), edgecolor='grey', lw=0.5, alpha = 1, zorder = 0.6)
+
+# Label players
+xs = bin_statistic['cx'].reshape(-1, order = 'F')
+ys = bin_statistic['cy'].reshape(-1, order = 'F')
+path_eff = [path_effects.Stroke(linewidth=2, foreground='#313332'), path_effects.Normal()]
+
+for idx in np.arange(0, len(bin_statistic['statistic'].reshape(-1))):
+    playerinfo_df.sort_values(by = f'zone_{idx}_xT', ascending = False, inplace = True)
+    if pitch_mode == '3' and grid_density != 'dense':
+        cnt = 0
+        for p_id, p_info in playerinfo_df.head(3).iterrows():
+            player_name = p_info['name']
+            format_name = player_name.split(' ')[0][0] + ". " + player_name.split(' ')[len(player_name.split(' '))-1] if len(player_name.split(' '))>1 else player_name
+            format_name = format_name if len(format_name) <= 13 else format_name[0:11] + '...'
+            format_text = format_name + '\n' + 'xT: ' +str(round(p_info[f'zone_{idx}_xT'],3))
+            team_logo, _ = lab.get_team_badge_and_colour(p_info['team'])
+            ab = AnnotationBbox(OffsetImage(team_logo, zoom = 0.05, resample = True), (ys[idx]+6.75, xs[idx]+5-cnt), frameon=False)
+            ax['pitch'].add_artist(ab)
+            pitch.annotate(text = format_text, xy = (xs[idx]+5-cnt, ys[idx]+3.5), ha = "left", va = "center", ax=ax['pitch'], fontsize = 6, path_effects=path_eff)
+            cnt+=5
+        title_plural = 's'
+        file_ext = 'top3'
+    else:
+        player_name = playerinfo_df.head(1)['name'].values[0]
+        format_name = player_name.split(' ')[0][0] + ". " + player_name.split(' ')[len(player_name.split(' '))-1] if len(player_name.split(' '))>1 else player_name
+        format_name = format_name if len(format_name) <= 13 else format_name[0:13] + '\n' + format_name[13:]
+        format_text = format_name + '\n' + 'xT: ' +str(round(playerinfo_df.head(1)[f'zone_{idx}_xT'].values[0],3))
+        team_logo, _ = lab.get_team_badge_and_colour(playerinfo_df.head(1)['team'].values[0])
+        title_plural = ''
+        if grid_density == 'dense':
+            ab = AnnotationBbox(OffsetImage(team_logo, zoom = 0.05, resample = True), (ys[idx], xs[idx]+2), frameon=False)
+            pitch.annotate(text = format_text, xy = (xs[idx]-0.5, ys[idx]), ha = "center", va = "top", ax=ax['pitch'], fontsize = 5, path_effects=path_eff)
+            file_ext = 'top1-dense'
+        else:
+            ab = AnnotationBbox(OffsetImage(team_logo, zoom = 0.1, resample = True), (ys[idx], xs[idx]+2.5), frameon=False)
+            pitch.annotate(text = format_text, xy = (xs[idx]-2.5, ys[idx]), ha = "center", va = "top", ax=ax['pitch'], fontsize = 8, path_effects=path_eff)
+            file_ext = 'top1'
+        ax['pitch'].add_artist(ab)
+        
+# Title
+title_text = f"{leagues[league]} {year}/{int(year)+1} − Threat Creators"
+subtitle_text = f"Top Threat Creator{title_plural} from each Pitch Zone"
+subsubtitle_text = f"In-Play Pass, Carry and Dribble events included. Negative threat events excluded.\nOnly includes {pos_input} with >{min_mins} total mins played. Correct as of {run_date}"
+fig.text(0.17, 0.945, title_text, fontweight="bold", fontsize=13, color='w')
+fig.text(0.17, 0.9175, subtitle_text, fontweight="bold", fontsize=12, color='w')
+fig.text(0.17, 0.8775, subsubtitle_text, fontweight="regular", fontsize=9, color='w')
+
+# Add competition logo
+ax = fig.add_axes([0.03, 0.85, 0.14, 0.14])
+ax.axis("off")
+ax.imshow(comp_logo)
+
+# Add direction of play arrow
+ax = fig.add_axes([0.85, 0.31, 0.01, 0.3])
+ax.axis("off")
+plt.arrow(0.5, 0.15, 0, 0.5, width = 0.004, color="white")
+fig.text(0.875, 0.4, "Direction of play", ha="center", rotation=270, fontsize=10, color="white", fontweight="regular")
+
+# Add footer text
+fig.text(0.5, 0.025, "Created by Jake Kolliari (@_JKDS_). Data provided by Opta.",
+         fontstyle="italic", ha="center", fontsize=9, color="white")
+
+# Add twitter logo
+logo_ax = fig.add_axes([0.91, -0.005, 0.07, 0.07])
+logo_ax.axis("off")
+badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
+logo_ax.imshow(badge)
+
+# Save image
+fig.savefig(f"player_threat_creators/{league}-{year}-top_threat_creator_by_zone-{file_ext}-{run_date.replace('/','_')}", dpi=300)
+

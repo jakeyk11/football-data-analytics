@@ -16,8 +16,8 @@ import analysis_tools.get_football_data as gfd
 # %% User inputs
 
 # Input first and last match id to obtain data from
-match_id_start = 1640874
-match_id_end = 1640874
+match_id_start = 1640730
+match_id_end = 1640740
 
 # Input year folder
 year = '2022'
