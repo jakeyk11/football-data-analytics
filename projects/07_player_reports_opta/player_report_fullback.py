@@ -47,22 +47,22 @@ import analysis_tools.logos_and_badges as lab
 # %% Inputs
 
 # Player, league and year to analyse
-player_name = 'Layvin Kurzawa'
-league = "Ligue_1"
-year = '2020'
+player_name = 'Dominic Thompson'
+league = "EFLC"
+year = '2022'
 
 # Players, leagues and years to compare
-comparison_players = [('Lucas Digne', 'EPL', '2022'),
-                      ('Andrew Robertson', 'EPL', '2022')]
+comparison_players = [('Morgan Fox', 'EFLC', '2022'),
+                      ('Max Lowe', 'EFLC', '2022')]
 
 # %%
 # Full league and criteria to compare against
-comparison_league = ('EPL', '2022')
+comparison_league = ('EFLC', '2022')
 comparison_pos = ['DL']
-comparison_min_mins = 450
+comparison_min_mins = 900
 
 # Abbreviated league name for printing
-comparison_league_abbrev = 'EPL'
+comparison_league_abbrev = 'EFLC'
 player_pos_abbrev = 'LB'
 comparison_pos_abbrev = 'LB'
 

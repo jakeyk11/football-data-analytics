@@ -45,17 +45,17 @@ import analysis_tools.logos_and_badges as lab
 # %% User inputs
 
 # Input WhoScored match id
-match_id = '1640902'
+match_id = '1648459'
 
 # Select year
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'EFLC'
 
 # Select team codes
-home_team = 'Chelsea'
-away_team = 'Fulham'
+home_team = 'Blackpool'
+away_team = 'Stoke'
 
 # Team name to print
 home_team_print = None
