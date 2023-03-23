@@ -8,6 +8,10 @@
 /data_directory/whoscored_data/2019_20/
 /data_directory/whoscored_data/2018_19/
 /data_directory/whoscored_data/2017_18/
+/data_directory/whoscored_data/2016_17/
+/data_directory/whoscored_data/2015_16/
+/data_directory/whoscored_data/2014_15/
+/data_directory/whoscored_data/2013_14/
 /projects/00_data_import_and_misc_work/import_data_statsbomb.py
 /projects/00_data_import_and_misc_work/check_whoscored_data_volume.py
 /projects/01_wc2018_box2box_mids_statsbomb/worldcup_b2b_mids/
