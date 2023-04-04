@@ -22,12 +22,6 @@ create_player_list(lineups, include_mins=False)
 
 group_player_events(events, player_data, group_type='count', event_types=None, primary_event_name='Column Name'):
     Aggregate event types per player, and add to player information dataframe.
-
-find_offensive_actions(events)
-    Return dataframe of in-play offensive actions from event data
-
-find_defensive_actions(events)
-    Return dataframe of in-play defensive actions from event data.
 """
 
 import numpy as np
@@ -384,7 +378,7 @@ def create_player_list(lineups, additional_cols=None, pass_extra=None):
     return playerinfo_df
 
 
-def group_player_events(events, player_data, group_type='count', event_types=None, primary_event_name='Column Name'):
+def group_player_events(events, player_data, group_type='count', agg_columns=None, primary_event_name='Column Name'):
     """ Aggregate event types per player, and add to player information dataframe
 
     Function to read a statsbomb-style events dataframe (single or multiple matches) and return a dataframe of
@@ -396,7 +390,7 @@ def group_player_events(events, player_data, group_type='count', event_types=Non
         player_data (pandas.DataFrame): statsbomb-style dataframe of player information. Must include a 'player_name'
                                         column.
         group_type (string, optional): aggregation method, can be set to 'sum' or 'count'. 'count' by default.
-        event_types (list, optional): list of columns in event to aggregate, additional to the main aggregation event.
+        agg_columns (list, optional): list of columns in event to aggregate, for sum or mean aggregation.
         primary_event_name (string, optional): name of main event type being aggregated (e.g. 'pass'). Used to name the
                                            aggregated column within player_data dataframe.
 
@@ -404,9 +398,9 @@ def group_player_events(events, player_data, group_type='count', event_types=Non
         pandas.DataFrame: statsbomb-style dataframe of player information, including aggregated data.
     """
 
-    # Specify event_types as list if not assigned
-    if event_types is None:
-        event_types = list()
+    # Specify agg_columns as list if not assigned
+    if agg_columns is None:
+        agg_columns = list()
 
     # Initialise output dataframe
     player_data_out = player_data.copy()
@@ -414,78 +408,17 @@ def group_player_events(events, player_data, group_type='count', event_types=Non
     # Perform aggregation based on grouping type input
     if group_type == 'count':
         grouped_events = events.groupby('player_id', axis=0).count()
-        selected_events = grouped_events[event_types].copy()
+        selected_events = grouped_events[agg_columns].copy()
         selected_events.loc[:, primary_event_name] = grouped_events['match_id']
     elif group_type == 'sum':
         grouped_events = events.groupby('player_id', axis=0).sum()
-        selected_events = grouped_events[event_types].copy()
+        selected_events = grouped_events[agg_columns].copy()
     elif group_type == 'mean':
         grouped_events = events.groupby('player_id', axis=0).mean()
-        selected_events = grouped_events[event_types].copy()
+        selected_events = grouped_events[agg_columns].copy()
     else:
         selected_events = pd.DataFrame()
 
     # Merge into player information dataframe
     player_data_out = player_data_out.merge(selected_events, left_on='player_id', right_index=True, how='outer')
     return player_data_out
-
-
-def find_offensive_actions(events):
-    """ Return dataframe of in-play offensive actions from event data.
-
-    Function to find all in-play offensive actions within a statsbomb-style events dataframe (single or multiple
-    matches), and return as a new dataframe.
-
-    Args:
-        events (pandas.DataFrame): statsbomb-style dataframe of event data. Events can be from multiple matches.
-
-    Returns:
-        pandas.DataFrame: statsbomb-style dataframe of offensive actions.
-    """
-
-    # Define and filter offensive events
-    offensive_actions = ['Carry', 'Dribble', 'Foul Won', 'Pass', 'Shot']
-    offensive_action_df = events[events['type'].isin(offensive_actions)].reset_index(drop=True)
-
-    # Remove defensive foul won
-    offensive_action_df = offensive_action_df.drop(offensive_action_df[offensive_action_df['foul_won_defensive']
-                                                                       == True].index)
-
-    # Remove passes from set pieces
-    offensive_action_df = offensive_action_df.drop(offensive_action_df[offensive_action_df['pass_type']
-                                                   .isin(['Corner', 'Free Kick', 'Throw-in'])].index)
-
-    # Remove shots from set pieces
-    offensive_action_df = offensive_action_df.drop(offensive_action_df[(offensive_action_df['shot_type'] != 'Open Play')
-                                                                       & (offensive_action_df['type'] == 'Shot')].index)
-
-    return offensive_action_df
-
-
-def find_defensive_actions(events):
-    """ Return dataframe of in-play defensive actions from event data.
-
-    Function to find all in-play defensive actions within a statsbomb-style events dataframe (single or multiple
-    matches), and return as a new dataframe.
-
-    Args:
-        events (pandas.DataFrame): statsbomb-style dataframe of event data. Events can be from multiple matches.
-
-    Returns:
-        pandas.DataFrame: statsbomb-style dataframe of defensive actions.
-    """
-
-    # Define and filter defensive events
-    defensive_actions = ['Ball Recovery', 'Block', 'Clearance', 'Interception', 'Pressure', 'Duel', '50/50', 'Foul Won']
-    defensive_action_df = events[events['type'].isin(defensive_actions)].reset_index(drop=True)
-
-    # Remove offensive team block
-    defensive_action_df = defensive_action_df.drop(defensive_action_df[defensive_action_df['block_offensive']
-                                                                       == True].index)
-
-    # Remove offensive foul won
-    defensive_action_df = defensive_action_df.drop(defensive_action_df[(defensive_action_df['foul_won_defensive'] !=
-                                                                        True) & (defensive_action_df['type'] ==
-                                                                                 'Foul Won')].index)
-
-    return defensive_action_df
