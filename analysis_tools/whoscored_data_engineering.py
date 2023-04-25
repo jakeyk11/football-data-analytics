@@ -432,7 +432,7 @@ def find_offensive_actions(events_df):
 
     # Define and filter offensive events
     offensive_actions = ['BallTouch', 'TakeOn', 'Pass', 'OffsidePass', 'MissedShots', 'SavedShot', 'Goal', 'Carry']
-    offensive_action_df = events_df[events_df['eventType'].isin(offensive_actions)].reset_index(drop=True)
+    offensive_action_df = events_df[(events_df['eventType'].isin(offensive_actions)) & (events_df['satisfiedEventsTypes'].apply(lambda x: not (31 in x or 34 in x or 212 in x)))]
 
     return offensive_action_df
 

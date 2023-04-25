@@ -5,17 +5,11 @@ Functions
 pre_assist(events):
     Calculate pre-assists from whoscored-style events dataframe, and returns with pre_assist column
 
-progressive_pass(single_event, inplay=True, successful_only=True)
-    Identify progressive pass from WhoScored-style pass event.
+progressive_action(single_event, inplay=True, successful_only=True)
+    Identify progressive pass or carry from WhoScored-style event.
 
-progressive_carry(single_event, successful_only=True):
-    Identify progressive carry from WhoScored-style carry event.
-
-pass_into_box(single_event, inplay=True, successful_only=True):
-    Identify successful pass into box from whoscored-style pass event.
-
-carry_into_box(single_event, successful_only=True):
-    Identify successful carry into box from whoscored-style carry event.
+box_entry(single_event, inplay=True, successful_only=True):
+    Identify pass or carry into box from whoscored-style event.
 
 create_convex_hull(events_df, name='default', min_events=3, include_percent=100, pitch_area = 10000):
     Create a dataframe of convex hull information from statsbomb-style event data.
@@ -81,27 +75,27 @@ def pre_assist(events):
     return events_out
 
 
-def progressive_pass(single_event, inplay=True, successful_only=True):
-    """ Identify progressive pass from WhoScored-style pass event.
+def progressive_action(single_event, inplay=True, successful_only=True):
+    """ Identify progressive pass or carry from WhoScored-style event.
 
-    Function to identify progressive passes. A pass is considered progressive if the distance between the
+    Function to identify progressive actions. An action is considered progressive if the distance between the
     starting point and the next touch is: (i) at least 30 meters closer to the opponent’s goal if the starting and
     finishing points are within a team’s own half, (ii) at least 15 meters closer to the opponent’s goal if the
     starting and finishing points are in different halves, (iii) at least 10 meters closer to the opponent’s goal if
     the starting and finishing points are in the opponent’s half. The function takes in a single event and returns a
-    boolean (True = successful progressive pass.) This function is best used with the dataframe apply method.
+    boolean (True = successful progressive action.) This function is best used with the dataframe apply method.
 
     Args:
         single_event (pandas.Series): series corresponding to a single event (row) from WhoScored-style event dataframe.
         inplay (bool, optional): selection of whether to include 'in-play' events only. True by default.
-        successful_only (bool, optional): selection of whether to only include successful passes. True by default
+        successful_only (bool, optional): selection of whether to only include successful actions. True by default
 
     Returns:
-        bool: True = progressive pass, nan = non-progressive pass, unsuccessful progressive pass or not a pass
+        bool: True = progressive action, nan = non-progressive action, unsuccessful action or not a pass/carry
     """
 
     # Determine if event is pass
-    if single_event['eventType'] == 'Pass':
+    if single_event['eventType'] in ['Carry', 'Pass']:
 
         # Check success (if successful_only = True)
         if successful_only:
@@ -111,7 +105,8 @@ def progressive_pass(single_event, inplay=True, successful_only=True):
 
         # Check pass made in-play (if inplay = True)
         if inplay:
-            check_inplay = not any(item in single_event['satisfiedEventsTypes'] for item in [48, 50, 51, 42, 44, 45, 31, 34, 212])
+            check_inplay = not any(item in single_event['satisfiedEventsTypes'] for item in [48, 50, 51, 42, 44,
+                                                                                             45, 31, 34, 212])
         else:
             check_inplay = True
 
@@ -141,77 +136,24 @@ def progressive_pass(single_event, inplay=True, successful_only=True):
         return float('nan')
 
 
-def progressive_carry(single_event, successful_only=True):
-    """ Identify progressive carry from WhoScored-style carry event.
+def box_entry(single_event, inplay=True, successful_only=True):
+    """ Identify pass and carry into box from whoscored-style event.
 
-    Function to identify progressive carries. A carry is considered progressive if the distance between the
-    starting point and the end position is: (i) at least 30 meters closer to the opponent’s goal if the starting and
-    finishing points are within a team’s own half, (ii) at least 15 meters closer to the opponent’s goal if the
-    starting and finishing points are in different halves, (iii) at least 10 meters closer to the opponent’s goal if
-    the starting and finishing points are in the opponent’s half. The function takes in a single event and returns a
-    boolean (True = successful progressive carry.) This function is best used with the dataframe apply method.
-
-    Args:
-        single_event (pandas.Series): series corresponding to a single event (row) from WhoScored-style event dataframe.
-        successful_only (bool, optional): selection of whether to only include successful carries. True by default
-
-    Returns:
-        bool: True = progressive carry, nan = non-progressive carry, unsuccessful progressive carry or not a carry
-    """
-
-    # Determine if event is pass
-    if single_event['eventType'] == 'Carry':
-
-        # Check success (if successful_only = True)
-        if successful_only:
-            check_success = single_event['outcomeType'] == 'Successful'
-        else:
-            check_success = True
-
-        # Determine pass start and end position in yards (assuming standard pitch), and determine whether progressive
-        x_startpos = 120*single_event['x']/100
-        y_startpos = 80*single_event['y']/100
-        x_endpos = 120*single_event['endX']/100
-        y_endpos = 80*single_event['endY']/100
-        delta_goal_dist = (np.sqrt((120 - x_startpos) ** 2 + (40 - y_startpos) ** 2) -
-                           np.sqrt((120 - x_endpos) ** 2 + (40 - y_endpos) ** 2))
-
-        # At least 30m closer to the opponent’s goal if the starting and finishing points are within a team’s own half
-        if check_success and (x_startpos < 60 and x_endpos < 60) and delta_goal_dist >= 32.8:
-            return True
-
-        # At least 15m closer to the opponent’s goal if the starting and finishing points are in different halves
-        elif check_success and (x_startpos < 60 and x_endpos >= 60) and delta_goal_dist >= 16.4:
-            return True
-
-        # At least 10m closer to the opponent’s goal if the starting and finishing points are in the opponent’s half
-        elif check_success and (x_startpos >= 60 and x_endpos >= 60) and delta_goal_dist >= 10.94:
-            return True
-        else:
-            return float('nan')
-
-    else:
-        return float('nan')
-
-
-def pass_into_box(single_event, inplay=True, successful_only=True):
-    """ Identify successful pass into box from whoscored-style pass event.
-
-    Function to identify successful passes that end up in the opposition box. The function takes in a single event,
-    and returns a boolean (True = successful pass into the box.) This function is best used with the dataframe apply
-    method.
+    Function to identify successful passes and carriesthat end up in the opposition box. The function takes in a single
+    event, and returns a boolean (True = successful action into the box.) This function is best used with the dataframe
+    apply method.
 
     Args:
         single_event (pandas.Series): series corresponding to a single event (row) from whoscored-style event dataframe.
         inplay (bool, optional): selection of whether to include 'in-play' events only. True by default.
-        successful_only (bool, optional): selection of whether to only include successful passes. True by default
+        successful_only (bool, optional): selection of whether to only include successful events. True by default
 
     Returns:
-        bool: True = successful pass into the box, nan = not box pass, unsuccessful pass or not a pass.
+        bool: True = successful action into the box, nan = not box action, unsuccessful action or not a pass/carry.
     """
 
     # Determine if event is pass and check pass success
-    if single_event['eventType'] == 'Pass':
+    if single_event['eventType'] in ['Pass', 'Carry']:
 
         # Check success (if successful_only = True)
         if successful_only:
@@ -221,50 +163,20 @@ def pass_into_box(single_event, inplay=True, successful_only=True):
 
         # Check pass made in-play (if inplay = True)
         if inplay:
-            check_inplay = not any(item in single_event['satisfiedEventsTypes'] for item in [48, 50, 51, 42, 44, 45, 31, 34, 212])
+            check_inplay = not any(item in single_event['satisfiedEventsTypes'] for item in [48, 50, 51, 42, 44,
+                                                                                             45, 31, 34, 212])
         else:
             check_inplay = True
 
         # Determine pass end position, and whether it's a successful pass into box
-        x_position = 120 * single_event['endX'] / 100
-        y_position = 80 * single_event['endY'] / 100
-        if (check_success and check_inplay) and (x_position >= 102) and (18 <= y_position <= 62):
-            return True
-        else:
-            return float('nan')
+        x_position = single_event['x']
+        y_position = single_event['y']
+        x_position_end = single_event['endX']
+        y_position_end = single_event['endY']
 
-    else:
-        return float('nan')
-
-
-def carry_into_box(single_event, successful_only=True):
-    """ Identify successful carry into box from whoscored-style pass event.
-
-    Function to identify successful carries that end up in the opposition box. The function takes in a single event,
-    and returns a boolean (True = successful carry into the box.) This function is best used with the dataframe apply
-    method.
-
-    Args:
-        single_event (pandas.Series): series corresponding to a single event (row) from whoscored-style event dataframe.
-        successful_only (bool, optional): selection of whether to only include successful carries. True by default
-
-    Returns:
-        bool: True = successful carry into the box, nan = not box carry, unsuccessful carry or not a carry.
-    """
-
-    # Determine if event is pass and check pass success
-    if single_event['eventType'] == 'Carry':
-
-        # Check success (if successful_only = True)
-        if successful_only:
-            check_success = single_event['outcomeType'] == 'Successful'
-        else:
-            check_success = True
-
-        # Determine pass end position, and whether it's a successful pass into box
-        x_position = 120 * single_event['endX'] / 100
-        y_position = 80 * single_event['endY'] / 100
-        if check_success and (x_position >= 102) and (18 <= y_position <= 62):
+        # Check whether action moves ball into the box
+        if (check_success and check_inplay) and (x_position_end >= 83) and (21.1 <= y_position_end <= 78.9) and \
+                ((x_position < 83) or ((y_position < 21.1) or (y_position > 78.9))):
             return True
         else:
             return float('nan')
