@@ -39,11 +39,20 @@ def get_competition_logo(competition, year=None, logo_brighten=False):
     if competition in ['EFLC', 'EFL Championship', 'Championship', 'GB2']:
         url = "https://brandlogos.net/wp-content/uploads/2022/07/efl_championship-logo_brandlogos.net_e58ej.png"
 
+    if competition in ['EFL1', 'EFL League One', 'League One', 'GB3']:
+        url = "https://a3.espncdn.com/combiner/i?img=%2Fi%2Fleaguelogos%2Fsoccer%2F500%2F25.png"
+
+    if competition in ['EFL2', 'EFL League Two', 'League Two', 'GB4']:
+        url = "https://a4.espncdn.com/combiner/i?img=%2Fi%2Fleaguelogos%2Fsoccer%2F500%2F26.png"
+
+    if competition in ['SPL', 'Scottish Premier League', 'Scotland Premier League', 'SC1']:
+        url = "https://static.wikia.nocookie.net/logopedia/images/1/16/CinchPremiership.png/"
+
     if competition in ['La Liga', 'La_Liga', 'La Liga Santander', 'ES1']:
         url = "https://assets.laliga.com/assets/logos/laliga-v/laliga-v-1200x1200.png"
 
     if competition in ['Bundesliga', 'Fußball-Bundesliga', 'Fußball Bundesliga', '1 Bundesliga', '1. Bundesliga', 'L1']:
-        url = "https://upload.wikimedia.org/wikipedia/en/thumb/d/df/Bundesliga_logo_%282017%29.svg/255px-Bundesliga_logo_%282017%29.svg.png"
+        url = "https://1000logos.net/wp-content/uploads/2020/09/Bundesliga-Logo.png"
 
     if competition in ['Serie A', 'Serie_A', 'Serie A TIM', 'Lega Serie A', 'IT1']:
         url = "https://1000logos.net/wp-content/uploads/2021/10/Italian-Serie-A-logo.png"
@@ -148,6 +157,7 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Bayern', 'Bayern Munich', 'FC Bayern Munich', 'FC Bayern München', 'Bayern München']:
         url = "https://www.footballkitarchive.com/static/logos/Re6G2mZRQ8Q0pxb/bayern-munchen-2017-logo.png"
+        cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Blues')
 
     if team in ['Belgium']:
         url = "https://cdn.countryflags.com/thumbs/belgium/flag-round-250.png"
@@ -181,6 +191,9 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://1000logos.net/wp-content/uploads/2018/06/AFC-Bournemouth-Logo-768x432.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Blues')
 
+    if team in ['Bradford', 'Bradford City', 'Bradford City AFC']:
+        url = "https://www.aroundthegrounds.org/media/1udayj5x/bradford.png"
+
     if team in ['Brazil']:
         url = "https://cdn.countryflags.com/thumbs/brazil/flag-round-250.png"
         cmap = cm.get_cmap('YlOrBr') if hoa == 'home' else cm.get_cmap('Blues')
@@ -196,6 +209,9 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['Bristol City', 'Bristol']:
         url = "https://www.aca-creative.co.uk/wp-content/uploads/2023/02/Bristol-City-980x980.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('gray')
+
+    if team in ['Bristol Rovers']:
+        url = "https://png2.cleanpng.com/sh/295eb3f6febddd74810600650c8308b2/L0KzQYm4UcE4N6J4jZH0aYP2gLBuTfJzcaR5h942cnB5dcP6TfYua15yfd94cnnkfH76lPFlcaZyRddvbD33grF3iQkubZcyTdRvMHO7RbK3VPFjOmIzUaU8OUS5R4m4VcQzPWE7TaoBMEG8QXB3jvc=/kisspng-bristol-rovers-f-c-memorial-stadium-efl-trophy-ef-5bf0c85a04ab21.9339467815425065860191.png"
 
     if team in ['Burnley FC', 'Burnley']:
         url = "https://1000logos.net/wp-content/uploads/2018/06/Burnley-logo-768x432.png"
@@ -219,9 +235,18 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['RC Celta de Vigo', 'RC Celta Vigo', 'Celta Vigo', 'RC Celta']:
         url = "https://img.uefa.com/imgml/TP/teams/logos/100x100/53043.png"
 
+    if team in ['Celtic', 'The Celtic Football Club', 'Celtic FC']:
+        url = "https://1000logos.net/wp-content/uploads/2020/09/Celtic-logo.png"
+
+    if team in ['Charlton', 'Charlton Athletic FC', 'Charlton Athletic']:
+        url = "https://www.charltonafc.com/themes/custom/charlton/files/charlton@3x.png"
+
     if team in ['Chelsea', 'Chelsea FC']:
         url = "https://logos-world.net/wp-content/uploads/2020/05/Chelsea-Logo.png"
         cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('YlOrBr')
+
+    if team in ['Colchester Utd', 'Colchester United FC', 'Colchester', 'Colchester United']:
+        url = "https://secure.cache.images.core.optasports.com/soccer/teams/150x150/714.png"
 
     if team in ['Costa Rica']:
         url = "https://cdn.countryflags.com/thumbs/costa-rica/flag-round-250.png"
@@ -242,9 +267,15 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://upload.wikimedia.org/wikipedia/hif/c/c1/Crystal_Palace_FC_logo.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Blues')
 
+    if team in ['Derby', 'Derby County', 'Derby County FC', 'Derby FC']:
+        url = "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/374.png"
+
     if team in ['Denmark']:
         url = "https://cdn.countryflags.com/thumbs/denmark/flag-round-250.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Greys')
+
+    if team in ['Dundee', 'Dundee Utd', 'Dundee United']:
+        url = "https://1.bp.blogspot.com/-WldxYkjszRo/X11HMOt_BPI/AAAAAAAAE4g/pv7COcN4ctkBcWKFvlZdf2paYx06KPQIgCLcBGAsYHQ/s1600/Dundee%2BUnited%2BF.%2BC..png"
 
     if team in ['Ecuador']:
         url = "https://cdn.countryflags.com/thumbs/ecuador/flag-round-250.png"
@@ -263,6 +294,9 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Fiorentina', 'ACF Fiorentina']:
         url = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/2022_ACF_Fiorentina_logo.svg/240px-2022_ACF_Fiorentina_logo.svg.png"
+
+    if team in ['Forest Green', 'Forest Green Rovers FC', 'Forest Green Rovers']:
+        url = "https://www.fgr.co.uk/static/fgr-logo-244366e93842f383f8a3b515ed76edc3.png"
 
     if team in ['France']:
         url = "https://cdn.countryflags.com/thumbs/france/flag-round-250.png"
@@ -289,11 +323,20 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['Girona', 'Girona FC']:
         url = "https://d2zywfiolv4f83.cloudfront.net/img/teams/2783.png"
 
+    if team in ['Hartlepool', 'Hartlepool United FC', 'Hartlepool United']:
+        url = "https://static.wikia.nocookie.net/fifa/images/c/c5/Hartlepool_United_FC.png"
+
+    if team in ['Heart of Midlothian FC', 'Heart of Midlothian', 'Hearts', 'Hearts FC']:
+        url = "https://cdn.freebiesupply.com/logos/large/2x/hearts-logo-png-transparent.png"
+
     if team in ['Hellas Verona FC', 'Hellas Verona', 'Verona']:
         url = "https://hellas.hqcdn.it/media?f=2020/09/verona-alt.png"
 
     if team in ['Hertha BSC', 'Hertha Berlin', 'Herta', 'Hertha BSC Berlin']:
         url = "https://b.fssta.com/uploads/application/soccer/team-logos/hertha-bsc-berlin.vresize.220.220.medium.0.png"
+
+    if team in ['Hibernian FC', 'Hibernian', 'Hibs']:
+        url = "https://cdn.freebiesupply.com/logos/large/2x/hibernian-edinburgh-fc-logo-png-transparent.png"
 
     if team in ['Hoffenheim', 'TSG 1899 Hoffenheim']:
         url = "https://www.tsg-hoffenheim.de/resources/themes/1899relaunch/images/Hoffenheim_Logo.png"
@@ -312,6 +355,9 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['Inter', 'Inter Milan', 'FC Internazionale Milano']:
         url = "https://cdn.resfu.com/img_data/equipos/60505.png"
 
+    if team in ['Ipswich', 'Ipswich Town FC', 'Ipswich Town']:
+        url = "https://brandslogos.com/wp-content/uploads/images/large/ipswich-town-fc-logo.png"
+
     if team in ['IR Iran', 'Iran']:
         url = "https://cdn.countryflags.com/thumbs/iran/flag-round-250.png"
         cmap = cm.get_cmap('gray') if hoa == 'home' else cm.get_cmap('Reds')
@@ -322,6 +368,9 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Juventus', 'Juventus FC']:
         url = "https://cdn.freebiesupply.com/images/large/2x/juventus-logo-png-transparent.png"
+
+    if team in ['Kilmarnock FC', 'Kilmarnock']:
+        url = "https://kilmarnockfc.co.uk/club-crests/crest-t64.png"
 
     if team in ['1. FC Köln', 'FC Köln', 'Köln', '1. FC Koln', 'FC Koln', 'Koln']:
         url = "http://as01.epimg.net/img/comunes/fotos/fichas/equipos/large/94.png"
@@ -358,9 +407,12 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://logos-world.net/wp-content/uploads/2020/06/Manchester-City-Logo.png"
         cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('gray')
 
-    if team in ['Manchester United', 'Manchester United FC', 'Man United', 'Man Utd', 'Manchested Utd']:
+    if team in ['Manchester United', 'Manchester United FC', 'Man United', 'Man Utd', 'Manchester Utd']:
         url = "https://logos-world.net/wp-content/uploads/2020/06/Manchester-United-logo-700x394.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('gray')
+
+    if team in ['Mansfield', 'Mansfield Town', 'Mansfield Town FC']:
+        url = "https://ktckts-cdn.com/76610b61-f709-4947-afe3-124c15ca0c76/34c70326-80ee-40ae-873b-7a6dd5ed08c3.png"
 
     if team in ['Mexico']:
         url = "https://cdn.countryflags.com/thumbs/mexico/flag-round-250.png"
@@ -421,6 +473,9 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['Paris Saint-Germain F.C.', 'Paris Saint-Germain', 'PSG']:
         url = "https://logos-world.net/wp-content/uploads/2020/06/PSG-Logo.png"
 
+    if team in ['Plymouth', 'Plymouth Argyle', 'Plymouth Argyle FC']:
+        url = "https://www.plymouthonlinedirectory.com/image/964/Plymouth-Argyle-Logo/original.png"
+
     if team in ['Poland']:
         url = "https://cdn.countryflags.com/thumbs/poland/flag-round-250.png"
         cmap = cm.get_cmap('Greys') if hoa == 'home' else cm.get_cmap('Reds')
@@ -428,6 +483,12 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['Portugal']:
         url = "https://cdn.countryflags.com/thumbs/portugal/flag-round-250.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Greys')
+
+    if team in ['Portsmouth', 'Portsmouth FC']:
+        url = "https://img.uefa.com/imgml/TP/teams/logos/140x140/84297.png"
+
+    if team in ['Port Vale', 'Port Vale FC']:
+        url = "https://s.yimg.com/cv/apiv2/default/soccer/20181213/500x500/PortVale_wbg.png"
 
     if team in ['Preston', 'Preston North End', 'Preston FC', 'Preston North End FC', 'PNE', 'PNE FC']:
         url = "https://s27807.pcdn.co/wp-content/uploads/Preston-North-End-LT800-1.png"
@@ -440,6 +501,9 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['Queens Park Rangers', 'Queens Park Rangers FC', 'QPR']:
         url = "https://cdn.bleacherreport.net/images/team_logos/328x328/queens_park_rangers.png"
         cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('BuPu')
+
+    if team in ['Rangers', 'Glasgow Rangers', 'Rangers FC']:
+        url = "https://logos-world.net/wp-content/uploads/2020/11/Rangers-Logo.png"
 
     if team in ['Rayo Vallecano', 'Rayo Vallecano de Madrid']:
         url = "https://seeklogo.com/images/R/Rayo_Vallecano-logo-83EC841FE5-seeklogo.com.png"
@@ -498,6 +562,9 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Sheffield_United_FC_logo.svg/1200px-Sheffield_United_FC_logo.svg.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Greys')
 
+    if team in ['Sheffield Wednesday', 'Sheffield Wednesday FC', 'Sheffield Wed', 'Sheff Wed']:
+        url = "https://cdn.pafc.co.uk/icons/team/dark/1x/id/674.png"
+
     if team in ['Southampton', 'Southampton FC']:
         url = "https://1000logos.net/wp-content/uploads/2018/07/Southampton-Logo-640x400.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('gray')
@@ -525,6 +592,9 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Strasbourg', 'RC Strasbourg Alsace FC', 'RC Strasbourg']:
         url = "https://ssl.gstatic.com/onebox/media/sports/logos/Eb9xtMpUy8FXQ0RCKvLxcg_96x96.png"
+
+    if team in ['Stockport', 'Stockport County FC', 'Stockport County']:
+        url = "https://1.bp.blogspot.com/-mTgOgDlBQkE/XtjebiqdRxI/AAAAAAABAsE/cv05Zge2EMMw-7wLWRlxDyJ7Q31vnhpjwCLcBGAsYHQ/s320/Stockport%2BCounty-ING.png"
 
     if team in ['Stuttgart', 'VfB Stuttgart', 'VfB Stuttgart 1893']:
         url = "https://www.vfb.de/?proxy=img/vfb_logo.png"
@@ -587,6 +657,9 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['West Ham United', 'West Ham United FC', 'West Ham', 'West Ham Utd']:
         url = "https://logos-world.net/wp-content/uploads/2020/06/West-Ham-Logo.png"
         cmap = cm.get_cmap('BuPu') if hoa == 'home' else cm.get_cmap('Blues')
+
+    if team in ['AFC Wimbledon', 'Wimbledon']:
+        url = "https://cdn.shopify.com/s/files/1/0405/8438/0574/files/AFCWimbledon_Logo_80x.png"
 
     if team in ['Wigan', 'Wigan Athletic', 'Wigan FC', 'Wigan Athletic FC']:
         url = "https://cdn.freebiesupply.com/logos/large/2x/wigan-athletic-logo-png-transparent.png"

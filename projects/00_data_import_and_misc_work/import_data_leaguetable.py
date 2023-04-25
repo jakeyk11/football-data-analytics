@@ -16,7 +16,7 @@ import analysis_tools.get_football_data as gfd
 # %% User inputs
 
 # Input league identifier and starting year of season
-league = "Ligue_1"
+league = "EFLC"
 start_year = '2021'
 
 # Set up folder path
