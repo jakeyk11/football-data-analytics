@@ -45,21 +45,21 @@ import analysis_tools.logos_and_badges as lab
 # %% User inputs
 
 # Input WhoScored match id
-match_id = '1648459'
+match_id = '1720701'
 
 # Select year
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EFLC'
+league = 'UCL'
 
 # Select team codes
-home_team = 'Blackpool'
-away_team = 'Stoke'
+home_team = 'Man City'
+away_team = 'Bayern'
 
 # Team name to print
 home_team_print = None
-away_team_print = None
+away_team_print = 'Bayern Munich'
 
 # Pass flow zone type
 zone_type = 'jdp_custom'
@@ -70,7 +70,7 @@ central_pct = 50
 # %% Logos, colours and printed names
 
 home_logo, home_colourmap = lab.get_team_badge_and_colour(home_team, 'home')
-away_logo, away_colourmap = lab.get_team_badge_and_colour(away_team, 'away')
+away_logo, away_colourmap = lab.get_team_badge_and_colour(away_team, 'home')
 
 if home_team_print is None:
     home_team_print = home_team
@@ -112,7 +112,6 @@ players_df = wde.minutes_played(players_df, events_df)
 
 # Calculate longest consistent xi
 players_df = wde.longest_xi(players_df)
-
 
 # %% Aggregate data per player
 
@@ -263,7 +262,8 @@ for idx, team in enumerate(players_df['teamId'].unique()):
 
 # Title text
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'FIFA World Cup'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'FIFA World Cup',
+           'UCL': 'Champions League'}
 
 title_text = f"{leagues[league]} - {year}/{int(year) + 1}" if not league in ['World_Cup'] else f"{leagues[league]} - {year}"
 subtitle_text = f"{home_team_print} {home_score}-{away_score} {away_team_print}"

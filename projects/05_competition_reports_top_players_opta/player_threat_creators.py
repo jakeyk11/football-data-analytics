@@ -54,7 +54,7 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EFLC'
+league = 'EPL'
 
 # Select position to exclude
 pos_exclude=['GK']
@@ -63,7 +63,7 @@ pos_exclude=['GK']
 pos_input = 'outfield players'
 
 # Input run-date
-run_date = '09/03/2023'
+run_date = '25/04/2023'
 
 # Normalisation mode
 norm_mode = '_90'
@@ -72,7 +72,7 @@ norm_mode = '_90'
 min_mins = 900
 
 # Brighten logo
-logo_brighten = False
+logo_brighten = True
 
 # Threat pitch grid mode (3 = top 3, else = top 1. dense = dense grid, else = sparse grid)
 pitch_mode = '1'
@@ -114,21 +114,26 @@ for file in files:
     else:
         pass
 
-# %% Pre-process data
+# %% Tag in-play successful box entries and progressive acions
 
-# Add cumulative minutes information
-events_df = wde.cumulative_match_mins(events_df)
-players_df = wde.minutes_played(players_df, events_df)
+events_df['progressive'] = events_df.apply(wce.progressive_action, axis=1, inplay = True, successful_only = True)
+events_df['box_entry'] = events_df.apply(wce.box_entry, axis=1, inplay = True, successful_only = True)
 
-# Add ball carries
-events_df = wce.insert_ball_carries(events_df)
-
-# Add expected threat information
-events_df = wce.get_xthreat(events_df, interpolate = True)
-
-# %% Aggregate data per player
+# %% Create player dataframe and account for players that have played for multiple teams
 
 playerinfo_df = wde.create_player_list(players_df)
+
+# Sum mins played for each player, into new dataframe
+playerinfo_mp = playerinfo_df.groupby(by='playerId', axis=0).sum()
+
+# Retain the player entry against the club he's played the most minutes for
+playerinfo_df = playerinfo_df.sort_values('mins_played', ascending = False)
+playerinfo_df = playerinfo_df[~playerinfo_df.index.duplicated(keep='first')]
+
+# Remove minutes played info and use the summed minutes
+playerinfo_df = playerinfo_df.drop('mins_played', axis=1).join(playerinfo_mp)
+
+# %% Aggregate data per player
 
 # Carries and total xT
 all_carries = events_df[events_df['eventType']=='Carry']
@@ -142,15 +147,30 @@ playerinfo_df = wde.group_player_events(all_passes, playerinfo_df, primary_event
 playerinfo_df = wde.group_player_events(all_passes, playerinfo_df, group_type='sum', event_types = ['xThreat', 'xThreat_gen'])
 playerinfo_df.rename(columns = {'xThreat':'xThreat_pass','xThreat_gen':'xThreat_gen_pass'}, inplace=True)
 
-# Carries and xT generated
+# Box entries and progresive actions
+playerinfo_df = wde.group_player_events(all_passes[all_passes['box_entry']==True], playerinfo_df, primary_event_name='pass_into_box')
+playerinfo_df = wde.group_player_events(all_carries[all_carries['box_entry']==True], playerinfo_df, primary_event_name='carry_into_box')
+playerinfo_df = wde.group_player_events(all_passes[all_passes['progressive']==True], playerinfo_df, primary_event_name='progressive_pass')
+playerinfo_df = wde.group_player_events(all_carries[all_carries['progressive']==True], playerinfo_df, primary_event_name='progressive_carry')
+
+# Aggregate carries
 playerinfo_df['carries_90'] = round(90*playerinfo_df['carries']/playerinfo_df['mins_played'],2)
 playerinfo_df['xThreat_carry_90'] = round(90*playerinfo_df['xThreat_carry']/playerinfo_df['mins_played'],3)
 playerinfo_df['xThreat_gen_carry_90'] = round(90*playerinfo_df['xThreat_gen_carry']/playerinfo_df['mins_played'],3)
+playerinfo_df['box_carries_90'] = round(90*playerinfo_df['carry_into_box']/playerinfo_df['mins_played'],2)
+playerinfo_df['prog_carries_90'] = round(90*playerinfo_df['progressive_carry']/playerinfo_df['mins_played'],2)
 
-# Passes and xT generated
+# Aggregate passes
 playerinfo_df['passes_90'] =  round(90*playerinfo_df['passes']/playerinfo_df['mins_played'],2)
 playerinfo_df['xThreat_pass_90'] =  round(90*playerinfo_df['xThreat_pass']/playerinfo_df['mins_played'],3)
 playerinfo_df['xThreat_gen_pass_90'] =  round(90*playerinfo_df['xThreat_gen_pass']/playerinfo_df['mins_played'],3)
+playerinfo_df['box_passes_90'] = round(90*playerinfo_df['pass_into_box']/playerinfo_df['mins_played'],2)
+playerinfo_df['prog_passes_90'] = round(90*playerinfo_df['progressive_pass']/playerinfo_df['mins_played'],2)
+
+# Aggregate carries + passes
+playerinfo_df['box_actions'] = playerinfo_df['pass_into_box'] + playerinfo_df['carry_into_box']
+playerinfo_df['box_actions_90'] = playerinfo_df['box_passes_90'] + playerinfo_df['box_carries_90']
+playerinfo_df['prog_actions_90'] = playerinfo_df['prog_passes_90'] + playerinfo_df['prog_carries_90']
 
 # Threat creating events
 all_threat_events = pd.concat([all_carries, all_passes], axis = 0)
@@ -172,6 +192,8 @@ for player_id, player_details in playerinfo_df.iterrows():
 
 playerinfo_df = playerinfo_df[(playerinfo_df['mins_played']>=min_mins) & (~playerinfo_df['pos_type'].isin(pos_exclude))]
 playerinfo_df = playerinfo_df[~playerinfo_df.index.duplicated(keep='first')]
+
+playerinfo_df = playerinfo_df[playerinfo_df['name']!='João Cancelo']
 
 # %% Plot formatting
 
@@ -444,3 +466,88 @@ logo_ax.imshow(badge)
 # Save image
 fig.savefig(f"player_threat_creators/{league}-{year}-top_threat_creator_by_zone-{file_ext}-{run_date.replace('/','_')}", dpi=300)
 
+# %% ------- VISUAL 3 - TOP 20 BOX ENTRIES -------
+
+# Order dataframe
+be_sorted_df = playerinfo_df.sort_values('box_actions_90', ascending=False)
+
+# Define custom colourmap
+CustomCmap = mpl.colors.LinearSegmentedColormap.from_list("", ["#313332","#47516B", "#848178", "#B2A66F", "#FDE636"])
+
+# Set-up pitch subplots
+pitch = VerticalPitch(pitch_color='#313332', pitch_type='opta', line_color='white', linewidth=1, half=True, stripe=False)
+fig, ax = pitch.grid(nrows=4, ncols=5, grid_height=0.79, title_height = 0.15, endnote_height = 0.04, space=0.1, axis=False)
+fig.set_size_inches(12, 10)
+fig.set_facecolor('#313332')
+ax['pitch'] = ax['pitch'].reshape(-1)
+idx = 0
+
+# Iterate through top players
+for player_id, name in be_sorted_df.head(20).iterrows():
+    
+    # Get box entries
+    player_box_entries = events_df[(events_df['box_entry']==True) & (events_df['playerId'] == player_id)]
+    
+    # Format and print player name
+    format_name =  name['name'].split(' ')[0][0] + " " + name['name'].split(' ')[len(name['name'].split(' '))-1] if len(name['name'].split(' '))>1 else name['name']
+    ax['pitch'][idx].set_title(f"  {idx + 1}: {format_name}", loc = "left", color='w', fontsize = 10, pad=-2)
+
+    # Plot density of start positions of box entries
+    kde_plot = pitch.kdeplot(player_box_entries['x'], player_box_entries['y'], ax=ax['pitch'][idx],
+                              fill=True, levels=100, shade_lowest=True,
+                              cut=4, cmap=CustomCmap, zorder=0)
+    
+    # Scatter starting points
+    pitch.scatter(player_box_entries['x'], player_box_entries['y'], color = 'w', alpha = 0.4, s = 12, zorder=1, ax=ax['pitch'][idx])
+    
+    # Plot polygon within penalty box
+    ax['pitch'][idx].fill([21.1, 78.9, 78.9, 21.1], [83, 83, 100, 100], '#313332', alpha = 1, zorder=0)
+        
+    # Add text 
+    ax['pitch'][idx].text(96, 58, "Total:", fontsize=8, fontweight='bold', color='w', zorder=3)
+    ax['pitch'][idx].text(96, 53, f"{int(name['box_actions'])}", fontsize=8, color='w', zorder=3)
+    if norm_mode == '_90':
+        ax['pitch'][idx].text(4, 58, "/90 mins:", fontsize=8, fontweight='bold', color='w', zorder=3, ha = 'right')
+        ax['pitch'][idx].text(4, 53, f"{round(name['box_actions_90'],2)}", fontsize=8, color='w', zorder=3, ha = 'right')        
+    
+    team = name['team']
+    team_logo, _ = lab.get_team_badge_and_colour(team)
+            
+    ax_pos = ax['pitch'][idx].get_position()
+    
+    logo_ax = fig.add_axes([ax_pos.x1-0.03, ax_pos.y1-0.002, 0.025, 0.025])
+    logo_ax.axis("off")
+    logo_ax.imshow(team_logo)
+    
+    idx += 1
+
+# Title
+leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
+
+title_text = f"{leagues[league]} {year}/{int(year)+1} − Players Ranked by Box Entries per 90"
+subtitle_text = "Heatmaps showing <Distribution> in starting position of player box entries"
+subsubtitle_text = f"Box entry defined as in-play pass or carry that begins outside and ends inside the opposition box. Includes players with >{min_mins} total mins played."
+
+fig.text(0.11, 0.945, title_text, fontweight="bold", fontsize=16, color='w')
+htext.fig_text(0.11, 0.933, s=subtitle_text, fontweight="bold", fontsize=13, color='w',
+               highlight_textprops=[{"color": "yellow", "fontweight": 'bold'}])
+fig.text(0.11, 0.894, subsubtitle_text, fontweight="regular", fontsize=10, color='w')
+    
+# Add footer text
+fig.text(0.5, 0.02, "Created by Jake Kolliari (@_JKDS_). Data provided by Opta.",
+         fontstyle="italic", ha="center", fontsize=9, color="white")
+
+
+# Add competition logo
+ax = fig.add_axes([0.017, 0.88, 0.1, 0.1])
+ax.axis("off")
+ax.imshow(comp_logo)
+
+# Add twitter logo
+ax = fig.add_axes([0.94, 0.007, 0.03, 0.03])
+ax.axis("off")
+badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
+ax.imshow(badge)    
+
+fig.savefig(f"player_threat_creators/{league}-{year}-player-box-entries", dpi=300)
