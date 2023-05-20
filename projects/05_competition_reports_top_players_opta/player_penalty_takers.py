@@ -53,7 +53,7 @@ data_grab = [['La_Liga', '2021'],
              ['Ligue_1', '2020'],
              ['Ligue_1', '2019']]
 
-data_grab = [['World_Cup', '2022']]
+data_grab = [['EFLC', '2022']]
 
 # Min minutes played
 min_pens = 1
@@ -84,7 +84,8 @@ for data in data_grab:
 
 # Create title and subtitles
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
+           'EFL1': 'EFL League One', 'EFL2': 'EFL League Two'}
 
 # Add titles
 if mode == "europe_top_5":
@@ -315,7 +316,7 @@ for player_id, player in pentaker_df.head(12).iterrows():
         logo_delta -= -0.028
     idx += 1
 
-title_text = f"{title_str} {year_str} - Top 12 Players by Penalty Placement"
+title_text = f"{title_str} {year_str}/{int(year_str)+1} - Top 12 Players by Penalty Placement"
 subtitle_text = "Players ranked by mean distance of on-target penalties from Goalkeeper midriff"
 subsubtitle_text = f"Off target penalties are penalised by\nassigning a distance of 0 yards. Saved\npenalties are not penalised. Only\nplayers that have taken {min_pens}+ penalties\nare included."
 

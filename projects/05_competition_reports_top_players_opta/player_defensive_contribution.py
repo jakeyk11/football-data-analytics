@@ -57,14 +57,14 @@ pos_exclude=['GK']
 pos_input = ''
 
 # Input run-date
-run_date = '12/12/2023'
+run_date = '08/05/2023'
 
 # Normalisation (None, '_90', '_100opp_pass')
 norm_mode = '_100opp_pass'
 #norm_mode = '_90'
 
 # Min minutes played
-min_mins = 900
+min_mins = 1800
 
 # Brighten logo
 logo_brighten = False
@@ -103,9 +103,6 @@ for file in files:
 
 
 # %% Pre-process data
-
-# Add cumulative minutes information
-players_df = wde.minutes_played(players_df, events_df)
 
 # Calculate pass events that each player faces per game
 players_df = wde.events_while_playing(events_df, players_df, event_name = 'Pass', event_team = 'opposition')
@@ -179,8 +176,8 @@ right_ax_norm_plot = 0.99 * right_ax_plot / max(right_ax_plot)
 left_ax_quantile = left_ax_norm_plot.quantile([0.2,0.5,0.8]).tolist()
 right_ax_quantile = right_ax_norm_plot.quantile([0.2,0.5,0.8]).tolist()
 
-plot_quantile_left = left_ax_norm_plot.quantile([0,0.5,0.9]).tolist()
-plot_quantile_right = right_ax_norm_plot.quantile([0,0.5,0.9]).tolist()
+plot_quantile_left = left_ax_norm_plot.quantile([0,0.5,0.95]).tolist()
+plot_quantile_right = right_ax_norm_plot.quantile([0,0.5,0.95]).tolist()
 
 plot_player = playerinfo_df[(left_ax_norm_plot>plot_quantile_left[2]) | (right_ax_norm_plot>plot_quantile_right[2])] #| ((left_ax_norm_plot<plot_quantile_left[0]) | (right_ax_norm_plot<plot_quantile_right[0]))]
 
@@ -281,7 +278,7 @@ path_eff = [path_effects.Stroke(linewidth=1.5, foreground='#313332'), path_effec
 for i, player in plot_player.iterrows():
     format_name =  player['name'].split(' ')[0][0] + " " + player['name'].split(' ')[len(player['name'].split(' '))-1] if len(player['name'].split(' '))>1 else player['name']
     text.append(aux_ax.text(right_ax_norm_plot[i]+0.01, left_ax_norm_plot[i]+0.01, format_name, color='w', fontsize=7, zorder=3, path_effects = path_eff))
-adjustText.adjust_text(text, ax = aux_ax)
+adjustText.adjust_text(text, ax = ax)
 
 # Add axis shading
 aux_ax.fill([right_ax_quantile[0], right_ax_quantile[0], right_ax_quantile[2], right_ax_quantile[2]], [0, 100, 100, 0], color='grey', alpha = 0.15, zorder=0)
@@ -334,7 +331,8 @@ text_ax_bottom.set_ylim([0,1])
 
 # Create title and subtitles
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
+           'EFL1': 'EFL League 1', 'EFL2': 'EFL League 2'}
 
 title_text = f"{leagues[league]} {year}/{int(year) + 1}: Defensive Contributions"
 subtitle_text = "Possessions Won & Ball Recoveries - Outfield Players"

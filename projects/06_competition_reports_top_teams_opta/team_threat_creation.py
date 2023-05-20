@@ -40,16 +40,19 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'EFLC'
 
 # Input run-date
-run_date = '13/01/2023'
+run_date = '08/05/2023'
 
 # Select whether to label %
 label_pct = False
 
 # Logo brighten
-logo_brighten = True
+logo_brighten = False
+
+# Select whether to use team colours
+team_colour = False
 
 # %% Get competition logo
 
@@ -82,12 +85,7 @@ for file in files:
         players_df = pd.concat([players_df, match_players])
     else:
         pass
-    
-# %% Synethesise additional information
 
-events_df = wde.cumulative_match_mins(events_df)
-events_df = wce.insert_ball_carries(events_df)
-events_df = wce.get_xthreat(events_df, interpolate = True)
 
 # %% Isolate events of choice (in play only)
 
@@ -121,6 +119,10 @@ for team in teams:
 # Sort dictionary by xT/90
 team_xt_90 = sorted(team_xt_90.items(), key=lambda x: x[1], reverse=True)
 
+# %% Custom colormap
+
+CustomCmap = mpl.colors.LinearSegmentedColormap.from_list("", ["#313332","#47516B", "#848178", "#B2A66F", "#FDE636"])
+
 # %% Create visual
 
 # Overwrite rcparams
@@ -152,7 +154,13 @@ for team in team_xt_90:
 
     # Get team logo and colour
     team_logo, team_cmap = lab.get_team_badge_and_colour(team[0])
-
+    if len(team_name) > 14:
+        team_name = team_name[0:13] + '...'
+        
+    # Set team colour
+    if not team_colour:
+        team_cmap = CustomCmap
+    
     # Draw heatmap
     bin_statistic = pitch.bin_statistic(team_threat_creating_events['x'], team_threat_creating_events['y'],
                                         statistic='sum', bins=(6, 5), normalize=True, values = team_threat_creating_events['xThreat_gen'])
@@ -169,7 +177,7 @@ for team in team_xt_90:
     ax['pitch'][idx].text(24, 2, round(team[1],2), fontsize=10, color='w', zorder=3, path_effects = path_eff)
     
     # Set title
-    ax['pitch'][idx].set_title(f"  {idx + 1}:  {team[0]}", loc = "left", color='w', fontsize = 16)
+    ax['pitch'][idx].set_title(f"  {idx + 1}:  {team_name}", loc = "left", color='w', fontsize = 16)
             
     ax_pos = ax['pitch'][idx].get_position()
     
@@ -181,7 +189,8 @@ for team in team_xt_90:
     
 # Title
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
+           'EFL1': 'EFL League One', 'EFL2': 'EFL League Two'}
 
 title_text = f"{leagues[league]} {year}/{int(year)+1} - Teams Ranked by In-Play Threat Creation"
 subtitle_text = "Heatmaps showing Zones of <High Threat Creation> and <Low Threat Creation>"
@@ -189,7 +198,7 @@ subsubtitle_text = f"Pass, Carry and Dribble events included. Negative threat ev
 
 fig.text(0.12, 0.945, title_text, fontweight="bold", fontsize=20, color='w')
 htext.fig_text(0.12, 0.934, s=subtitle_text, fontweight="bold", fontsize=18, color='w',
-               highlight_textprops=[{"color": 'orange', "fontweight": 'bold'}, {"color": 'grey', "fontweight": 'bold'}])
+               highlight_textprops=[{"color": 'yellow', "fontweight": 'bold'}, {"color": 'grey', "fontweight": 'bold'}])
 fig.text(0.12, 0.9, subsubtitle_text, fontweight="regular", fontsize=16, color='w')
     
 # Add direction of play arrow
@@ -214,5 +223,3 @@ badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
 ax.imshow(badge)    
 
 fig.savefig(f"team_threat_creation/{league}-{year}-team-threat-creation", dpi=300)
-
-# %%

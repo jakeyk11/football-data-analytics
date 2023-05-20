@@ -42,20 +42,23 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'EFLC'
 
 # Input run-date
-run_date = '13/01/2023'
+run_date = '08/05/2023'
 
 # Select whether to label %
 label_pct = False
 
 # Select whether to brighten logo
-logo_brighten = True
+logo_brighten = False
+
+# Select whether to use team colours
+team_colour = False
 
 # %% Get competition logo
 
-comp_logo = lab.get_competition_logo(league, year, logo_brighten=True)
+comp_logo = lab.get_competition_logo(league, year, logo_brighten=logo_brighten)
 
 # %% Get data
 
@@ -114,6 +117,10 @@ for team in teams:
 # Sort dictionary by xT/90
 team_ball_win_height = sorted(team_ball_win_height.items(), key=lambda x: x[1], reverse=True)
 
+# %% Custom colormap
+
+CustomCmap = mpl.colors.LinearSegmentedColormap.from_list("", ["#313332","#47516B", "#848178", "#B2A66F", "#FDE636"])
+
 # %% Create visual
 
 # Overwrite rcparams
@@ -139,9 +146,15 @@ for team in team_ball_win_height:
     team_name = team[0]
     team_id = players_df[players_df['team']==team_name]['teamId'].values[0]
     team_ball_wins = ball_wins_df[ball_wins_df['teamId']==team_id]
-    
+        
     # Get team logo and colour
     team_logo, team_cmap = lab.get_team_badge_and_colour(team_name)
+    if len(team_name) > 14:
+        team_name = team_name[0:13] + '...'
+        
+    # Set team colour
+    if not team_colour:
+        team_cmap = CustomCmap
 
     # Draw heatmap
     bin_statistic = pitch.bin_statistic(team_ball_wins['x'], team_ball_wins['y'],
@@ -172,7 +185,8 @@ for team in team_ball_win_height:
 
 # Title
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
+           'EFL1': 'EFL League One', 'EFL2': 'EFL League Two'}
 
 title_text = f"{leagues[league]} {year}/{int(year)+1} - Teams Ranked by Average Ball Win Height"
 subtitle_text = "Heatmaps showing Zones of <Frequent Ball Winning> and <Infrequent Ball Winning>"
@@ -180,7 +194,7 @@ subsubtitle_text = f"Correct as of {run_date}"
 
 fig.text(0.12, 0.945, title_text, fontweight="bold", fontsize=20, color='w')
 htext.fig_text(0.12, 0.934, s=subtitle_text, fontweight="bold", fontsize=18, color='w',
-               highlight_textprops=[{"color": 'orange', "fontweight": 'bold'}, {"color": 'grey', "fontweight": 'bold'}])
+               highlight_textprops=[{"color": 'yellow', "fontweight": 'bold'}, {"color": 'grey', "fontweight": 'bold'}])
 fig.text(0.12, 0.9, subsubtitle_text, fontweight="regular", fontsize=16, color='w')
     
 # Add direction of play arrow

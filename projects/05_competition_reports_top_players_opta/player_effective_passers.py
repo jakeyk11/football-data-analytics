@@ -59,13 +59,13 @@ pos_exclude=['GK']
 pos_input = 'outfield players'
 
 # Input run-date
-run_date = '12/02/2023'
+run_date = '08/05/2023'
 
 # Normalisation (None, '_90', '_100pass', '_100teampass')
 norm_mode = '_90'
 
 # Min minutes played (only used if normalising)
-min_mins = 900
+min_mins = 1800
 
 # Brighten logo
 logo_brighten = False
@@ -76,7 +76,8 @@ comp_logo = lab.get_competition_logo(league, year, logo_brighten)
     
 # Create title and subtitles
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
+           'EFL1': 'EFL League One', 'EFL2': 'EFL League Two'}
 
 # %% Get data
 
@@ -117,9 +118,6 @@ players_df = wde.minutes_played(players_df, events_df)
 # Add pre-assist information
 events_df = wce.pre_assist(events_df)
 
-# Add expected threat information
-events_df = wce.get_xthreat(events_df, interpolate = True)
-
 # Calculate longest consistent xi
 players_df = wde.longest_xi(players_df)
 
@@ -127,8 +125,8 @@ players_df = wde.longest_xi(players_df)
 players_df = wde.events_while_playing(events_df, players_df, event_name = 'Pass', event_team = 'own')
 
 # Add progressive pass and box entry information to event dataframe
-events_df['progressive_pass'] = events_df.apply(wce.progressive_pass, axis=1, inplay = True, successful_only = False)
-events_df['into_box'] = events_df.apply(wce.pass_into_box, axis=1, inplay = True, successful_only = False)
+events_df['progressive_action'] = events_df.apply(wce.progressive_action, axis=1, inplay = True, successful_only = False)
+events_df['into_box'] = events_df.apply(wce.box_entry, axis=1, inplay = True, successful_only = False)
 
 # Determine substitute positions (TBC)
 #for idx, player in players_df.iterrows():
@@ -150,7 +148,7 @@ suc_passes = all_passes[all_passes['outcomeType']=='Successful']
 playerinfo_df = wde.group_player_events(suc_passes, playerinfo_df, primary_event_name='suc_passes')
 
 # Progressive passes
-prog_passes = all_passes[all_passes['progressive_pass']==True]
+prog_passes = all_passes[all_passes['progressive_action']==True]
 playerinfo_df = wde.group_player_events(prog_passes, playerinfo_df, primary_event_name='prog_passes')
 suc_prog_passes = prog_passes[prog_passes['outcomeType']=='Successful']
 playerinfo_df = wde.group_player_events(suc_prog_passes, playerinfo_df, primary_event_name='suc_prog_passes')
@@ -572,8 +570,8 @@ for player_id, name in pp_sorted_df.head(12).iterrows():
     idx += 1
 
 # Create title and subtitles, using highlighting as figure legend
-title_text = f"Top 12 {title_pos_str}, ranked by successful in-play progressive passes {title_addition}"
-subtitle_text = f"{leagues[league]} {year}/{int(year) + 1} - <Successful Progressive Passes>, <Key Progressive Passes> and <Assists>"
+title_text = f"{leagues[league]} {year}/{int(year) + 1} - Top 12 {title_pos_str} by in-play progressive passes {title_addition}"
+subtitle_text = f"<Successful Progressive Passes>, <Key Progressive Passes> and <Assists>"
 subsubtitle_text = f"Correct as of {run_date}. {subsubtitle_addition}"
 fig.text(0.1, 0.945, title_text, fontweight="bold", fontsize=14.5, color='w')
 htext.fig_text(0.1, 0.93, s=subtitle_text, fontweight="regular", fontsize=13, color='w',
@@ -662,8 +660,8 @@ for player_id, name in xt_sorted_df.head(12).iterrows():
     idx += 1
     
 # Create title and subtitles, using highlighting as figure legend
-title_text = f"Top 12 {title_pos_str}, ranked by threat generated from in-play passes {title_addition}"
-subtitle_text = f"{leagues[league]} {year} - <Low Threat> and <High Threat> Successful Passes Shown"
+title_text = f"{leagues[league]} {year} - Top 12 {title_pos_str} by threat generated from in-play passes {title_addition}"
+subtitle_text = f"<Low Threat> and <High Threat> Successful Passes Shown"
 subsubtitle_text = f"Correct as of {run_date}. {subsubtitle_addition}"
 fig.text(0.1, 0.945, title_text, fontweight="bold", fontsize=16, color='w')
 htext.fig_text(0.1, 0.93, s=subtitle_text, fontweight="bold", fontsize=13, color='w',

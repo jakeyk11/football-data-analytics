@@ -58,14 +58,14 @@ pos_exclude=[]
 pos_input = ''
 
 # Input run-date
-run_date = '12/02/2023'
+run_date = '08/05/2023'
 
 # Normalisation (None, '_90', '_100opp_pass')
 norm_mode = '_100opp_pass'
 #norm_mode = '_90'
 
 # Min minutes played
-min_mins = 900
+min_mins = 1800
 
 # Brighten logo
 logo_brighten = False
@@ -224,10 +224,11 @@ for player_id, name in sorted_df.head(12).iterrows():
 
 # Create title and subtitles, using highlighting as figure legend
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
+           'EFL1': 'EFL League One', 'EFL2': 'EFL League Two'}
 
 title_text = f"{leagues[league]} {year}/{int(year) + 1} - Top 12 {title_pos_str} by Tendency to Defend from the Front"
-subtitle_text = f"Heatmaps of defensive actions shown. Players ranked by total number of defensive actions in opposition third, {title_addition}"
+subtitle_text = f"Heatmaps of defensive actions shown. Ranking by total number of defensive actions in opp third, {title_addition}"
 subsubtitle_text = f"Ball recoveries, blocks, clearances, interceptions and tackles included. Correct as of {run_date}. Players with less than {min_mins} mins play-time omitted."
 
 # Title

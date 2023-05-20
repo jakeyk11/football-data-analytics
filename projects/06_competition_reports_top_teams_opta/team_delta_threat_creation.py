@@ -49,7 +49,7 @@ league_below = 'EFL1'
 league_above = 'EPL'
 
 # Input run-date
-run_date = '23/02/2023'
+run_date = '08/05/2023'
 
 # Select whether to label %
 label_pct = False
@@ -170,9 +170,6 @@ if league_above != None:
 # %% Function to process data
 
 def process_event_data(events_in):
-    events_in = wde.cumulative_match_mins(events_in)
-    events_in = wce.insert_ball_carries(events_in)
-    events_in = wce.get_xthreat(events_in, interpolate = True)
     threat_creating_events = events_in[events_in['xThreat']==events_in['xThreat']]
     threat_creating_events = threat_creating_events[~threat_creating_events['satisfiedEventsTypes'].apply(lambda x: True if (31 in x or 34 in x or 212 in x) else False)]
 
@@ -328,7 +325,9 @@ cbar.ax.set_title('Change in xT/90', color='w', fontsize=8, pad = 2)
 
 # Title
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
+           'EFL1': 'EFL League One', 'EFL2': 'EFL League Two'}
+
 
 title_text = f"{leagues[league]} {year}/{int(year)+1} − Improvement in Threat Creation by Team"
 subtitle_text = "Zones of <Improved> and <Reduced> Threat Creation compared to Last Season"

@@ -235,9 +235,9 @@ def istouch(single_event, inplay=True):
     if single_event['location'] == single_event['location']:
         x_position = single_event['location'][0]
         y_position = single_event['location'][1]
-        if (x_position >= 102) and (18 <= y_position <= 62):
+        if (x_position >= 102) and (18 <= y_position <= 62) and touch_type == touch_type:
             box_touch = True
-        if x_position >= 80:
+        if x_position >= 80 and touch_type == touch_type:
             final_third_touch = True
 
     # Include or exclude set pieces
@@ -346,6 +346,7 @@ def progressive_action(single_event, inplay=True):
     # Determine if event is carry
     elif single_event['type'] == 'Carry':
         check_success = True
+        check_inplay = True
 
         # Determine carry start and end position
         x_startpos = single_event['location'][0]
@@ -938,11 +939,13 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_name, playe
 
     # Initialise  ball receipt dataframe
     ball_received = pd.DataFrame(columns=['match_id', 'match_period', 'matchtime', 'pass_x', 'pass_y',
-                                          'pass_type', 'pass_obv_for_net', 'pass_obv_total_net', 'receipt_x',
-                                          'receipt_y', 'receipt_under_pressure', 'receipt_miscontrol', 'initial_carry',
-                                          'carry_under_pressure', 'init_carry_endx', 'init_carry_endy', 'next_action',
-                                          'next_action_body_part', 'next_action_success', 'next_action_endx',
-                                          'next_action_endy', 'next_actions_obv_for_net', 'next_actions_obv_total_net',
+                                          'pass_type', 'pass_obv_for_net', 'pass_obv_for_net_abs', 'pass_obv_total_net',
+                                          'pass_obv_total_net_abs', 'receipt_x', 'receipt_y', 'receipt_under_pressure',
+                                          'receipt_miscontrol', 'initial_carry', 'carry_under_pressure',
+                                          'init_carry_endx', 'init_carry_endy', 'next_action', 'next_action_body_part',
+                                          'next_action_success', 'next_action_endx', 'next_action_endy',
+                                          'next_actions_obv_for_net', 'next_actions_obv_for_net_abs',
+                                          'next_actions_obv_total_net', 'next_actions_obv_total_net_abs',
                                           't_next_action', 'ball_success'])
 
     for idx, ball_evt in ball_to_player.iterrows():
@@ -969,7 +972,9 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_name, playe
         player_next_evt_endx = np.nan
         player_next_evt_endy = np.nan
         player_next_evt_obv_for_net = np.nan
+        player_next_evt_obv_for_net_abs = np.nan
         player_next_evt_obv_total_net = np.nan
+        player_next_evt_obv_total_net_abs = np.nan
         player_next_evt_time = np.nan
         miscontrol = np.nan
 
@@ -1001,7 +1006,11 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_name, playe
                         [player_next_evt_endx, player_next_evt_endy] = player_immed_evt['pass_end_location'].values[0]
                         player_next_evt_time = player_immed_evt['cumulative_mins'].values[0]
                         player_next_evt_obv_for_net = player_immed_evt['obv_for_net'].values[0]
+                        player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
+                                                           else player_next_evt_obv_for_net)
                         player_next_evt_obv_total_net = player_immed_evt['obv_total_net'].values[0]
+                        player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
+                                                             else player_next_evt_obv_total_net)
 
                     elif player_immed_evt['type'].values[0] == 'Shot':
                         player_next_evt_type = player_immed_evt['type'].values[0]
@@ -1012,7 +1021,11 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_name, playe
                             player_immed_evt['shot_end_location'].values[0][0:2]
                         player_next_evt_time = player_immed_evt['cumulative_mins'].values[0]
                         player_next_evt_obv_for_net = player_immed_evt['obv_for_net'].values[0]
+                        player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
+                                                           else player_next_evt_obv_for_net)
                         player_next_evt_obv_total_net = player_immed_evt['obv_total_net'].values[0]
+                        player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
+                                                             else player_next_evt_obv_total_net)
 
                     # Flag miscontrol
                     elif player_immed_evt['type'].values[0] == 'Miscontrol':
@@ -1034,10 +1047,14 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_name, playe
                                 [player_next_evt_endx, player_next_evt_endy] = \
                                     player_next_evt['pass_end_location'].values[0]
                                 player_next_evt_time = player_next_evt['cumulative_mins'].values[0]
-                                player_next_evt_obv_for_net = (player_next_evt['obv_for_net'].values[0] +
-                                                               player_initial_carry['obv_for_net'].values[0])
-                                player_next_evt_obv_total_net = (player_next_evt['obv_total_net'].values[0] +
-                                                                 player_initial_carry['obv_total_net'].values[0])
+                                player_next_evt_obv_for_net = np.nansum([player_next_evt['obv_for_net'].values[0],
+                                                                         player_initial_carry['obv_for_net'].values[0]])
+                                player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
+                                                                   else player_next_evt_obv_for_net)
+                                player_next_evt_obv_total_net = np.nansum([player_next_evt['obv_total_net'].values[0],
+                                                                           player_initial_carry['obv_total_net'].values[0]])
+                                player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
+                                                                     else player_next_evt_obv_total_net)
 
                             # Shot
                             elif player_next_evt['type'].values[0] == 'Shot':
@@ -1048,10 +1065,14 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_name, playe
                                 [player_next_evt_endx, player_next_evt_endy] = \
                                     player_next_evt['shot_end_location'].values[0][0:2]
                                 player_next_evt_time = player_next_evt['cumulative_mins'].values[0]
-                                player_next_evt_obv_for_net = (player_next_evt['obv_for_net'].values[0] +
-                                                               player_initial_carry['obv_for_net'].values[0])
-                                player_next_evt_obv_total_net = (player_next_evt['obv_total_net'].values[0] +
-                                                                 player_initial_carry['obv_total_net'].values[0])
+                                player_next_evt_obv_for_net = np.nansum([player_next_evt['obv_for_net'].values[0],
+                                                                         player_initial_carry['obv_for_net'].values[0]])
+                                player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
+                                                                   else player_next_evt_obv_for_net)
+                                player_next_evt_obv_total_net = np.nansum([player_next_evt['obv_total_net'].values[0],
+                                                                           player_initial_carry['obv_total_net'].values[0]])
+                                player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
+                                                                     else player_next_evt_obv_total_net)
 
                             # Free kick win
                             elif player_next_evt['type'].values[0] == 'Foul Won':
@@ -1067,10 +1088,14 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_name, playe
                                                                       0] == 'Complete' else False
                                 [player_next_evt_endx, player_next_evt_endy] = player_next_evt['location'].values[0]
                                 player_next_evt_time = player_next_evt['cumulative_mins'].values[0]
-                                player_next_evt_obv_for_net = (player_next_evt['obv_for_net'].values[0] +
-                                                               player_initial_carry['obv_for_net'].values[0])
-                                player_next_evt_obv_total_net = (player_next_evt['obv_total_net'].values[0] +
-                                                                 player_initial_carry['obv_total_net'].values[0])
+                                player_next_evt_obv_for_net = np.nansum([player_next_evt['obv_for_net'].values[0],
+                                                                         player_initial_carry['obv_for_net'].values[0]])
+                                player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
+                                                                   else player_next_evt_obv_for_net)
+                                player_next_evt_obv_total_net = np.nansum([player_next_evt['obv_total_net'].values[0],
+                                                                           player_initial_carry['obv_total_net'].values[0]])
+                                player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
+                                                                     else player_next_evt_obv_total_net)
 
                             # Dispossession
                             elif player_next_evt['type'].values[0] == 'Dispossessed':
@@ -1098,7 +1123,11 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_name, playe
                             player_next_evt['pass_end_location'].values[0]
                         player_next_evt_time = player_next_evt['cumulative_mins'].values[0]
                         player_next_evt_obv_for_net = player_next_evt['obv_for_net'].values[0]
+                        player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
+                                                           else player_next_evt_obv_for_net)
                         player_next_evt_obv_total_net = player_next_evt['obv_total_net'].values[0]
+                        player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
+                                                             else player_next_evt_obv_total_net)
 
                     # Shot
                     elif player_next_evt['type'].values[0] == 'Shot':
@@ -1110,8 +1139,11 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_name, playe
                             player_next_evt['shot_end_location'].values[0][0:2]
                         player_next_evt_time = player_next_evt['cumulative_mins'].values[0]
                         player_next_evt_obv_for_net = player_next_evt['obv_for_net'].values[0]
+                        player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
+                                                           else player_next_evt_obv_for_net)
                         player_next_evt_obv_total_net = player_next_evt['obv_total_net'].values[0]
-
+                        player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
+                                                             else player_next_evt_obv_total_net)
                 # Check team possession 10 seconds after ball receipt
                 possession_team = following_evts[(following_evts['cumulative_mins'] <=
                                                   receipt_time + (1 / 6))].iloc[-1:]['possession_team'].values[0]
@@ -1125,7 +1157,11 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_name, playe
                 ball_received.loc[idx, ['pass_x', 'pass_y']] = ball_evt['location']
                 ball_received.loc[idx, 'pass_type'] = ball_evt['pass_height']
                 ball_received.loc[idx, 'pass_obv_for_net'] = ball_evt['obv_for_net']
+                ball_received.loc[idx, 'pass_obv_for_net_abs'] = (0 if ball_evt['obv_for_net'] < 0
+                                                                  else ball_evt['obv_for_net'])
                 ball_received.loc[idx, 'pass_obv_total_net'] = ball_evt['obv_total_net']
+                ball_received.loc[idx, 'pass_obv_total_net_abs'] = (0 if ball_evt['obv_total_net'] < 0
+                                                                    else ball_evt['obv_total_net'])
                 ball_received.loc[idx, ['receipt_x', 'receipt_y']] = ball_evt['pass_end_location']
                 ball_received.loc[idx, 'receipt_under_pressure'] = ball_receipt['under_pressure'].values[0]
                 ball_received.loc[idx, 'receipt_miscontrol'] = miscontrol
@@ -1141,7 +1177,9 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_name, playe
                 ball_received.loc[idx, ['next_action_endx', 'next_action_endy']] = [player_next_evt_endx,
                                                                                     player_next_evt_endy]
                 ball_received.loc[idx, 'next_actions_obv_for_net'] = player_next_evt_obv_for_net
+                ball_received.loc[idx, 'next_actions_obv_for_net_abs'] = player_next_evt_obv_for_net_abs
                 ball_received.loc[idx, 'next_actions_obv_total_net'] = player_next_evt_obv_total_net
+                ball_received.loc[idx, 'next_actions_obv_total_net_abs'] = player_next_evt_obv_total_net_abs
                 ball_received.loc[idx, 't_next_action'] = 60 * (player_next_evt_time - receipt_time)
                 ball_received.loc[idx, 'ball_success'] = True if (possession_team == player_team and
                                                                   miscontrol != miscontrol) or goal else np.nan

@@ -19,6 +19,7 @@ from sklearn.linear_model import LogisticRegression
 from mplsoccer.pitch import VerticalPitch
 import pickle
 import bz2
+from PIL import Image
 
 # %% Add custom tools to path
 
@@ -115,6 +116,9 @@ prob_goal_grnd = np.zeros((int(1+PITCH_LENGTH_X/2), int(1+PITCH_WIDTH_Y)))
 prob_goal_head = np.zeros((int(1+PITCH_LENGTH_X/2), int(1+PITCH_WIDTH_Y)))
 
 # Create array of shots
+dists = list()
+probs = list()
+
 for x_pos in range(0,int(PITCH_LENGTH_X/2 + 1)):
     for y_pos in range(0, int(PITCH_WIDTH_Y + 1)):
         c_pos = y_pos - PITCH_WIDTH_Y/2
@@ -128,6 +132,9 @@ for x_pos in range(0,int(PITCH_LENGTH_X/2 + 1)):
         distance = np.sqrt(x_pos**2 + c_pos**2)
         prob_goal_grnd[x_pos, y_pos] = log_model.predict_proba([[x_pos, c_pos, distance, angle, 0]])[:,1]
         prob_goal_head[x_pos, y_pos] = log_model.predict_proba([[x_pos, c_pos, distance, angle, 1]])[:,1]
+        
+        dists.append(distance)
+        probs.append(prob_goal_grnd[x_pos, y_pos])
 
 # %% Plot xG model
 
@@ -162,9 +169,45 @@ cbar = fig.colorbar(pos2, ax=ax['pitch'][1], location="bottom",  fraction = 0.04
 cbar.ax.set_ylabel('xG', loc="bottom", color = "white", fontweight="bold", rotation=0, labelpad=20)
 
 # Footer text
-fig.text(0.255, 0.09, "Created by Jake Kolliari. Data provided by Wyscout.com",
+fig.text(0.255, 0.09, "Created by Jake Kolliari (@_JKDS_). Data provided by Wyscout.",
          fontstyle="italic", ha="center", fontsize=9, color="white")  
 
 # Format and show
 plt.tight_layout()
 plt.show()
+
+# %% Plot distance vs. xG
+
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize = (8,8), facecolor = '#313332')
+ax.patch.set_alpha(0)
+
+# Add line
+plt.scatter(x = dists, y = probs, color = 'mediumaquamarine', s = 10)
+#reg = sns.regplot(x = dists, y = probs, scatter = False, order = 2, line_kws={"color": "paleturquoise", "lw":1, "ls" :'--'}, scatter_kws={"color": "mediumaquamarine", "s":50}, ax=ax)
+
+# Format
+ax.spines['bottom'].set_color('w')
+ax.spines['top'].set_visible(False) 
+ax.spines['right'].set_visible(False) 
+ax.spines['left'].set_color('w')
+ax.grid(lw = 0.5, color= 'grey', ls = ':')
+ax.set_xlabel("Distance from Goal (yds)", fontsize=12, fontweight = "bold", labelpad = 10)
+ax.set_ylabel("Probability of Scoring", fontsize=12, color = "mediumaquamarine", fontweight = "bold", labelpad = 10)
+
+# Titles
+title_text = f"Expected Goals Model"
+subtitle_text = "Probability of Scoring vs. Distance from Goal" 
+fig.text(0.08, 0.935, title_text, fontweight="bold", fontsize=16, color='w')
+fig.text(0.08, 0.9, subtitle_text, fontweight="regular", fontsize=13, color='w')
+
+# Add footer text
+fig.text(0.5, 0.02, "Created by Jake Kolliari (@_JKDS_). Data provided by Wyscout.",
+         fontstyle="italic", ha="center", fontsize=9, color="white")
+
+# Add twitter logo
+logo_ax = fig.add_axes([0.94, 0.005, 0.04, 0.04])
+logo_ax.axis("off")
+badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
+logo_ax.imshow(badge)
+
+fig.tight_layout(rect=[0.03, 0.04, 0.97, 0.86])

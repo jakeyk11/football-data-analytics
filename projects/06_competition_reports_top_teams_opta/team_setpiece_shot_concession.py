@@ -17,6 +17,7 @@ import sys
 import bz2
 import pickle
 import numpy as np
+import matplotlib as mpl
 
 # %% Add custom tools to path
 
@@ -35,20 +36,20 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'EFLC'
 
 # Input run-date
-run_date = '28/02/2023'
+run_date = '08/05/2023'
 
 # Select whether to label %
 label_pct = False
 
 # Logo brighten
-logo_brighten = True
+logo_brighten = False
 
 # %% Get competition logo
 
-comp_logo = lab.get_competition_logo(league, year, logo_brighten=True)
+comp_logo = lab.get_competition_logo(league, year, logo_brighten=logo_brighten)
 
 # %% Get data
 
@@ -80,7 +81,6 @@ for file in files:
 
 # %% Get cumulative minutes info
 
-events_df = wde.cumulative_match_mins(events_df)
 events_df = wde.add_team_name(events_df, players_df)
 
 # %% Get free-kicks and corners (Selecting "indirect" only for purpose of this work)
@@ -138,6 +138,10 @@ team_sp_concede_df['sp_goal_concede_pct'] = 100*team_sp_concede_df['sp_goal_conc
 
 # %% VISUAL 1: Ranked bar graph by percentage of opposition set pieces resulting in chance
 
+# Overwrite rcparams
+mpl.rcParams['xtick.color'] = 'w'
+mpl.rcParams['ytick.color'] = 'w'
+
 # Order dataframe and reindex
 team_sp_concede_df.sort_values('sp_chance_concede_pct', ascending = True, inplace = True)
 team_sp_concede_df.reset_index(drop=True, inplace=True)
@@ -162,7 +166,8 @@ ax.barh(team_rank, team_sp_concede_df["sp_goal_concede_pct"], hatch = '////', co
 
 # Create title
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
+           'EFL1': 'EFL League One', 'EFL2': 'EFL League Two'}
 
 title_text = f"{leagues[league]} {year}/{str(int(year)+1).replace('20','',1)} − Defending \"Indirect\" Set Pieces"
 subtitle_text = "% of Set Pieces Against Resulting in Opp. Chance or Goal (within 5s)"
@@ -186,8 +191,8 @@ path_eff = [path_effects.Stroke(linewidth=3, foreground='#313332'), path_effects
 for idx, plot_pos in enumerate(np.arange(0.2, len(team_sp_concede_df))):
     goal_text = ' goal' if team_sp_concede_df.loc[idx,"sp_goal_concede"] == 1 else ' goals'
     chance_text = ' chance' if team_sp_concede_df.loc[idx,"sp_chance_concede"] == 1 else ' chances'
-    ax.text(team_sp_concede_df.loc[idx,"sp_goal_concede_pct"], plot_pos, " " + str(team_sp_concede_df.loc[idx,"sp_goal_concede"])+ goal_text, fontsize = 8, path_effects = path_eff)
-    ax.text(team_sp_concede_df.loc[idx,"sp_chance_concede_pct"], plot_pos, " " + str(team_sp_concede_df.loc[idx,"sp_chance_concede"])+ chance_text, fontsize = 8, path_effects = path_eff)
+    ax.text(team_sp_concede_df.loc[idx,"sp_goal_concede_pct"], plot_pos, " " + str(team_sp_concede_df.loc[idx,"sp_goal_concede"])+ goal_text, fontsize = 8, color = 'w', path_effects = path_eff)
+    ax.text(team_sp_concede_df.loc[idx,"sp_chance_concede_pct"], plot_pos, " " + str(team_sp_concede_df.loc[idx,"sp_chance_concede"])+ chance_text, fontsize = 8, color = 'w', path_effects = path_eff)
     
 # Add competition Logo
 ax2 = fig.add_axes([0.035, 0.87, 0.1, 0.1])
@@ -235,9 +240,6 @@ ax.barh(team_rank, team_sp_concede_df["sp_chance_concede_per_match"], color=my_c
 ax.barh(team_rank, team_sp_concede_df["sp_goal_concede_per_match"], hatch = '////', color = 'none', edgecolor='w', alpha = 0.7)
 
 # Create title
-leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
-
 title_text = f"{leagues[league]} {year}/{str(int(year)+1).replace('20','',1)} − Defending \"Indirect\" Set Pieces"
 subtitle_text = "Set Pieces Against Resulting in Opp. Chance or Goal (within 5s) per match"
 subsubtitle_text = f"Correct as of {run_date}. \"Indirect\" covers corners or FKs where ball remains in-play after initial action."
@@ -260,8 +262,8 @@ path_eff = [path_effects.Stroke(linewidth=3, foreground='#313332'), path_effects
 for idx, plot_pos in enumerate(np.arange(0.2, len(team_sp_concede_df))):
     goal_text = ' goal' if team_sp_concede_df.loc[idx,"sp_goal_concede"] == 1 else ' goals'
     chance_text = ' chance' if team_sp_concede_df.loc[idx,"sp_chance_concede"] == 1 else ' chances'
-    ax.text(team_sp_concede_df.loc[idx,"sp_goal_concede_per_match"], plot_pos, " " + str(team_sp_concede_df.loc[idx,"sp_goal_concede"])+ goal_text, fontsize = 8, path_effects = path_eff)
-    ax.text(team_sp_concede_df.loc[idx,"sp_chance_concede_per_match"], plot_pos, " " + str(team_sp_concede_df.loc[idx,"sp_chance_concede"])+ chance_text, fontsize = 8, path_effects = path_eff)
+    ax.text(team_sp_concede_df.loc[idx,"sp_goal_concede_per_match"], plot_pos, " " + str(team_sp_concede_df.loc[idx,"sp_goal_concede"])+ goal_text, fontsize = 8, color = 'w', path_effects = path_eff)
+    ax.text(team_sp_concede_df.loc[idx,"sp_chance_concede_per_match"], plot_pos, " " + str(team_sp_concede_df.loc[idx,"sp_chance_concede"])+ chance_text, fontsize = 8, color = 'w', path_effects = path_eff)
     
 # Add competition Logo
 ax2 = fig.add_axes([0.035, 0.87, 0.1, 0.1])

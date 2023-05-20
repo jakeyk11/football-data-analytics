@@ -17,7 +17,7 @@ events_while_playing(events, lineups, event_name='Pass', event_team='opposition'
 add_player_nickname(events, lineups)
     Add player nicknames to statsbomb-style event data, using statsbomb-style lineups dataframe
 
-create_player_list(lineups, include_mins=False)
+create_player_list(lineups, additional_cols=None, pass_extra=None, group_team=False)
     Create a list of players from statsbomb-style lineups dataframe.
 
 group_player_events(events, player_data, group_type='count', event_types=None, primary_event_name='Column Name'):
@@ -223,8 +223,8 @@ def events_while_playing(events, lineups, event_name='Pass', event_team='opposit
 
     # Add event count to lineup data, resetting for each individual match
     for match_id in events['match_id'].unique():
-        match_events = events[events['match_id'] == match_id]
-        lineup = lineups[lineups['match_id'] == match_id]
+        match_events = events[events['match_id'] == match_id].copy()
+        lineup = lineups[lineups['match_id'] == match_id].copy()
 
         # For each team calculate team events, and assign to player
         for team in set(match_events['team']):
@@ -232,19 +232,37 @@ def events_while_playing(events, lineups, event_name='Pass', event_team='opposit
 
             # Choose whether to include own team or opposition events, and build column name
             if event_team == 'own':
-                team_events = match_events[(match_events['possession_team'] == team) &
-                                           (match_events['type'] == event_name)]
+                if event_name == 'Touch':
+                    team_events = match_events[(match_events['team'] == team) &
+                                               (match_events['istouch'] == match_events['istouch'])]
+                elif event_name == 'Possession':
+                    team_events = match_events[match_events['possession_team'] == team]
+                else:
+                    team_events = match_events[(match_events['team'] == team) &
+                                               (match_events['type'] == event_name)]
                 col_name = 'team_' + event_name.lower()
 
             else:
-                team_events = match_events[(match_events['possession_team'] != team) &
-                                           (match_events['type'] == event_name)]
+                if event_name == 'Touch':
+                    team_events = match_events[(match_events['team'] != team) &
+                                               (match_events['istouch'] == match_events['istouch'])]
+                elif event_name == 'Possession':
+                    team_events = match_events[match_events['possession_team'] != team]
+                else:
+                    team_events = match_events[(match_events['team'] != team) &
+                                               (match_events['type'] == event_name)]
+
                 col_name = 'opp_' + event_name.lower()
 
             # For each player, count events whilst they were on the pitch
             for idx, player in team_lineup.iterrows():
-                event_count = len(team_events[(team_events['cumulative_mins'] >= player['time_on']) &
-                                              (team_events['cumulative_mins'] <= player['time_off'])])
+                if event_name == 'Possession':
+                    event_count = len(set(team_events[(team_events['cumulative_mins'] >= player['time_on']) &
+                                                      (team_events['cumulative_mins'] <= player['time_off'])]
+                                          ['possession']))
+                else:
+                    event_count = len(team_events[(team_events['cumulative_mins'] >= player['time_on']) &
+                                                  (team_events['cumulative_mins'] <= player['time_off'])])
                 lineup.loc[idx, col_name] = event_count
 
         # Rebuild lineups dataframe
@@ -286,7 +304,7 @@ def add_player_nickname(events, lineups):
     return events_out, lineups_out
 
 
-def create_player_list(lineups, additional_cols=None, pass_extra=None):
+def create_player_list(lineups, additional_cols=None, pass_extra=None, group_team=False):
     """ Create a list of players from statsbomb-style lineups dataframe
 
     Function to read a whoscored-style lineups dataframe (single or multiple matches) and return a dataframe of
@@ -298,6 +316,7 @@ def create_player_list(lineups, additional_cols=None, pass_extra=None):
         lineups (pandas.DataFrame): statsbomb-style dataframe of lineups, can be from multiple matches.
         additional_cols (list, optional): list of column names to be aggregated and included in output dataframe.
         pass_extra (list, optional): list of extra columns within lineups to include in output dataframe.
+        group_team (bool, optional): decide whether to group player if played for multiple teams (transfer)
 
     Returns:
         pandas.DataFrame: players that feature in one or more lineup entries, may include total minutes played.
@@ -345,37 +364,38 @@ def create_player_list(lineups, additional_cols=None, pass_extra=None):
     # Dataframe of player names and team
     if pass_extra is None:
         playerinfo_df = lineups[['player_id', 'player_name', 'player_nickname', 'position', 'country',
-                                 'team_name']].drop_duplicates().set_index('player_id')
+                                 'team_name']].drop_duplicates()
     else:
         playerinfo_df = lineups[['player_id', 'player_name', 'player_nickname', 'position', 'country',
-                                 'team_name'] + pass_extra].drop_duplicates().set_index('player_id')
+                                 'team_name'] + pass_extra].drop_duplicates()
 
-    # Calculate total playing minutes for each player and add to dataframe
+    # Calculate total playing minutes and other aggregated columns for each player and add to dataframe
     if additional_cols is None:
-        included_cols = lineups.groupby(['player_id', 'position'], axis=0).sum()['mins_played']
+        included_cols = lineups.groupby(['player_id', 'position', 'team_name'], axis=0).sum()['mins_played']
     else:
-        included_cols = lineups.groupby(['player_id', 'position'], axis=0).sum()[['mins_played'] + additional_cols]
+        included_cols = lineups.groupby(['player_id', 'position', 'team_name'], axis=0).sum()[['mins_played']
+                                                                                              + additional_cols]
 
-    playerinfo_df = playerinfo_df.merge(included_cols, left_on=['player_id', 'position'], right_index=True)
+    playerinfo_df = playerinfo_df.merge(included_cols, left_on=['player_id', 'position', 'team_name'], right_index=True)
 
-    # Sum minutes played in each position
-    playerinfo_df['tot_mins_played'] = playerinfo_df.groupby(['player_id'])['mins_played'].transform('sum')
-
-    # Order player entries by minutes played, ensuring most popular position is at the top.
+    # Group by player and team (to avoid removing transfers) and drop duplicates due to different positions
     playerinfo_df.sort_values('mins_played', ascending=False, inplace=True)
+    playerinfo_df[['mins_played'] + additional_cols] = (playerinfo_df.groupby(['player_id', 'team_name'])
+                                                        [['mins_played'] + additional_cols].transform('sum'))
+    playerinfo_df.drop_duplicates(subset=['player_id', 'team_name'], keep='first', inplace=True)
 
-    # Remove duplicates, leaving only the player in their most popular position
-    playerinfo_df = playerinfo_df[~playerinfo_df.index.duplicated(keep='first')]
-
-    # Rename columns
-    playerinfo_df['mins_played'] = playerinfo_df['tot_mins_played']
-    playerinfo_df.drop('tot_mins_played', axis=1, inplace=True)
+    # Remove duplicate teams if required
+    if group_team:
+        playerinfo_df.sort_values('mins_played', ascending=False, inplace=True)
+        playerinfo_df[['mins_played'] + additional_cols] = (playerinfo_df.groupby(['player_id'])
+                                                            [['mins_played'] + additional_cols].transform('sum'))
+        playerinfo_df.drop_duplicates(subset=['player_id'], keep='first', inplace=True)
 
     # Add position info
     playerinfo_df['position_group'], playerinfo_df['position_category'] = zip(*playerinfo_df['position'].
                                                                               apply(group_positions))
 
-    return playerinfo_df
+    return playerinfo_df.set_index('player_id')
 
 
 def group_player_events(events, player_data, group_type='count', agg_columns=None, primary_event_name='Column Name'):

@@ -54,7 +54,7 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'EFLC'
 
 # Select position to exclude
 pos_exclude=['GK']
@@ -63,20 +63,20 @@ pos_exclude=['GK']
 pos_input = 'outfield players'
 
 # Input run-date
-run_date = '25/04/2023'
+run_date = '08/05/2023'
 
 # Normalisation mode
 norm_mode = '_90'
 
 # Min minutes played (only used if normalising)
-min_mins = 900
+min_mins = 1800
 
 # Brighten logo
-logo_brighten = True
+logo_brighten = False
 
 # Threat pitch grid mode (3 = top 3, else = top 1. dense = dense grid, else = sparse grid)
 pitch_mode = '1'
-grid_density = 'dense'
+grid_density = 'sparse'
 
 # %% League logo and league naming
 
@@ -84,7 +84,8 @@ comp_logo = lab.get_competition_logo(league, year, logo_brighten)
     
 # Create title and subtitles
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
+           'EFL1': 'EFL League One', 'EFL2': 'EFL League Two'}
 
 # %% Get data
 
@@ -523,7 +524,8 @@ for player_id, name in be_sorted_df.head(20).iterrows():
 
 # Title
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
+           'EFL1': 'EFL League 1', 'EFL2': 'EFL League 2'}
 
 title_text = f"{leagues[league]} {year}/{int(year)+1} − Players Ranked by Box Entries per 90"
 subtitle_text = "Heatmaps showing <Distribution> in starting position of player box entries"

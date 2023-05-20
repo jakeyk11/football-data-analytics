@@ -45,7 +45,7 @@ year = '2022'
 league = 'EFLC'
 
 # Input run-date
-run_date = '12/02/2023'
+run_date = '08/05/2023'
 
 # Select whether to label %
 label_pct = False
@@ -55,12 +55,7 @@ logo_brighten = False
 
 # %% Get competition logo
 
-if logo_brighten:
-    comp_logo = lab.get_competition_logo(league, year)
-    enhancer = ImageEnhance.Brightness(comp_logo)
-    comp_logo = enhancer.enhance(100)
-else:
-    comp_logo = lab.get_competition_logo(league, year)
+comp_logo = lab.get_competition_logo(league, year, logo_brighten=logo_brighten)
 
 # %% Get data
 
@@ -164,7 +159,6 @@ normal_col = 'grey'
 key_col = 'lightseagreen'
 assist_col = 'yellow'
 
-
 # Plot crosses for each team
 for team in team_effective_cross:
     
@@ -261,7 +255,8 @@ for team in team_effective_cross:
 
 # Title
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
+           'EFL1': 'EFL League One', 'EFL2': 'EFL League Two'}
 
 title_text = f"{leagues[league]} {year}/{int(year)+1} − Teams Ranked by In-Play Cross Effectiveness"
 subtitle_text = "In-Play Crosses Shown: <Cross Assists> and <Effective Crosses> highlighted"

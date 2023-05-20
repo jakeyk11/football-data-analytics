@@ -58,13 +58,13 @@ pos_exclude=['GK']
 pos_input = 'outfield players'
 
 # Input run-date
-run_date = '09/02/2023'
+run_date = '08/05/2023'
 
 # Normalisation mode
 norm_mode = '_90'
 
 # Min minutes played (only used if normalising)
-min_mins = 900
+min_mins = 1800
 
 # Brighten logo
 logo_brighten = False
@@ -75,7 +75,8 @@ comp_logo = lab.get_competition_logo(league, year, logo_brighten)
     
 # Create title and subtitles
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
-           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup'}
+           'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
+           'EFL1': 'EFL League One', 'EFL2': 'EFL League Two'}
 
 # %% Get data
 
@@ -108,21 +109,14 @@ for file in files:
 # %% Pre-process data
 
 # Add cumulative minutes information
-events_df = wde.cumulative_match_mins(events_df)
 players_df = wde.minutes_played(players_df, events_df)
-
-# Add ball carries
-events_df = wce.insert_ball_carries(events_df)
-
-# Add expected threat information
-events_df = wce.get_xthreat(events_df, interpolate = True)
 
 # Calculate longest consistent xi
 players_df = wde.longest_xi(players_df)
 
 # Add progressive pass and box entry information to event dataframe
-events_df['progressive_carry'] = events_df.apply(wce.progressive_carry, axis=1)
-events_df['carry_into_box'] = events_df.apply(wce.carry_into_box, axis=1)
+events_df['progressive_action'] = events_df.apply(wce.progressive_action, axis=1)
+events_df['box_entry'] = events_df.apply(wce.box_entry, axis=1)
 
 # %% Aggregate data per player
 
@@ -134,7 +128,7 @@ playerinfo_df = wde.group_player_events(all_carries, playerinfo_df, primary_even
 playerinfo_df = wde.group_player_events(all_carries, playerinfo_df, group_type='sum', event_types = ['xThreat', 'xThreat_gen'])
 
 # Progressive passes
-prog_carries = all_carries[all_carries['progressive_carry']==True]
+prog_carries = all_carries[all_carries['progressive_action']==True]
 playerinfo_df = wde.group_player_events(prog_carries, playerinfo_df, primary_event_name='prog_carries')
 
 # Successful progressive carries in opposition half
@@ -142,7 +136,7 @@ opphalf_prog_carries = prog_carries[prog_carries['x'] > 50]
 playerinfo_df = wde.group_player_events(opphalf_prog_carries, playerinfo_df, primary_event_name='opphalf_prog_carries')
 
 # Carriers into opposition box
-box_carries = all_carries[all_carries['carry_into_box'] == True]
+box_carries = all_carries[all_carries['box_entry'] == True]
 playerinfo_df = wde.group_player_events(box_carries, playerinfo_df, primary_event_name='box_carries')
 
 # %% Calculate statistics per 90 mins
@@ -261,8 +255,8 @@ for player_id, name in xt_sorted_df.head(12).iterrows():
     idx += 1
     
 # Create title and subtitles, using highlighting as figure legend
-title_text = f"Top 12 {title_pos_str}, ranked by threat generated from carries {title_addition}"
-subtitle_text = f"{leagues[league]} {year} - <Low Threat> and <High Threat> Successful Carries Shown"
+title_text = f"{leagues[league]} {year}/{int(year)+1} - Top 12 {title_pos_str} by threat generated from carries {title_addition}"
+subtitle_text = "<Low Threat> and <High Threat> Successful Carries Shown"
 subsubtitle_text = f"Correct as of {run_date}. {subsubtitle_addition}"
 fig.text(0.1, 0.945, title_text, fontweight="bold", fontsize=16, color='w')
 htext.fig_text(0.1, 0.93, s=subtitle_text, fontweight="bold", fontsize=13, color='w',
