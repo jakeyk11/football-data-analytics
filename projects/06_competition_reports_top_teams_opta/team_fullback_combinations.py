@@ -40,13 +40,13 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EFLC'
+league = 'EPL'
 
 # Input run-date
-run_date = '08/05/2023'
+run_date = '28/05/2023'
 
 # Select whether to brighten logo
-logo_brighten = False
+logo_brighten = True
 
 # Max time between a pass and shot that tags the pass as "shot-creating"
 min_delta = 1/6

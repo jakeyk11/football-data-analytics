@@ -42,16 +42,16 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EFLC'
+league = 'EPL'
 
 # Input run-date
-run_date = '08/05/2023'
+run_date = '28/05/2023'
 
 # Select whether to label %
 label_pct = False
 
 # Select whether to brighten logo
-logo_brighten = False
+logo_brighten = True
 
 # %% Get competition logo
 
@@ -98,21 +98,25 @@ open_play_crosses = all_crosses[~all_crosses['satisfiedEventsTypes'].apply(lambd
 # %% Calculate pressure action retention (bespoke method for carries)
 
 # Add new column to categorise cross
-open_play_crosses['cross_outcome'] = np.nan
+open_play_crosses = open_play_crosses.reset_index(drop=True)
+open_play_crosses.loc[:,'cross_outcome'] = np.nan
 
 for idx, cross in open_play_crosses.iterrows():
     next_evts = events_df[(events_df['match_id'] == cross['match_id']) & (events_df['period'] == cross['period']) & (events_df['cumulative_mins'] > cross['cumulative_mins']) & (events_df['cumulative_mins'] <= cross['cumulative_mins']+(5/60))]
-    team_next_evts = next_evts[next_evts['teamId'] == cross['teamId']]  
-    if ('Goal' in next_evts['eventType'].tolist()) or (92 in cross['satisfiedEventsTypes']):
-        open_play_crosses.loc[idx, 'cross_outcome'] = 'Goal'
-    elif ('SavedShot' in team_next_evts['eventType'].tolist()) or ('ShotOnPost' in team_next_evts['eventType'].tolist()) or ('MissedShots' in team_next_evts['eventType'].tolist()):
-        open_play_crosses.loc[idx, 'cross_outcome'] = 'Shot'
-    elif bool(set([item for sublist in next_evts['satisfiedEventsTypes'].tolist() for item in sublist]) & set(np.arange(39,47))):
-        open_play_crosses.loc[idx, 'cross_outcome'] = 'Key Pass'
-    elif cross['outcomeType'] == 'Successful':
-        open_play_crosses.loc[idx, 'cross_outcome'] = 'To Team-mate'
-    else:
+    team_next_evts = next_evts[next_evts['teamId'] == cross['teamId']]
+    if (cross['endX'] == 100) | (cross['endY'] == 100) | (cross['endY'] == 0):
         open_play_crosses.loc[idx, 'cross_outcome'] = 'Unsuccessful'
+    else:
+        if ('Goal' in next_evts['eventType'].tolist()) or (92 in cross['satisfiedEventsTypes']):
+            open_play_crosses.loc[idx, 'cross_outcome'] = 'Goal'
+        elif ('SavedShot' in team_next_evts['eventType'].tolist()) or ('ShotOnPost' in team_next_evts['eventType'].tolist()) or ('MissedShots' in team_next_evts['eventType'].tolist()):
+            open_play_crosses.loc[idx, 'cross_outcome'] = 'Shot'
+        elif bool(set([item for sublist in next_evts['satisfiedEventsTypes'].tolist() for item in sublist]) & set(np.arange(39,47))):
+            open_play_crosses.loc[idx, 'cross_outcome'] = 'Key Pass'
+        elif cross['outcomeType'] == 'Successful':
+            open_play_crosses.loc[idx, 'cross_outcome'] = 'To Team-mate'
+        else:
+            open_play_crosses.loc[idx, 'cross_outcome'] = 'Unsuccessful'
 
 # %% Get teams and order on count of effective crosses
 

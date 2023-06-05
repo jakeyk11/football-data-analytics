@@ -1305,8 +1305,8 @@ def get_counterpressure_events(events, t=5):
 
             # Check for defensive actions completed by ball-loser, mark as either counterpressure or recovery attempt
             if ((check_evt['team'] == ball_loss['team']) and
-                    (check_evt['event_type_name'] in ['Block', '50/50', 'Pressure', 'Dribbled Past', 'Foul Committed',
-                                                      'Ball Recovery', 'Interception', 'Duel'])):
+                    (check_evt['type'] in ['Block', '50/50', 'Pressure', 'Dribbled Past', 'Foul Committed',
+                                           'Ball Recovery', 'Interception', 'Duel'])):
 
                 if check_evt['counterpress'] == True:
                     all_ball_loss.loc[idx, 'recovery_action'] = 'Counterpress'
@@ -1377,7 +1377,7 @@ def get_counterattack_events(events, t=5):
                                                                          'Success Out']))]
 
     ball_recoveries = def_events[(def_events['type'] == 'Ball Recovery') &
-                                 (def_events['recovery_failure'] != True)]
+                                 (def_events['ball_recovery_recovery_failure'] != True)]
 
     ball_wins = pd.concat([ball_recoveries, interceptions, ground_duels], axis=0)
 
@@ -1408,7 +1408,7 @@ def get_counterattack_events(events, t=5):
 
             # Check for passes, shots or carries completed by team that won the ball back, and add required information
             if (check_evt['team'] == ball_win['team']) and (check_evt['type'] in ['Carries', 'Pass', 'Shot']):
-                ball_wins.loc[idx, 'next_action'] = check_evt['event_type_name']
+                ball_wins.loc[idx, 'next_action'] = check_evt['type']
                 ball_wins.loc[idx, 'next_action_location_x'] = check_evt['location'][0]
                 ball_wins.loc[idx, 'next_action_location_y'] = check_evt['location'][1]
 
@@ -1446,5 +1446,17 @@ def get_counterattack_events(events, t=5):
 
             # Increase check index
             chk_idx += 1
+
+        potential_goals_evts = events_out[(events_out['match_id'] == ball_win['match_id']) &
+                                          (events_out['period'] == ball_win['period']) &
+                                          (events_out['team'] == ball_win['team']) &
+                                          (events_out['cumulative_mins'] >= ball_win['cumulative_mins']) &
+                                          (events_out['cumulative_mins'] <= ball_win['cumulative_mins'] + (20 / 60))]
+
+        ball_wins.loc[idx, 'result_in_chance'] = (True if 'Shot' in potential_goals_evts['type'].values.tolist()
+                                                  else False)
+        ball_wins.loc[idx, 'result_in_goal'] = (True if 'Shot' in potential_goals_evts['type'].values.tolist() and
+                                                'Goal' in potential_goals_evts['shot_outcome'].values.tolist()
+                                                else False)
 
     return ball_wins

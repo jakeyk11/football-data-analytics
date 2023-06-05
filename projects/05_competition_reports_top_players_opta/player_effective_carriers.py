@@ -49,7 +49,7 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EFLC'
+league = 'EPL'
 
 # Select position to exclude
 pos_exclude=['GK']
@@ -58,7 +58,7 @@ pos_exclude=['GK']
 pos_input = 'outfield players'
 
 # Input run-date
-run_date = '08/05/2023'
+run_date = '28/05/2023'
 
 # Normalisation mode
 norm_mode = '_90'
@@ -67,7 +67,7 @@ norm_mode = '_90'
 min_mins = 1800
 
 # Brighten logo
-logo_brighten = False
+logo_brighten = True
 
 # %% League logo and league naming
 

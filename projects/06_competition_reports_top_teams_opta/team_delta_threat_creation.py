@@ -44,18 +44,18 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EFLC'
-league_below = 'EFL1'
-league_above = 'EPL'
+league = 'EPL'
+league_below = 'EFLC'
+league_above = None
 
 # Input run-date
-run_date = '08/05/2023'
+run_date = '28/05/2023'
 
 # Select whether to label %
 label_pct = False
 
 # Logo brighten
-logo_brighten = False
+logo_brighten = True
 
 # %% Get competition logo
 
@@ -142,7 +142,7 @@ for file in files:
     else:
         pass
     
-# %% Get data for current year, league below selected league
+# %% Get data for current year, league above selected league
 
 events_prev_above_df = pd.DataFrame()
 players_prev_above_df = pd.DataFrame()

@@ -118,6 +118,9 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['Unión Deportiva Almería', 'UD Almeria', 'U.D. Almeria', 'Almeria']:
         url = "https://seeklogo.com/images/A/almeria-ud-logo-1AEACC1508-seeklogo.com.png"
 
+    if team in ['Atalanta']:
+        url = "https://b.fssta.com/uploads/application/soccer/team-logos/atalanta.vresize.350.350.medium.0.png"
+
     if team in ['Athletic Club Ajaccio', 'AC Ajaccio', 'A.C. Ajaccio', 'Ajaccio']:
         url = "https://tmssl.akamaized.net/images/wappen/head/1147.png"
 
@@ -263,6 +266,9 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://logos-world.net/wp-content/uploads/2020/05/Chelsea-Logo.png"
         cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('YlOrBr')
 
+    if team in ['Clermont Foot', 'Clermont Foot 63']:
+        url = "https://secure.cache.images.core.optasports.com/soccer/teams/150x150/916.png"
+
     if team in ['Colchester Utd', 'Colchester United FC', 'Colchester', 'Colchester United']:
         url = "https://secure.cache.images.core.optasports.com/soccer/teams/150x150/714.png"
 
@@ -302,9 +308,18 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['Eintracht Frankfurt']:
         url = "https://assets-sports.thescore.com/soccer/team/115/logo.png"
 
+    if team in ['Elche CF', 'Elche']:
+        url = "https://www.costablancapeople.com/wp-content/uploads/2021/09/1200px-Elche_CF_logo.svg_.png"
+
+    if team in ['Empoli']:
+        url = "https://static.wixstatic.com/media/ef63b8_449146af6f0b4cfb8764b56ff9e07b62~mv2.png"
+
     if team in ['England']:
         url = "https://cdn.countryflags.com/thumbs/england/flag-round-250.png"
         cmap = cm.get_cmap('Greys') if hoa == 'home' else cm.get_cmap('Reds')
+
+    if team in ['Espanyol', 'RCS Espanyol']:
+        url = "https://b.fssta.com/uploads/application/soccer/team-logos/espanyol.vresize.350.350.medium.0.png"
 
     if team in ['Everton', 'Everton FC']:
         url = "https://logos-world.net/wp-content/uploads/2020/06/Everton-Logo-700x394.png"
@@ -330,7 +345,7 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://www.scfreiburg.com/images/logo-socialshare.png"
 
     if team in ['Fulham', 'Fulham FC']:
-        url = "https://sportslogohistory.com/wp-content/uploads/2020/11/fulham_fc_2001-pres.png"
+        url = "https://clublogos.stadion.io/assets/ClubLogos/Football/English/654.png"
         cmap = cm.get_cmap('Greys') if hoa == 'home' else cm.get_cmap('gray')
 
     if team in ['Germany']:
@@ -338,7 +353,7 @@ def get_team_badge_and_colour(team, hoa='home'):
         cmap = cm.get_cmap('Greys') if hoa == 'home' else cm.get_cmap('gray')
 
     if team in ['Getafe Club de Fútbol', 'Getafe CF', 'Getafe']:
-        url = "https://www.getafecf.com/Portals/0/logo120.png"
+        url = "https://b.fssta.com/uploads/application/soccer/team-logos/getafe.vresize.350.350.medium.0.png"
 
     if team in ['Ghana']:
         url = "https://cdn.countryflags.com/thumbs/ghana/flag-round-250.png"
@@ -416,12 +431,18 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['Levante', 'Levante UD']:
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/7/7b/Levante_Uni%C3%B3n_Deportiva%2C_S.A.D._logo.svg/225px-Levante_Uni%C3%B3n_Deportiva%2C_S.A.D._logo.svg.png"
 
+    if team in ['Lille', 'Lille OSC', 'LOSC Lille']:
+        url = "https://b.fssta.com/uploads/application/soccer/team-logos/lille.vresize.350.350.medium.0.png"
+
     if team in ['Lincoln', 'Lincoln City', 'Lincoln City FC']:
         url = "https://cdn.theposh.com/icons/team/light/1x/id/224.png"
 
     if team in ['Liverpool', 'Liverpool FC']:
         url = "https://logos-world.net/wp-content/uploads/2020/06/Liverpool-Logo.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('BuPu')
+
+    if team in ['FC Lorient', 'Lorient']:
+        url = "https://fclweb.fr/voy_content/uploads/2018/03/logo.png"
 
     if team in ['Luton Town', 'Luton', 'Luton Town FC']:
         url = "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/301.png"
@@ -586,6 +607,9 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['U.S. Sassuolo Calcio', 'US Sassuolo Calcio', 'Sassuolo']:
         url = "https://1000logos.net/wp-content/uploads/2018/06/Sassuolo-Logo.png"
 
+    if team in ['Schalke', 'FC Schalke', 'FC Schalke 04']:
+        url = "https://b.fssta.com/uploads/application/soccer/team-logos/fc-schalke-04.vresize.220.220.medium.0.png"
+
     if team in ['Serbia']:
         url = "https://cdn.countryflags.com/thumbs/serbia/flag-round-250.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Greys')
@@ -605,7 +629,7 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://cdn.pafc.co.uk/icons/team/dark/1x/id/674.png"
 
     if team in ['Shrewsbury', 'Shrewsbury Town FC', 'Shrewsbury Town']:
-        url = "https://cdn.theposh.com/icons/team/light/1x/id/194.png"
+        url = "https://static.wikia.nocookie.net/logopedia/images/0/01/Shrewsbury_Town_2015.png"
 
     if team in ['Southampton', 'Southampton FC']:
         url = "https://1000logos.net/wp-content/uploads/2018/07/Southampton-Logo-640x400.png"
@@ -627,6 +651,9 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Stade Rennais FC', 'Stade Rennais', 'Rennais', 'Rennes']:
         url = "https://1000logos.net/wp-content/uploads/2020/09/Rennais-logo.png"
+
+    if team in ['Stade Reims FC', 'Stade Reims', 'Reims']:
+        url = "https://www.ligue1.com/-/media/Project/LFP/shared/Images/Clubs/2022-2023/41.png"
 
     if team in ['Stoke City', 'Stoke City FC', 'Stoke', 'Stoke FC']:
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/2/29/Stoke_City_FC.svg/415px-Stoke_City_FC.svg.png"
@@ -653,6 +680,9 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://cdn.countryflags.com/thumbs/switzerland/flag-round-250.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Greys')
 
+    if team in ['Torino']:
+        url = "https://b.fssta.com/uploads/application/soccer/team-logos/torino.vresize.350.350.medium.0.png"
+
     if team in ['Tottenham Hotspur', 'Tottenham Hotspur FC', 'Tottenham', 'Spurs']:
         url = "https://logos-world.net/wp-content/uploads/2020/06/Tottenham-Hotspur-Logo-700x394.png"
         cmap = cm.get_cmap('Greys') if hoa == 'home' else cm.get_cmap('Blues')
@@ -666,6 +696,12 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['Tunisia']:
         url = "https://cdn.countryflags.com/thumbs/tunisia/flag-round-250.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Greys')
+
+    if team in ['Udinese']:
+        url = "https://b.fssta.com/uploads/application/soccer/team-logos/udinese.vresize.350.350.medium.0.png"
+
+    if team in ['Union Berlin', '1. FC Union Berlin', 'FC Union Berlin']:
+        url = "https://b.fssta.com/uploads/application/soccer/team-logos/1-fc-union-berlin.vresize.220.220.medium.0.png"
 
     if team in ['Uruguay']:
         url = "https://cdn.countryflags.com/thumbs/uruguay/flag-round-250.png"

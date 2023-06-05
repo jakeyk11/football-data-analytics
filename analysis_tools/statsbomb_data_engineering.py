@@ -22,6 +22,12 @@ create_player_list(lineups, additional_cols=None, pass_extra=None, group_team=Fa
 
 group_player_events(events, player_data, group_type='count', event_types=None, primary_event_name='Column Name'):
     Aggregate event types per player, and add to player information dataframe.
+
+create_team_list(lineups):
+    Create a list of teams from statsbomb-style lineups dataframe
+
+group_team_events(events, team_info, group_type='count', agg_columns=None, primary_event_name='Column Name'):
+    Aggregate event types per team, and add to team information dataframe.
 """
 
 import numpy as np
@@ -307,7 +313,7 @@ def add_player_nickname(events, lineups):
 def create_player_list(lineups, additional_cols=None, pass_extra=None, group_team=False):
     """ Create a list of players from statsbomb-style lineups dataframe
 
-    Function to read a whoscored-style lineups dataframe (single or multiple matches) and return a dataframe of
+    Function to read a statsbomb-style lineups dataframe (single or multiple matches) and return a dataframe of
     players that featured in squads. When multiple matches are passes, the function will determine the position that a
     player most frequently plays. The function will also aggregate player information if columns are passed into the
     additional_cols argument.
@@ -407,7 +413,7 @@ def group_player_events(events, player_data, group_type='count', agg_columns=Non
 
     Args:
         events (pandas.DataFrame): statsbomb-style dataframe of event data. Events can be from multiple matches.
-        player_data (pandas.DataFrame): statsbomb-style dataframe of player information. Must include a 'player_name'
+        player_data (pandas.DataFrame): statsbomb-style dataframe of player information. Must include a 'player_id'
                                         column.
         group_type (string, optional): aggregation method, can be set to 'sum' or 'count'. 'count' by default.
         agg_columns (list, optional): list of columns in event to aggregate, for sum or mean aggregation.
@@ -442,3 +448,73 @@ def group_player_events(events, player_data, group_type='count', agg_columns=Non
     # Merge into player information dataframe
     player_data_out = player_data_out.merge(selected_events, left_on='player_id', right_index=True, how='outer')
     return player_data_out
+
+
+def create_team_list(lineups):
+    """ Create a list of teams from statsbomb-style lineups dataframe
+
+    Function to read a statsbomb-style lineups dataframe (single or multiple matches) and return a dataframe of
+    teams that featured, number of games played and total minutes played.
+
+    Args:
+        lineups (pandas.DataFrame): statsbomb-style dataframe of lineups, can be from multiple matches.
+
+    Returns:
+        pandas.DataFrame: teams that feature in one or more lineup entries, including total minutes played.
+    """
+
+    teaminfo_df = lineups[['team_name', 'match_id']].drop_duplicates()
+
+    included_cols_max = lineups.groupby(['team_name', 'match_id'], axis=0).max()['mins_played']
+
+    teaminfo_df = teaminfo_df.merge(included_cols_max, left_on=['team_name', 'match_id'], right_index=True)
+    teaminfo_df['matches_played'] = 1
+
+    teaminfo_df = teaminfo_df.groupby(['team_name']).sum()[['mins_played', 'matches_played']]
+
+    return teaminfo_df
+
+
+def group_team_events(events, team_info, group_type='count', agg_columns=None, primary_event_name='Column Name'):
+    """ Aggregate event types per team, and add to team information dataframe
+
+    Function to read a statsbomb-style events dataframe (single or multiple matches) and return a dataframe of
+    aggregated information per team. Aggregation may be an event count or an event sum, based on the group_type
+    input.
+
+    Args:
+        events (pandas.DataFrame): statsbomb-style dataframe of event data. Events can be from multiple matches.
+        team_info (pandas.DataFrame): statsbomb-style dataframe of team information. Must include a 'team' column.
+        group_type (string, optional): aggregation method, can be set to 'sum' or 'count'. 'count' by default.
+        agg_columns (list, optional): list of columns in event to aggregate, for sum or mean aggregation.
+        primary_event_name (string, optional): name of main event type being aggregated (e.g. 'pass'). Used to name the
+                                           aggregated column within player_data dataframe.
+
+    Returns:
+        pandas.DataFrame: statsbomb-style dataframe of team information, including aggregated data.
+    """
+
+    # Specify agg_columns as list if not assigned
+    if agg_columns is None:
+        agg_columns = list()
+
+    # Initialise output dataframe
+    team_info_out = team_info.copy()
+
+    # Perform aggregation based on grouping type input
+    if group_type == 'count':
+        grouped_events = events.groupby('team', axis=0).count()
+        selected_events = grouped_events[agg_columns].copy()
+        selected_events.loc[:, primary_event_name] = grouped_events['match_id']
+    elif group_type == 'sum':
+        grouped_events = events.groupby('team', axis=0).sum()
+        selected_events = grouped_events[agg_columns].copy()
+    elif group_type == 'mean':
+        grouped_events = events.groupby('team', axis=0).mean()
+        selected_events = grouped_events[agg_columns].copy()
+    else:
+        selected_events = pd.DataFrame()
+
+    # Merge into player information dataframe
+    team_info_out = team_info_out.merge(selected_events, left_on='team_name', right_index=True, how='outer')
+    return team_info_out

@@ -42,16 +42,16 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EFLC'
+league = 'EPL'
 
 # Input run-date
-run_date = '08/05/2023'
+run_date = '28/05/2023'
 
 # Select whether to label %
 label_pct = False
 
 # Select whether to brighten logo
-logo_brighten = False
+logo_brighten = True
 
 # Select whether to use team colours
 team_colour = False
