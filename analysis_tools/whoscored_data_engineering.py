@@ -24,14 +24,8 @@ create_player_list(lineups, additional_cols=None):
     Create a list of players from whoscored-style lineups dataframe. This requires minutes played information.
 
 group_player_events(events, player_data, group_type='count', event_types=None, primary_event_name='Column Name'):
-    Aggregate event types per player, and add to player information dataframe
-
-find_offensive_actions(events_df):
-    Return dataframe of in-play offensive actions from event data.
-
-find_defensive_actions(events_df):
-    Return dataframe of in-play defensive actions from event data.
-
+    Aggregate event types per player, and add to player info
+    
 """
 
 import pandas as pd
@@ -417,42 +411,3 @@ def group_player_events(events, player_data, group_type='count', event_types=Non
     return player_data_out
 
 
-def find_offensive_actions(events_df):
-    """ Return dataframe of in-play offensive actions from event data.
-
-    Function to find all in-play offensive actions within a whoscored-style events dataframe (single or multiple
-    matches), and return as a new dataframe.
-
-    Args:
-        events_df (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
-
-    Returns:
-        pandas.DataFrame: whoscored-style dataframe of offensive actions.
-    """
-
-    # Define and filter offensive events
-    offensive_actions = ['BallTouch', 'TakeOn', 'Pass', 'OffsidePass', 'MissedShots', 'SavedShot', 'Goal', 'Carry']
-    offensive_action_df = events_df[(events_df['eventType'].isin(offensive_actions)) & (events_df['satisfiedEventsTypes'].apply(lambda x: not (31 in x or 34 in x or 212 in x)))]
-
-    return offensive_action_df
-
-
-def find_defensive_actions(events_df):
-    """ Return dataframe of in-play defensive actions from event data.
-
-    Function to find all in-play defensive actions within a whscored-style events dataframe (single or multiple
-    matches), and return as a new dataframe.
-
-    Args:
-        events_df (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
-
-    Returns:
-        pandas.DataFrame: whoscored-style dataframe of defensive actions.
-    """
-
-    # Define and filter defensive events
-    defensive_actions = ['BallRecovery', 'BlockedPass', 'Challenge', 'Clearance', 'Foul', 'Interception', 'Tackle',
-                         'Claim', 'KeeperPickup', 'Punch', 'Save']
-    defensive_action_df = events_df[events_df['eventType'].isin(defensive_actions)]
-
-    return defensive_action_df

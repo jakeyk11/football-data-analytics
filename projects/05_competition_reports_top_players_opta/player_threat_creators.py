@@ -54,7 +54,7 @@ import analysis_tools.logos_and_badges as lab
 year = '2022'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'EPL'
+league = 'UCL'
 
 # Select position to exclude
 pos_exclude=['GK']
@@ -63,19 +63,19 @@ pos_exclude=['GK']
 pos_input = 'outfield players'
 
 # Input run-date
-run_date = '28/05/2023'
+run_date = '11/06/2023'
 
 # Normalisation mode
 norm_mode = '_90'
 
 # Min minutes played (only used if normalising)
-min_mins = 1800
+min_mins = 360
 
 # Brighten logo
 logo_brighten = True
 
 # Threat pitch grid mode (3 = top 3, else = top 1. dense = dense grid, else = sparse grid)
-pitch_mode = '1'
+pitch_mode = '3'
 grid_density = 'sparse'
 
 # %% League logo and league naming
@@ -85,7 +85,7 @@ comp_logo = lab.get_competition_logo(league, year, logo_brighten)
 # Create title and subtitles
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
            'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
-           'EFL1': 'EFL League One', 'EFL2': 'EFL League Two'}
+           'EFL1': 'EFL League One', 'EFL2': 'EFL League Two', 'UCL': 'Champions League'}
 
 # %% Get data
 
@@ -193,8 +193,6 @@ for player_id, player_details in playerinfo_df.iterrows():
 
 playerinfo_df = playerinfo_df[(playerinfo_df['mins_played']>=min_mins) & (~playerinfo_df['pos_type'].isin(pos_exclude))]
 playerinfo_df = playerinfo_df[~playerinfo_df.index.duplicated(keep='first')]
-
-playerinfo_df = playerinfo_df[playerinfo_df['name']!='João Cancelo']
 
 # %% Plot formatting
 
@@ -362,7 +360,7 @@ text_ax_bottom.axis("off")
 text_ax_bottom.set_xlim([0,1])
 text_ax_bottom.set_ylim([0,1])
 
-title_text = f"{leagues[league]} {year}/{int(year) + 1}: Threat Creators"
+title_text = f"{leagues[league]} {year}/{str(int(year) + 1).replace('20','',1)}: Threat Creators"
 subtitle_text = "Threat Created through Successful In-Play Passes and Carries" 
 
 # Title
@@ -395,6 +393,7 @@ fig.set_size_inches(7, 9)
 fig.set_facecolor('#313332')
 
 # Draw Pitch Zones
+pitch = VerticalPitch(pitch_color='#313332', pitch_type='opta', line_color='white', linewidth=1, stripe=False)
 pitch.heatmap(bin_statistic, ax=ax['pitch'], cmap = ListedColormap(['#313332']), edgecolor='grey', lw=0.5, alpha = 1, zorder = 0.6)
 
 # Label players
@@ -436,7 +435,7 @@ for idx in np.arange(0, len(bin_statistic['statistic'].reshape(-1))):
         ax['pitch'].add_artist(ab)
         
 # Title
-title_text = f"{leagues[league]} {year}/{int(year)+1} − Threat Creators"
+title_text = f"{leagues[league]} {year}/{str(int(year)+1).replace('20','',1)} − Threat Creators"
 subtitle_text = f"Top Threat Creator{title_plural} from each Pitch Zone"
 subsubtitle_text = f"In-Play Pass, Carry and Dribble events included. Negative threat events excluded.\nOnly includes {pos_input} with >{min_mins} total mins played. Correct as of {run_date}"
 fig.text(0.17, 0.945, title_text, fontweight="bold", fontsize=13, color='w')
@@ -444,7 +443,7 @@ fig.text(0.17, 0.9175, subtitle_text, fontweight="bold", fontsize=12, color='w')
 fig.text(0.17, 0.8775, subsubtitle_text, fontweight="regular", fontsize=9, color='w')
 
 # Add competition logo
-ax = fig.add_axes([0.03, 0.85, 0.14, 0.14])
+ax = fig.add_axes([0.03, 0.85, 0.14, 0.15])
 ax.axis("off")
 ax.imshow(comp_logo)
 

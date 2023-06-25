@@ -60,6 +60,9 @@ def get_competition_logo(competition, year=None, logo_brighten=False):
     if competition in ['Ligue 1', 'Ligue_1', 'Ligue 1 Uber Eats', 'FR1']:
         url = "https://sportivka.net/wp-content/uploads/2021/10/Ligue_1_logo_PNG1.png"
 
+    if competition in ['UEFA Champions League', 'Champions League', 'UCL']:
+        url = "https://logoeps.com/wp-content/uploads/2013/06/uefa-champions-league-eps-vector-logo.png"
+
     if competition in ['World_Cup', 'World Cup', 'FIFA World Cup']:
         if year == '2022':
             url = "https://logodownload.org/wp-content/uploads/2018/07/world-cup-2022-logo-1.png"
@@ -114,6 +117,9 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['AC Milan', 'A.C. Milan']:
         url = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/195px-Logo_of_AC_Milan.svg.png"
+
+    if team in ['Ajax']:
+        url = "https://logodownload.org/wp-content/uploads/2018/09/ajax-logo-escudo.png"
 
     if team in ['Unión Deportiva Almería', 'UD Almeria', 'U.D. Almeria', 'Almeria']:
         url = "https://seeklogo.com/images/A/almeria-ud-logo-1AEACC1508-seeklogo.com.png"
@@ -171,6 +177,9 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['Belgium']:
         url = "https://cdn.countryflags.com/thumbs/belgium/flag-round-250.png"
         cmap = cm.get_cmap('Reds') if hoa == 'home' else cm.get_cmap('Greys')
+
+    if team in ['SL Benfica', 'Benfica']:
+        url = "https://b.fssta.com/uploads/application/soccer/team-logos/benfica.vresize.350.350.medium.0.png"
 
     if team in ['Birmingham', 'Birmingham FC', 'Birmingham City', 'Birmingham City FC']:
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/6/68/Birmingham_City_FC_logo.svg/302px-Birmingham_City_FC_logo.svg.png"
@@ -271,6 +280,9 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Colchester Utd', 'Colchester United FC', 'Colchester', 'Colchester United']:
         url = "https://secure.cache.images.core.optasports.com/soccer/teams/150x150/714.png"
+
+    if team in ['FC Copenhagen', 'Copenhagen', 'København', 'FC København']:
+        url= "https://img.uefa.com/imgml/TP/teams/logos/140x140/2605464.png"
 
     if team in ['Costa Rica']:
         url = "https://cdn.countryflags.com/thumbs/costa-rica/flag-round-250.png"
@@ -619,7 +631,10 @@ def get_team_badge_and_colour(team, hoa='home'):
         cmap = cm.get_cmap('Greens') if hoa == 'home' else cm.get_cmap('Greys')
 
     if team in ['Sevilla', 'Sevilla FC']:
-        url = "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/Sevilla_FC_logo.svg/225px-Sevilla_FC_logo.svg.png"
+        url = "https://b.fssta.com/uploads/application/soccer/team-logos/sevilla.vresize.350.350.medium.0.png"
+
+    if team in ['Shakhtar', 'Shakhtar Donetsk', 'FC Shakhtar Donetsk']:
+        url = "https://static.wikia.nocookie.net/the-football-database/images/2/20/FC_Shakhtar_Donetsk.png"
 
     if team in ['Sheffield United', 'Sheffield United FC', 'Sheffield Utd', 'Sheff Utd']:
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Sheffield_United_FC_logo.svg/1200px-Sheffield_United_FC_logo.svg.png"
@@ -645,6 +660,9 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Spezia Calcio', 'Spezia']:
         url = "https://store.acspezia.com/wp-content/uploads/2021/01/logo-spezia-150x150.png"
+
+    if team in ['Sporting', 'Sporting CP']:
+        url = "https://b.fssta.com/uploads/application/soccer/team-logos/sporting-cp.vresize.350.350.medium.0.png"
 
     if team in ['Stade Brestois 29', 'Brest']:
         url = "https://logodownload.org/wp-content/uploads/2019/09/stade-brestois-29-logo-1.png"
@@ -713,6 +731,9 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Valencia', 'Valencia CF']:
         url = "https://valenciacf.azureedge.net/thumbs/2x/vLLXe4oi315XPTDor6oyZW6U27EhvBRByyaCfvvXb4h9Xj0rCBEPcVXht5A4Oanf.png"
+
+    if team in ['Viktoria Plzen', 'Plzen']:
+        url = "https://www.fcviktoria.cz/img/logo.png"
 
     if team in ['Villarreal', 'Villarreal CF']:
         url = "https://cdn.soccerwiki.org/images/logos/clubs/174.png"

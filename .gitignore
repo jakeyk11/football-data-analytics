@@ -16,6 +16,7 @@
 /data_directory/whoscored_data/2011_12/
 /data_directory/whoscored_data/2010_11/
 /data_directory/whoscored_data/2009_10/
+/projects/00_data_import_and_misc_work/misc_work_images/
 /projects/00_data_import_and_misc_work/import_data_statsbomb.py
 /projects/00_data_import_and_misc_work/check_whoscored_data_volume.py
 /projects/01_wc2018_box2box_mids_statsbomb/worldcup_b2b_mids/
@@ -37,7 +38,9 @@
 /projects/06_competition_reports_top_teams_opta/team_fullback_combinations/
 /projects/06_competition_reports_top_teams_opta/team_threat_creation/
 /projects/06_competition_reports_top_teams_opta/team_setpiece_chance_concession/
+/projects/06_competition_reports_top_teams_opta/team_common_actions/
 /projects/07_player_reports_opta/player_reports/
 /projects/07_player_reports_opta/player_report_centreforward_sb.py
 /projects/07_player_reports_opta/player_report_winger_sb.py
 /projects/07_player_reports_opta/test_env.py
+/projects/08_exploratory_work_opta/shot_characteristics_trending/

@@ -22,6 +22,12 @@ insert_ball_carries(events_df, min_carry_length=3, max_carry_length=60, min_carr
 
 get_xthreat(events_df, interpolate=True, pitch_length=105, pitch_width=68):
     Add expected threat metric to whoscored-style events dataframe
+
+find_offensive_actions(events_df):
+    Return dataframe of in-play offensive actions from event data.
+
+find_defensive_actions(events_df):
+    Return dataframe of in-play defensive actions from event data.
 """
 
 import numpy as np
@@ -570,3 +576,122 @@ def get_xthreat(events_df, interpolate=True, pitch_length=100, pitch_width=100):
         events_out['xThreat_gen'] = events_out['xThreat'].apply(lambda xt: xt if (xt > 0 or xt != xt) else 0)
 
     return events_out
+
+
+def find_offensive_actions(events_df):
+    """ Return dataframe of in-play offensive actions from event data.
+
+    Function to find all in-play offensive actions within a whoscored-style events dataframe (single or multiple
+    matches), and return as a new dataframe.
+
+    Args:
+        events_df (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
+
+    Returns:
+        pandas.DataFrame: whoscored-style dataframe of offensive actions.
+    """
+
+    # Offensive aerials
+    aerials = events_df[events_df['eventType'] == 'Aerial']
+    offensive_aerials = aerials[aerials['qualifiers'].apply(lambda x:
+                                                            {'type': {'value': 286, 'displayName': 'Offensive'}} in x)]
+
+    # Define and filter offensive events
+    offensive_actions = ['BallTouch', 'GoodSkill', 'TakeOn', 'Pass', 'OffsidePass', 'MissedShots', 'SavedShot',
+                         'ShotOnPost', 'Goal', 'Carry']
+    offensive_action_df = events_df[(events_df['eventType'].isin(offensive_actions)) &
+                                    (events_df['satisfiedEventsTypes'].apply(lambda x: not (5 in x or 6 in x or 31 in x
+                                                                                            or 34 in x or 212 in x)))]
+    offensive_action_df = pd.concat([offensive_action_df,
+                                     offensive_aerials], axis=0).sort_values(['match_id', 'cumulative_mins'])
+
+    return offensive_action_df
+
+
+def find_defensive_actions(events_df):
+    """ Return dataframe of in-play defensive actions from event data.
+
+    Function to find all in-play defensive actions within a whscored-style events dataframe (single or multiple
+    matches), and return as a new dataframe.
+
+    Args:
+        events_df (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
+
+    Returns:
+        pandas.DataFrame: whoscored-style dataframe of defensive actions.
+    """
+
+    # Defensive Aerials
+    aerials = events_df[events_df['eventType']=='Aerial']
+    defensive_aerials = aerials[aerials['qualifiers'].apply(lambda x:
+                                                            {'type': {'value': 285, 'displayName': 'Defensive'}} in x)]
+
+    # Define and filter defensive events
+    defensive_actions = ['BallRecovery', 'BlockedPass', 'Clearance', 'Foul', 'Interception', 'Tackle',
+                         'Claim', 'KeeperPickup', 'KeeperSweeper', 'Smother', 'Punch', 'Save']
+    defensive_action_df = events_df[events_df['eventType'].isin(defensive_actions)]
+
+    defensive_action_df = pd.concat([defensive_action_df,
+                                     defensive_aerials], axis=0).sort_values(['match_id', 'cumulative_mins'])
+
+    # Note challenges are never successful and represent when the opposition completes a take on
+    return defensive_action_df
+
+
+def get_pass_outcome(pass_events, contextual_events, t=5):
+    """ Determine outcome of pass events
+
+    Function to determine longer term outcomes of pass events by processing following events within a specified time
+    period of the original pass action. The function appends a 'pass_outcome' column to pass events that are input.
+
+    Args:
+        pass_events (pandas.DataFrame): whoscored-style dataframe of pass events to investigate.
+        contextual_events (pandas.DataFrame): whoscored-style dataframe of events that surround passes
+        t (int): Time period to look for contextual events and identify longer term outcome
+
+    Returns:
+        pandas.DataFrame: whoscored-style dataframe of pass events with additional 'pass_outcome' column
+    """
+
+    # Initialise output
+    pass_events_out = pass_events.reset_index(drop=True).copy()
+    pass_events_out['pass_outcome'] = np.nan
+
+    # Iterate through passes and look through following actions
+    for idx, pass_evt in pass_events_out.iterrows():
+
+        # Following events and team next events
+        next_evts = contextual_events[((contextual_events['match_id'] == pass_evt['match_id']) &
+                                       (contextual_events['period'] == pass_evt['period']) &
+                                       (contextual_events['cumulative_mins'] > pass_evt['cumulative_mins']) &
+                                       (contextual_events['cumulative_mins'] <= pass_evt['cumulative_mins'] + (t/60))
+                                       )]
+        team_next_evts = next_evts[next_evts['teamId'] == pass_evt['teamId']]
+
+        # Passes off the pitch are unsuccessful
+        if (pass_evt['endX'] == 100) | (pass_evt['endX'] == 0) | (pass_evt['endY'] == 100) | (pass_evt['endY'] == 0):
+            pass_events_out.loc[idx, 'pass_outcome'] = 'Unsuccessful'
+
+        # Looks for goals in next t seconds
+        elif ('Goal' in team_next_evts['eventType'].tolist()) or (92 in pass_evt['satisfiedEventsTypes']):
+            pass_events_out.loc[idx, 'pass_outcome'] = 'Goal'
+
+        # Look for shots in next t seconds
+        elif (('SavedShot' in team_next_evts['eventType'].tolist()) or
+              ('ShotOnPost' in team_next_evts['eventType'].tolist()) or
+              ('MissedShots' in team_next_evts['eventType'].tolist())):
+            pass_events_out.loc[idx, 'pass_outcome'] = 'Shot'
+
+        # Look for key pass events in next t seconds
+        elif bool(set([item for sublist in next_evts['satisfiedEventsTypes'].tolist() for item in sublist]) &
+                  set(np.arange(39, 47))):
+            pass_events_out.loc[idx, 'pass_outcome'] = 'Key Pass'
+
+        # Otherwise check pass success
+        elif pass_evt['outcomeType'] == 'Successful':
+            pass_events_out.loc[idx, 'pass_outcome'] = 'To Team'
+        else:
+            pass_events_out.loc[idx, 'pass_outcome'] = 'Unsuccessful'
+
+    return pass_events_out
+
