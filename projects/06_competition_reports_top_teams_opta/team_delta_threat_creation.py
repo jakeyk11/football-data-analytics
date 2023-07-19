@@ -328,7 +328,6 @@ leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesl
            'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
            'EFL1': 'EFL League One', 'EFL2': 'EFL League Two'}
 
-
 title_text = f"{leagues[league]} {year}/{int(year)+1} − Improvement in Threat Creation by Team"
 subtitle_text = "Zones of <Improved> and <Reduced> Threat Creation compared to Last Season"
 subsubtitle_text = f"In-Play Pass, Carry and Dribble events included. Negative threat events excluded. Correct as of {run_date}"

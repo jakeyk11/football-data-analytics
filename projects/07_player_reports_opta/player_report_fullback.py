@@ -6,12 +6,6 @@
 #
 # Outputs:  Player report
 
-# To add
-
-# Crosses and cutbacks
-# Long ball percentage
-# Actions after turnover
-
 # %% Imports and parameters
 
 import pandas as pd
@@ -47,22 +41,22 @@ import analysis_tools.logos_and_badges as lab
 # %% Inputs
 
 # Player, league and year to analyse
-player_name = 'Dominic Thompson'
-league = "EFLC"
+player_name = 'Josko Gvardiol'
+league = "Bundesliga"
 year = '2022'
 
 # Players, leagues and years to compare
-comparison_players = [('Morgan Fox', 'EFLC', '2022'),
-                      ('Max Lowe', 'EFLC', '2022')]
+comparison_players = [('Nathan Aké', 'EPL', '2022'),
+                      ('João Cancelo', 'EPL', '2021')]
 
 # %%
 # Full league and criteria to compare against
-comparison_league = ('EFLC', '2022')
+comparison_league = ('EPL', '2022')
 comparison_pos = ['DL']
 comparison_min_mins = 900
 
 # Abbreviated league name for printing
-comparison_league_abbrev = 'EFLC'
+comparison_league_abbrev = 'EPL'
 player_pos_abbrev = 'LB'
 comparison_pos_abbrev = 'LB'
 
@@ -104,12 +98,7 @@ for idx, data in enumerate(data_to_load):
             players_df = pd.concat([players_df, match_players])
         else:
             pass
-        
-    # Synthesise additional information
-    events_df = wde.cumulative_match_mins(events_df)
-    events_df = wce.insert_ball_carries(events_df)
-    events_df = wce.get_xthreat(events_df, interpolate = True)
-    
+
     # Store information
     all_data.loc[idx, 'player'] = data[0]
     all_data.loc[idx, 'league'] = data[1]
@@ -121,7 +110,7 @@ for idx, data in enumerate(data_to_load):
     del events_df
     del players_df
 
-# %%
+# %% Get data for player and comparison players
     
 player_stats = all_data.loc[:,['player', 'league', 'year']]
 player_stats = pd.DataFrame()
@@ -157,31 +146,29 @@ for idx, dataset in all_data.iterrows():
     suc_touch_box = inplay_touches[(inplay_touches['outcomeType']=='Successful') & (inplay_touches['x']>=83) & (inplay_touches['y']<=79) & (inplay_touches['y']>=21)]
     
     # Player progressive passes, passes into opposition third and box passes
-    player_events['progressive_pass'] = player_events.apply(wce.progressive_pass, axis=1)
-    player_events['box_pass'] = player_events.apply(wce.pass_into_box, axis=1)
+    player_events['progressive_action'] = player_events.apply(wce.progressive_action, axis=1)
+    player_events['box_entry'] = player_events.apply(wce.box_entry, axis=1)
     all_pass =  player_events[player_events['eventType']=='Pass']
     suc_pass = all_pass[all_pass['outcomeType']=='Successful']   
-    suc_prog_pass = player_events[(player_events['progressive_pass']==True)]    
-    suc_prog_pass_opph = player_events[(player_events['progressive_pass']==True) & (player_events['x']>=50)]
-    pass_opp3 = player_events[(player_events['eventType'] == 'Pass') & (player_events['x']<100*(2/3)) & (player_events['endX'] >=100*(2/3))]
+    suc_prog_pass = all_pass[(all_pass['progressive_action']==True)]    
+    suc_prog_pass_opph = all_pass[(all_pass['progressive_action']==True) & (all_pass['x']>=50)]
+    pass_opp3 = all_pass[(all_pass['x']<100*(2/3)) & (all_pass['endX'] >=100*(2/3))]
     suc_pass_opp3 = pass_opp3[pass_opp3['outcomeType'] == 'Successful']
-    suc_pass_box = player_events[(player_events['box_pass']==True)]    
+    suc_pass_box = all_pass[(all_pass['box_entry']==True)]    
     
     # Player progressive carries, carries into opposition third and box carries
-    player_events['progressive_carry'] = player_events.apply(wce.progressive_carry, axis=1)
-    player_events['box_carry'] = player_events.apply(wce.carry_into_box, axis=1)
     suc_carry = player_events[(player_events['eventType']=='Carry') & (player_events['outcomeType']=='Successful')]   
-    suc_prog_carry = player_events[(player_events['progressive_carry']==True)]    
-    suc_prog_carry_opph = player_events[(player_events['progressive_carry']==True) & (player_events['x']>=50)]
-    suc_carry_opp3 = player_events[(player_events['eventType'] == 'Carry') & (player_events['x']<100*(2/3)) & (player_events['endX'] >=100*(2/3))]
-    suc_carry_box = player_events[(player_events['box_carry']==True)]
+    suc_prog_carry = suc_carry[(suc_carry['progressive_action']==True)]    
+    suc_prog_carry_opph = suc_carry[(suc_carry['progressive_action']==True) & (suc_carry['x']>=50)]
+    suc_carry_opp3 = suc_carry[(suc_carry['x']<100*(2/3)) & (suc_carry['endX'] >=100*(2/3))]
+    suc_carry_box = suc_carry[(suc_carry['box_entry']==True)]
     
     # Crosses
     crosses = all_pass[all_pass['satisfiedEventsTypes'].apply(lambda x: True if (125 in x or 126 in x) else False)]
     suc_crosses = crosses[crosses['outcomeType']=='Successful']
 
     # Player defensive actions, convex hull and opposition actions in convex hull
-    player_def_actions = wde.find_defensive_actions(player_events)     
+    player_def_actions = wce.find_defensive_actions(player_events)     
     player_def_hull = wce.create_convex_hull(player_def_actions, name=dataset['player'], min_events=5, include_events='1std', pitch_area = 10000)
     player_def_hull = wce.passes_into_hull(player_def_hull.squeeze(), player_match_events[player_match_events['teamId'] != team_id], xt_info=True)
 
@@ -306,10 +293,6 @@ for file in files:
     else:
         pass
 
-# Synthesise additional information
-comp_events = wde.cumulative_match_mins(comp_events)
-comp_events = wce.insert_ball_carries(comp_events)
-comp_events = wce.get_xthreat(comp_events, interpolate = True)
 
 # %% Produce player dataframe for comparison league
 
@@ -320,24 +303,22 @@ suc_touch_opp3 = inplay_touches[(inplay_touches['outcomeType']=='Successful') & 
 suc_touch_box = inplay_touches[(inplay_touches['outcomeType']=='Successful') & (inplay_touches['x']>=83) & (inplay_touches['y']<=79) & (inplay_touches['y']>=21)]
     
 # Player progressive passes, passes into opposition third and box passes
-comp_events['progressive_pass'] = comp_events.apply(wce.progressive_pass, axis=1)
-comp_events['box_pass'] = comp_events.apply(wce.pass_into_box, axis=1)
+comp_events['progressive_action'] = comp_events.apply(wce.progressive_action, axis=1)
+comp_events['box_entry'] = comp_events.apply(wce.box_entry, axis=1)
 all_pass =  comp_events[comp_events['eventType']=='Pass']
 suc_pass = all_pass[all_pass['outcomeType']=='Successful']   
-suc_prog_pass = comp_events[(comp_events['progressive_pass']==True)]    
-suc_prog_pass_opph = comp_events[(player_events['progressive_pass']==True) & (comp_events['x']>=50)]
-pass_opp3 = comp_events[(comp_events['eventType'] == 'Pass') & (comp_events['x']<100*(2/3)) & (comp_events['endX'] >=100*(2/3))]
+suc_prog_pass = all_pass[(all_pass['progressive_action']==True)]    
+suc_prog_pass_opph = all_pass[(all_pass['progressive_action']==True) & (all_pass['x']>=50)]
+pass_opp3 = all_pass[(all_pass['x']<100*(2/3)) & (all_pass['endX'] >=100*(2/3))]
 suc_pass_opp3 = pass_opp3[pass_opp3['outcomeType'] == 'Successful']
-suc_pass_box = comp_events[(comp_events['box_pass']==True)]    
+suc_pass_box = all_pass[(all_pass['box_entry']==True)]    
 
 # Player progressive carries, carries into opposition third and box carries
-comp_events['progressive_carry'] = comp_events.apply(wce.progressive_carry, axis=1)
-comp_events['box_carry'] = comp_events.apply(wce.carry_into_box, axis=1)
 suc_carry = comp_events[(comp_events['eventType']=='Carry') & (comp_events['outcomeType']=='Successful')]   
-suc_prog_carry = comp_events[(comp_events['progressive_carry']==True)]    
-suc_prog_carry_opph = comp_events[(comp_events['progressive_carry']==True) & (comp_events['x']>=50)]
-suc_carry_opp3 = comp_events[(comp_events['eventType'] == 'Carry') & (comp_events['x']<100*(2/3)) & (comp_events['endX'] >=100*(2/3))]
-suc_carry_box = comp_events[(comp_events['box_carry']==True)]
+suc_prog_carry = suc_carry[(suc_carry['progressive_action']==True)]    
+suc_prog_carry_opph = suc_carry[(suc_carry['progressive_action']==True) & (suc_carry['x']>=50)]
+suc_carry_opp3 = suc_carry[(suc_carry['x']<100*(2/3)) & (suc_carry['endX'] >=100*(2/3))]
+suc_carry_box = suc_carry[(suc_carry['box_entry']==True)]
 
 # Crosses
 crosses = all_pass[all_pass['satisfiedEventsTypes'].apply(lambda x: True if (125 in x or 126 in x) else False)]

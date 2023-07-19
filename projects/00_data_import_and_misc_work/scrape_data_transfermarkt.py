@@ -15,7 +15,7 @@ import analysis_tools.get_football_data as gfd
 # %% User Inputs
 
 # Input league country (England = GB, Spain = ES, Germany = L, Italy = IT, France = FR, Scotland = SC)
-country_code = 'GB'
+country_code = 'FR'
 
 # Input league number (for example Premier League = 1, Championship = 2, League One = 3, etc.)
 division_num = '2'

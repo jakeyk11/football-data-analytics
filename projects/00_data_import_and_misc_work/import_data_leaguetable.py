@@ -17,7 +17,7 @@ import analysis_tools.get_football_data as gfd
 
 # Input league identifier and starting year of season
 league = "EFLC"
-start_year = '2021'
+start_year = '2018'
 
 # Set up folder path
 folder_path = f"../../data_directory/leaguetable_data/{start_year}_{str(int(start_year.replace('20','', 1)) + 1)}"

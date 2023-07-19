@@ -133,11 +133,12 @@ def pre_assist(events):
 
 
 def xg_assisted(events):
-    """ Calculate expected goals assisted from statsbomb-style events dataframe, and returns with xg_assisted column
+    """ Calculate expected goals assisted from statsbomb-style events dataframe, and returns with pass_xg_assisted
+    column
 
     Function to calculate expected goals assisted from a statsbomb-style event dataframe (from one or multiple
     matches), where xg assisted is the xg resulting from a shot that occurs after a played has made a successful pass
-    to the shooter. The events dataframe is returned with an additional xg_assisted column.
+    to the shooter. The events dataframe is returned with an additional pass_xg_assisted column.
 
     Args:
         events (pandas.DataFrame): statsbomb-style dataframe of event data. Events can be from multiple matches.
@@ -159,7 +160,7 @@ def xg_assisted(events):
     return events_out
 
 
-def istouch(single_event, inplay=True):
+def istouch(single_event):
     """Determine whether a statsbomb-style event involves the player touching the ball.
 
     Function to identify events that involve the player touching the ball. The function takes in a single event,
@@ -168,121 +169,102 @@ def istouch(single_event, inplay=True):
 
     Args:
         single_event (pandas.Series): series corresponding to a single event (row) from statsbomb-style event dataframe.
-        inplay (bool, optional): selection of whether to include 'in-play' events only. True by default.
 
     Returns:
         string: Offensive = offensive touch, Defensive = defensive touch, nan = not a touch (or invalid touch).
         bool: Identifies successful touches with True marker
-        bool: Identifies touches within the box with True marker
-        bool: Identifies touches within the final third with True marker
     """
 
     # Initialise variables
     touch_type = float(np.nan)
     touch_success = float(np.nan)
-    box_touch = float(np.nan)
-    final_third_touch = float(np.nan)
-    set_piece = False
 
     # 50 50s won
-    if single_event['50_50'] == single_event['50_50']:
-        if single_event['team'] == single_event['possession_team']:
+    if single_event['type_name'] == '50/50':
+        if single_event['team_name'] == single_event['possession_team_name']:
             touch_type = 'Offensive'
         else:
             touch_type = 'Defensive'
-        if single_event['50_50']['outcome']['name'] in ['Won', 'Success To Team', 'Success To Opposition']:
-            touch_success = True
+        if single_event['outcome_name'] in ['Won', 'Success To Team', 'Success To Opposition']:
+            touch_success = 1
 
     # Successful ball receipt
-    elif single_event['type'] == 'Ball Receipt*' and (single_event['ball_receipt_outcome'] !=
-                                                      single_event['ball_receipt_outcome']):
+    elif single_event['type_name'] == 'Ball Receipt' and (single_event['outcome_name'] != single_event['outcome_name']):
         touch_type = 'Offensive'
-        touch_success = True
+        touch_success = 1
 
     # Successful recovery
-    elif single_event['type'] == 'Ball Recovery':
-        if single_event['ball_recovery_offensive'] == single_event['ball_recovery_offensive']:
-            touch_type = 'Offensive'
+    elif single_event['type_name'] == 'Ball Recovery':
+        if 'ball_recovery_offensive' in single_event.index.tolist():
+            if single_event['ball_recovery_offensive'] == single_event['ball_recovery_offensive']:
+                touch_type = 'Offensive'
         else:
             touch_type = 'Defensive'
-        if single_event['ball_recovery_recovery_failure'] != single_event['ball_recovery_recovery_failure']:
-            touch_success = True
+        if 'ball_recovery_recovery_failure' in single_event.index.tolist():
+            if single_event['ball_recovery_recovery_failure'] != single_event['ball_recovery_recovery_failure']:
+                touch_success = 1
+        else:
+            touch_success = 1
 
     # Block or deflection
-    elif single_event['type'] == 'Block':
-        if single_event['block_offensive'] == single_event['block_offensive']:
-            touch_type = 'Offensive'
+    elif single_event['type_name'] == 'Block':
+        if 'block_offensive' in single_event.index.tolist():
+            if single_event['block_offensive'] == single_event['block_offensive']:
+                touch_type = 'Offensive'
         else:
             touch_type = 'Defensive'
-        touch_success = True
+        touch_success = 1
 
     # Carry
-    elif single_event['type'] == 'Carry':
+    elif single_event['type_name'] == 'Carry':
         touch_type = 'Offensive'
-        touch_success = True
+        touch_success = 1
 
     # Clearance
-    elif single_event['type'] == 'Clearance':
+    elif single_event['type_name'] == 'Clearance':
         touch_type = 'Defensive'
-        touch_success = True
+        touch_success = 1
 
     # Dribble
-    elif single_event['type'] == 'Dribble' and single_event['dribble_no_touch'] != single_event['dribble_no_touch']:
-        touch_type = 'Offensive'
-        if single_event['dribble_outcome'] == 'Complete':
-            touch_success = True
+    elif single_event['type_name'] == 'Dribble':
+        if 'dribble_no_touch' in single_event.index.tolist():
+            if single_event['dribble_no_touch'] != single_event['dribble_no_touch']:
+                touch_type = 'Offensive'
+        else:
+            touch_type = 'Offensive'
+        if single_event['outcome_name'] == 'Complete':
+            touch_success = 1
 
     # Duel
-    elif single_event['duel_type'] == 'Tackle':
-        touch_type = 'Defensive'
-        if single_event['duel_outcome'] in ['Won', 'Success', 'Success In Play', 'Success Out']:
-            touch_success = True
+    elif single_event['type_name'] == 'Duel':
+        if single_event['sub_type_name'] == 'Tackle':
+            touch_type = 'Defensive'
+        if single_event['outcome_name'] in ['Won', 'Success', 'Success In Play', 'Success Out']:
+            touch_success = 1
 
     # Interception
-    elif single_event['type'] == 'Interception' and single_event['interception_outcome'] != 'Lost':
+    elif single_event['type_name'] == 'Interception' and single_event['outcome_name'] != 'Lost':
         touch_type = 'Defensive'
-        if single_event['interception_outcome'] in ['Won', 'Success', 'Success In Play', 'Success Out']:
-            touch_success = True
+        if single_event['outcome_name'] in ['Won', 'Success', 'Success In Play', 'Success Out']:
+            touch_success = 1
 
     # Miscontrol
-    elif single_event['type'] == 'Miscontrol':
+    elif single_event['type_name'] == 'Miscontrol':
         touch_type = 'Offensive'
 
     # Pass
-    elif single_event['type'] == 'Pass' and single_event['pass_body_part'] != 'No Touch':
+    elif single_event['type_name'] == 'Pass' and single_event['body_part_name'] != 'No Touch':
         touch_type = 'Offensive'
-        if single_event['pass_type'] in ['Corner', 'Free Kick', 'Goal Kick', 'Kick Off', 'Throw-in']:
-            set_piece = True
-        else:
-            set_piece = False
-        if single_event['pass_outcome'] != single_event['pass_outcome']:
-            touch_success = True
+        if single_event['outcome_name'] != single_event['outcome_name']:
+            touch_success = 1
 
     # Shot
-    elif single_event['type'] == 'Shot':
+    elif single_event['type_name'] == 'Shot':
         touch_type = 'Offensive'
-        if single_event['shot_type'] == 'Open Play':
-            set_piece = False
-        else:
-            set_piece = True
-        if single_event['shot_outcome'] in ['Saved', 'Goal', 'Saved To Post']:
-            touch_success = True
+        if single_event['outcome_name'] in ['Saved', 'Goal', 'Saved To Post']:
+            touch_success = 1
 
-    # In box
-    if single_event['location'] == single_event['location']:
-        x_position = single_event['location'][0]
-        y_position = single_event['location'][1]
-        if (x_position >= 102) and (18 <= y_position <= 62) and touch_type == touch_type:
-            box_touch = True
-        if x_position >= 80 and touch_type == touch_type:
-            final_third_touch = True
-
-    # Include or exclude set pieces
-    if inplay:
-        if not set_piece:
-            return touch_type, touch_success, box_touch, final_third_touch
-    else:
-        return touch_type, touch_success, box_touch, final_third_touch
+    return touch_type, touch_success
 
 
 def box_entry(events, inplay=True, successful_only=True):
@@ -924,45 +906,40 @@ def long_ball_retention(events, player_name, player_team):
     return long_ball_received
 
 
-def analyse_ball_receipts(analysis_events, contextual_events, player_name, player_team):
+def analyse_ball_receipts(analysis_events, contextual_events, player_id):
     """ Analyse player next actions after a ball is played to them.
 
     Function to analyse player next actions after a ball is played to them. A dataframe is created containing all
     balls received, player interim carries, player next action, time to next action, next action success and event
     locations. A  ball receipt is considered successful overall if the player does not immediately miscontrol the
     ball, and the player's team still has the ball 10 seconds after the long ball was received OR a goal is scored.
-    Overall success is added to the returned long ball dataframe.
+    Overall success is added to the returned ball receipt dataframe.
 
     Args:
         analysis_events (pandas.DataFrame): statsbomb-style events dataframe containing ball receipts to analyse, can be
         from multiple matches.
         contextual_events (pandas.DataFrame): statsbomb-style events dataframe containing analysis_events and follow on
         events.
-        player_name (string): full name of player receiving long balls.
-        player_team (string): team that player receiving long balls belongs to.
+        player_id (int): id of player receiving passes
 
     Returns:
         pandas.DataFrame: Dataframe of player ball receipt information
     """
 
     # Filter out balls played to chosen player
-    ball_to_player = analysis_events[analysis_events['pass_recipient'] == player_name]
+    ball_to_player = analysis_events[analysis_events['pass_recipient_id'] == player_id]
+
+    contextual_events = contextual_events[(contextual_events['match_id'].isin(ball_to_player['match_id']
+                                                                              .unique().tolist()))]
 
     # Initialise  ball receipt dataframe
-    ball_received = pd.DataFrame(columns=['match_id', 'match_period', 'matchtime', 'pass_x', 'pass_y',
-                                          'pass_type', 'pass_obv_for_net', 'pass_obv_for_net_abs', 'pass_obv_total_net',
-                                          'pass_obv_total_net_abs', 'receipt_x', 'receipt_y', 'receipt_under_pressure',
-                                          'receipt_miscontrol', 'initial_carry', 'carry_under_pressure',
-                                          'init_carry_endx', 'init_carry_endy', 'next_action', 'next_action_body_part',
-                                          'next_action_success', 'next_action_endx', 'next_action_endy',
-                                          'next_actions_obv_for_net', 'next_actions_obv_for_net_abs',
-                                          'next_actions_obv_total_net', 'next_actions_obv_total_net_abs',
-                                          't_next_action', 'ball_success'])
+    ball_received = pd.DataFrame()
 
     for idx, ball_evt in ball_to_player.iterrows():
 
         # Get match, period, time and event index
-        evt_match, evt_period, evt_time, evt_index = ball_evt[['match_id', 'period', 'cumulative_mins', 'index']]
+        evt_match, evt_period, evt_time, evt_index, evt_team = ball_evt[
+            ['match_id', 'period', 'cumulative_mins', 'index', 'team_id']]
 
         # Obtain the following 20s worth of events
         following_evts = contextual_events[(contextual_events['match_id'] == evt_match) &
@@ -972,8 +949,8 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_name, playe
                                            (contextual_events['index'] >= evt_index)].sort_values('index')
 
         # Get player ball receipt (first instance)
-        ball_receipt = following_evts[(following_evts['type'] == 'Ball Receipt*') &
-                                      (following_evts['player'] == player_name)].head(1)
+        ball_receipt = following_evts[(following_evts['type_name'] == 'Ball Receipt') &
+                                      (following_evts['player_id'] == player_id)].head(1)
 
         # Initialise flags
         player_initial_carry = pd.DataFrame()
@@ -983,217 +960,147 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_name, playe
         player_next_evt_endx = np.nan
         player_next_evt_endy = np.nan
         player_next_evt_obv_for_net = np.nan
-        player_next_evt_obv_for_net_abs = np.nan
-        player_next_evt_obv_total_net = np.nan
-        player_next_evt_obv_total_net_abs = np.nan
+        player_next_evt_obv_for_net_z = np.nan
         player_next_evt_time = np.nan
         miscontrol = np.nan
 
         # Only continue if a ball receipt event is found
         if len(ball_receipt) == 1:
             receipt_time = ball_receipt['cumulative_mins'].values[0]
-            receipt_outcome = ball_receipt['ball_receipt_outcome'].values[0]
+            receipt_outcome = ball_receipt['outcome_name'].values[0]
 
             # Only continue if ball receipt event is complete
-            if receipt_outcome != receipt_outcome:
+            if receipt_outcome is None:
 
                 # Check for an event that takes place at the same time as the ball receipt, and an event that takes
                 # place after the ball receipt
-                player_immed_evt = following_evts[(following_evts['player'] == player_name) &
+                player_immed_evt = following_evts[(following_evts['player_id'] == player_id) &
                                                   (following_evts['cumulative_mins'] == receipt_time) &
-                                                  (following_evts['type'] != "Ball Receipt*")].head(1)
-                player_next_evt = following_evts[(following_evts['player'] == player_name) &
+                                                  (following_evts['type_name'] != "Ball Receipt")].head(1)
+                player_next_evt = following_evts[(following_evts['player_id'] == player_id) &
                                                  (following_evts['cumulative_mins'] > receipt_time)].head(1)
 
                 # If there is an immediate event, flag headers from high balls
                 if len(player_immed_evt) == 1:
 
-                    # First time pass and shot
-                    if player_immed_evt['type'].values[0] == 'Pass':
-                        player_next_evt_type = player_immed_evt['type'].values[0]
-                        player_next_evt_body_part = player_immed_evt['pass_body_part'].values[0]
-                        player_next_evt_success = True if (player_immed_evt['pass_outcome'].values[0] !=
-                                                           player_immed_evt['pass_outcome'].values[0]) else False
-                        [player_next_evt_endx, player_next_evt_endy] = player_immed_evt['pass_end_location'].values[0]
-                        player_next_evt_time = player_immed_evt['cumulative_mins'].values[0]
-                        player_next_evt_obv_for_net = player_immed_evt['obv_for_net'].values[0]
-                        player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
-                                                           else player_next_evt_obv_for_net)
-                        player_next_evt_obv_total_net = player_immed_evt['obv_total_net'].values[0]
-                        player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
-                                                             else player_next_evt_obv_total_net)
+                    # First time pass or shot
+                    if player_immed_evt['type_name'].values[0] in ['Pass', 'Shot']:
 
-                    elif player_immed_evt['type'].values[0] == 'Shot':
-                        player_next_evt_type = player_immed_evt['type'].values[0]
-                        player_next_evt_body_part = player_immed_evt['shot_body_part'].values[0]
-                        player_next_evt_success = True if (player_immed_evt['shot_outcome'].values[0] in
-                                                           ['Saved', 'Goal', 'Saved To Pos']) else False
-                        [player_next_evt_endx, player_next_evt_endy] = \
-                            player_immed_evt['shot_end_location'].values[0][0:2]
+                        player_next_evt_type = player_immed_evt['type_name'].values[0]
+                        player_next_evt_body_part = player_immed_evt['body_part_name'].values[0]
+                        player_next_evt_success = 1 if ((player_immed_evt['outcome_name'].values[0] is None) or
+                                                        (player_immed_evt['outcome_name'].values[0] in ['Saved', 'Goal',
+                                                                                                        'Saved To Post'])) else np.nan
+                        player_next_evt_endx = player_immed_evt['end_x'].values[0]
+                        player_next_evt_endy = player_immed_evt['end_y'].values[0]
                         player_next_evt_time = player_immed_evt['cumulative_mins'].values[0]
                         player_next_evt_obv_for_net = player_immed_evt['obv_for_net'].values[0]
-                        player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
-                                                           else player_next_evt_obv_for_net)
-                        player_next_evt_obv_total_net = player_immed_evt['obv_total_net'].values[0]
-                        player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
-                                                             else player_next_evt_obv_total_net)
+                        player_next_evt_obv_for_net_z = player_immed_evt['obv_for_net_z'].values[0]
 
                     # Flag miscontrol
-                    elif player_immed_evt['type'].values[0] == 'Miscontrol':
-                        miscontrol = True
+                    elif player_immed_evt['type_name'].values[0] == 'Miscontrol':
+                        miscontrol = 1
 
-                    # A carry event is an interim event that should be accounted for
-                    elif player_immed_evt['type'].values[0] == 'Carry':
+                    # A carry event is an interim event that should be accounted for. We then look for following events
+                    elif player_immed_evt['type_name'].values[0] == 'Carry':
                         player_initial_carry = player_immed_evt
 
                         # The next event should always exist, but if it doesn't
                         if len(player_next_evt) == 1:
 
                             # Pass
-                            if player_next_evt['type'].values[0] == 'Pass':
-                                player_next_evt_type = player_next_evt['type'].values[0]
-                                player_next_evt_body_part = player_next_evt['pass_body_part'].values[0]
-                                player_next_evt_success = True if (player_next_evt['pass_outcome'].values[0] !=
-                                                                   player_next_evt['pass_outcome'].values[0]) else False
-                                [player_next_evt_endx, player_next_evt_endy] = \
-                                    player_next_evt['pass_end_location'].values[0]
-                                player_next_evt_time = player_next_evt['cumulative_mins'].values[0]
-                                player_next_evt_obv_for_net = np.nansum([player_next_evt['obv_for_net'].values[0],
-                                                                         player_initial_carry['obv_for_net'].values[0]])
-                                player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
-                                                                   else player_next_evt_obv_for_net)
-                                player_next_evt_obv_total_net = np.nansum([player_next_evt['obv_total_net'].values[0],
-                                                                           player_initial_carry['obv_total_net'].values[0]])
-                                player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
-                                                                     else player_next_evt_obv_total_net)
+                            if player_next_evt['type_name'].values[0] in ['Pass', 'Shot', 'Dribble']:
+                                player_next_evt_type = player_next_evt['type_name'].values[0]
+                                player_next_evt_body_part = player_next_evt['body_part_name'].values[0]
+                                player_next_evt_success = 1 if ((player_next_evt['outcome_name'].values[0] is None) or
+                                                                (player_next_evt['outcome_name'].values[0] in [
+                                                                    'Complete', 'Saved', 'Goal',
+                                                                    'Saved To Post'])) else np.nan
 
-                            # Shot
-                            elif player_next_evt['type'].values[0] == 'Shot':
-                                player_next_evt_type = player_next_evt['type'].values[0]
-                                player_next_evt_body_part = player_next_evt['shot_body_part'].values[0]
-                                player_next_evt_success = True if (player_next_evt['shot_outcome'].values[0] in
-                                                                   ['Saved', 'Goal', 'Saved To Pos']) else False
-                                [player_next_evt_endx, player_next_evt_endy] = \
-                                    player_next_evt['shot_end_location'].values[0][0:2]
+                                if player_next_evt_type == 'Dribble':
+                                    player_next_evt_endx = player_next_evt['x'].values[0]
+                                    player_next_evt_endy = player_next_evt['y'].values[0]
+                                else:
+                                    player_next_evt_endx = player_next_evt['end_x'].values[0]
+                                    player_next_evt_endy = player_next_evt['end_y'].values[0]
                                 player_next_evt_time = player_next_evt['cumulative_mins'].values[0]
                                 player_next_evt_obv_for_net = np.nansum([player_next_evt['obv_for_net'].values[0],
                                                                          player_initial_carry['obv_for_net'].values[0]])
-                                player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
-                                                                   else player_next_evt_obv_for_net)
-                                player_next_evt_obv_total_net = np.nansum([player_next_evt['obv_total_net'].values[0],
-                                                                           player_initial_carry['obv_total_net'].values[0]])
-                                player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
-                                                                     else player_next_evt_obv_total_net)
+                                player_next_evt_obv_for_net_z = (0 if player_next_evt_obv_for_net < 0
+                                                                 else player_next_evt_obv_for_net)
 
                             # Free kick win
-                            elif player_next_evt['type'].values[0] == 'Foul Won':
-                                player_next_evt_type = player_next_evt['type'].values[0]
-                                player_next_evt_success = True
-                                [player_next_evt_endx, player_next_evt_endy] = player_next_evt['location'].values[0]
+                            elif player_next_evt['type_name'].values[0] == 'Foul Won':
+                                player_next_evt_type = player_next_evt['type_name'].values[0]
+                                player_next_evt_success = 1
+                                player_next_evt_endx = player_next_evt['x'].values[0]
+                                player_next_evt_endy = player_next_evt['y'].values[0]
                                 player_next_evt_time = player_next_evt['cumulative_mins'].values[0]
-
-                            # Dribble
-                            elif player_next_evt['type'].values[0] == 'Dribble':
-                                player_next_evt_type = player_next_evt['type'].values[0]
-                                player_next_evt_success = True if player_next_evt['dribble_outcome'].values[
-                                                                      0] == 'Complete' else False
-                                [player_next_evt_endx, player_next_evt_endy] = player_next_evt['location'].values[0]
-                                player_next_evt_time = player_next_evt['cumulative_mins'].values[0]
-                                player_next_evt_obv_for_net = np.nansum([player_next_evt['obv_for_net'].values[0],
-                                                                         player_initial_carry['obv_for_net'].values[0]])
-                                player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
-                                                                   else player_next_evt_obv_for_net)
-                                player_next_evt_obv_total_net = np.nansum([player_next_evt['obv_total_net'].values[0],
-                                                                           player_initial_carry['obv_total_net'].values[0]])
-                                player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
-                                                                     else player_next_evt_obv_total_net)
 
                             # Dispossession
-                            elif player_next_evt['type'].values[0] == 'Dispossessed':
-                                player_next_evt_type = player_next_evt['type'].values[0]
-                                player_next_evt_success = False
-                                [player_next_evt_endx, player_next_evt_endy] = \
-                                    player_initial_carry['carry_end_location'].values[0]
+                            elif player_next_evt['type_name'].values[0] == 'Dispossessed':
+                                player_next_evt_type = player_next_evt['type_name'].values[0]
+                                player_next_evt_success = np.nan
+                                player_next_evt_endx = player_next_evt['x'].values[0]
+                                player_next_evt_endy = player_next_evt['y'].values[0]
                                 player_next_evt_time = player_next_evt['cumulative_mins'].values[0]
 
                             # Flag miscontrol
-                            elif player_next_evt['type'].values[0] == 'Miscontrol':
-                                miscontrol = True
+                            elif player_next_evt['type_name'].values[0] == 'Miscontrol':
+                                miscontrol = 1
                                 player_next_evt = pd.DataFrame()
 
                 # Account for occasions where there is no interim carry and a pass/shot is made after ball receipt
                 elif len(player_immed_evt) == 0 and len(player_next_evt) == 1:
 
                     # Pass
-                    if player_next_evt['type'].values[0] == 'Pass':
-                        player_next_evt_type = player_next_evt['type'].values[0]
-                        player_next_evt_body_part = player_next_evt['pass_body_part'].values[0]
-                        player_next_evt_success = True if (player_next_evt['pass_outcome'].values[0] !=
-                                                           player_next_evt['pass_outcome'].values[0]) else False
-                        [player_next_evt_endx, player_next_evt_endy] = \
-                            player_next_evt['pass_end_location'].values[0]
+                    if player_next_evt['type_name'].values[0] in ['Pass', 'Shot']:
+                        player_next_evt_type = player_next_evt['type_name'].values[0]
+                        player_next_evt_body_part = player_next_evt['body_part_name'].values[0]
+                        player_next_evt_success = 1 if ((player_next_evt['outcome_name'].values[0] is None) or
+                                                        (player_next_evt['outcome_name'].values[0] in ['Complete',
+                                                                                                       'Saved', 'Goal',
+                                                                                                       'Saved To Post'])) else np.nan
+                        player_next_evt_endx = player_next_evt['end_x'].values[0]
+                        player_next_evt_endy = player_next_evt['end_y'].values[0]
                         player_next_evt_time = player_next_evt['cumulative_mins'].values[0]
                         player_next_evt_obv_for_net = player_next_evt['obv_for_net'].values[0]
-                        player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
-                                                           else player_next_evt_obv_for_net)
-                        player_next_evt_obv_total_net = player_next_evt['obv_total_net'].values[0]
-                        player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
-                                                             else player_next_evt_obv_total_net)
+                        player_next_evt_obv_for_net_z = player_next_evt['obv_for_net_z'].values[0]
 
-                    # Shot
-                    elif player_next_evt['type'].values[0] == 'Shot':
-                        player_next_evt_type = player_next_evt['type'].values[0]
-                        player_next_evt_body_part = player_next_evt['shot_body_part'].values[0]
-                        player_next_evt_success = True if (player_next_evt['shot_outcome'].values[0] in
-                                                           ['Saved', 'Goal', 'Saved To Pos']) else False
-                        [player_next_evt_endx, player_next_evt_endy] = \
-                            player_next_evt['shot_end_location'].values[0][0:2]
-                        player_next_evt_time = player_next_evt['cumulative_mins'].values[0]
-                        player_next_evt_obv_for_net = player_next_evt['obv_for_net'].values[0]
-                        player_next_evt_obv_for_net_abs = (0 if player_next_evt_obv_for_net < 0
-                                                           else player_next_evt_obv_for_net)
-                        player_next_evt_obv_total_net = player_next_evt['obv_total_net'].values[0]
-                        player_next_evt_obv_total_net_abs = (0 if player_next_evt_obv_total_net < 0
-                                                             else player_next_evt_obv_total_net)
                 # Check team possession 10 seconds after ball receipt
                 possession_team = following_evts[(following_evts['cumulative_mins'] <=
-                                                  receipt_time + (1 / 6))].iloc[-1:]['possession_team'].values[0]
+                                                  receipt_time + (1 / 6))].iloc[-1:]['possession_team_id'].values[0]
 
-                goal = True if True in (following_evts['shot_outcome'] == 'Goal') & (
-                            following_evts['team'] == player_team) else False
+                goal = True if True in (following_evts['outcome_name'] == 'Goal') & (
+                        following_evts['team_id'] == evt_team) else False
 
                 ball_received.loc[idx, 'match_id'] = str(evt_match)
                 ball_received.loc[idx, 'match_period'] = evt_period
                 ball_received.loc[idx, 'matchtime'] = ball_evt['timestamp']
-                ball_received.loc[idx, ['pass_x', 'pass_y']] = ball_evt['location']
-                ball_received.loc[idx, 'pass_type'] = ball_evt['pass_height']
+                ball_received.loc[idx, 'pass_x'] = ball_evt['x']
+                ball_received.loc[idx, 'pass_y'] = ball_evt['y']
+                ball_received.loc[idx, 'pass_type'] = ball_evt['pass_height_name']
                 ball_received.loc[idx, 'pass_obv_for_net'] = ball_evt['obv_for_net']
-                ball_received.loc[idx, 'pass_obv_for_net_abs'] = (0 if ball_evt['obv_for_net'] < 0
-                                                                  else ball_evt['obv_for_net'])
-                ball_received.loc[idx, 'pass_obv_total_net'] = ball_evt['obv_total_net']
-                ball_received.loc[idx, 'pass_obv_total_net_abs'] = (0 if ball_evt['obv_total_net'] < 0
-                                                                    else ball_evt['obv_total_net'])
-                ball_received.loc[idx, ['receipt_x', 'receipt_y']] = ball_evt['pass_end_location']
+                ball_received.loc[idx, 'pass_obv_for_net_z'] = ball_evt['obv_for_net_z']
+                ball_received.loc[idx, 'receipt_x'] = ball_evt['end_x']
+                ball_received.loc[idx, 'receipt_y'] = ball_evt['end_y']
                 ball_received.loc[idx, 'receipt_under_pressure'] = ball_receipt['under_pressure'].values[0]
                 ball_received.loc[idx, 'receipt_miscontrol'] = miscontrol
                 if len(player_initial_carry) == 1:
-                    ball_received.loc[idx, 'initial_carry'] = True
-                    ball_received.loc[idx, 'carry_under_pressure'] = True if (
-                                player_initial_carry['under_pressure'].values[0] == True) else np.nan
-                    ball_received.loc[idx, ['init_carry_endx', 'init_carry_endy']] = \
-                        player_initial_carry['carry_end_location'].values[0]
+                    ball_received.loc[idx, 'initial_carry'] = 1
+                    ball_received.loc[idx, 'carry_under_pressure'] = player_initial_carry['under_pressure'].values[0]
+                    ball_received.loc[idx, 'init_carry_endx'] = player_initial_carry['end_x'].values[0]
+                    ball_received.loc[idx, 'init_carry_endy'] = player_initial_carry['end_y'].values[0]
                 ball_received.loc[idx, 'next_action'] = player_next_evt_type
                 ball_received.loc[idx, 'next_action_body_part'] = player_next_evt_body_part
                 ball_received.loc[idx, 'next_action_success'] = player_next_evt_success
-                ball_received.loc[idx, ['next_action_endx', 'next_action_endy']] = [player_next_evt_endx,
-                                                                                    player_next_evt_endy]
+                ball_received.loc[idx, 'next_action_endx'] = player_next_evt_endx
+                ball_received.loc[idx, 'next_action_endy'] = player_next_evt_endy
                 ball_received.loc[idx, 'next_actions_obv_for_net'] = player_next_evt_obv_for_net
-                ball_received.loc[idx, 'next_actions_obv_for_net_abs'] = player_next_evt_obv_for_net_abs
-                ball_received.loc[idx, 'next_actions_obv_total_net'] = player_next_evt_obv_total_net
-                ball_received.loc[idx, 'next_actions_obv_total_net_abs'] = player_next_evt_obv_total_net_abs
+                ball_received.loc[idx, 'next_actions_obv_for_net_z'] = player_next_evt_obv_for_net_z
                 ball_received.loc[idx, 't_next_action'] = 60 * (player_next_evt_time - receipt_time)
-                ball_received.loc[idx, 'ball_success'] = True if (possession_team == player_team and
-                                                                  miscontrol != miscontrol) or goal else np.nan
+                ball_received.loc[idx, 'team_retention'] = 1 if (possession_team == evt_team and
+                                                                 miscontrol != miscontrol) or goal else np.nan
 
     ball_received_out = ball_received.copy()
 

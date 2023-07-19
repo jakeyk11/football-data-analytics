@@ -275,8 +275,8 @@ def process_lineups(lineups, events, tactics):
                     subbed_in['tactics_formation'] = subbed_out['tactics_formation'].values[0]
                     lineup_entry = pd.concat([lineup_entry, subbed_in], ignore_index=True)
                     lineup_entry['time_on'] = team_tactical_event['cumulative_mins']
-                    lineup_entry['time_off'] = match_duration if idx == len(team_tactical_events) - 1 else \
-                    team_tactical_events.iloc[idx + 1, :]['cumulative_mins']
+                    lineup_entry['time_off'] = (match_duration if idx == len(team_tactical_events) - 1 else
+                                                team_tactical_events.iloc[idx + 1, :]['cumulative_mins'])
                     lineup_entry = lineup_entry[lineup_entry['player_id'] != team_tactical_event['player_id']]
 
                 # Red card or second yellow
@@ -331,30 +331,30 @@ def process_lineups(lineups, events, tactics):
                                                    'time_on']).reset_index(drop=True)
         match_lineups = pd.concat([match_lineups.groupby(['player_id', 'player_name', 'player_nickname', 'birth_date',
                                                           'player_gender', 'player_height', 'player_weight',
-                                                          'jersey_number', 'match_id', 'team_id', 'team_name',
-                                                          'country_id', 'country_name', 'position_name',
-                                                          'tactics_formation'], dropna=False, as_index=False).min().drop(columns=['time_off', 'time_played']),
+                                                          'jersey_number', 'match_id', 'competition', 'season',
+                                                          'team_id', 'team_name', 'country_id', 'country_name',
+                                                          'position_name', 'tactics_formation'], dropna=False, as_index=False).min().drop(columns=['time_off', 'time_played']),
                                    match_lineups.groupby(['player_id', 'player_name', 'player_nickname', 'birth_date',
                                                           'player_gender', 'player_height', 'player_weight',
-                                                          'jersey_number', 'match_id', 'team_id', 'team_name',
-                                                          'country_id', 'country_name', 'position_name',
-                                                          'tactics_formation'], dropna=False, as_index=False).max()['time_off']], axis=1)
+                                                          'jersey_number', 'match_id', 'competition', 'season',
+                                                          'team_id', 'team_name', 'country_id', 'country_name',
+                                                          'position_name', 'tactics_formation'], dropna=False, as_index=False).max()['time_off']], axis=1)
         match_lineups['time_played'] = match_lineups['time_off'] - match_lineups['time_on']
 
         # Further condense to revert to standard lineups dataframe (using players most common position)
         match_lineups_condensed = pd.concat([match_lineups.groupby(['player_id', 'player_name', 'player_nickname',
                                                                     'birth_date', 'player_gender', 'player_height',
                                                                     'player_weight', 'jersey_number', 'match_id',
-                                                                    'team_id', 'team_name', 'country_id',
-                                                                    'country_name'], dropna=False, as_index=False).
+                                                                    'competition', 'season', 'team_id', 'team_name',
+                                                                    'country_id', 'country_name'], dropna=False, as_index=False).
                                             min().drop(columns=['time_off', 'longest_tactic', 'tactics_formation',
                                                                 'position_name', 'tactical_setup_id', 'player_setup_id',
                                                                 'time_played']),
                                              match_lineups.groupby(['player_id', 'player_name', 'player_nickname',
                                                                     'birth_date', 'player_gender', 'player_height',
                                                                     'player_weight', 'jersey_number', 'match_id',
-                                                                    'team_id', 'team_name', 'country_id',
-                                                                    'country_name'],dropna=False, as_index=False).max()['time_off']], axis=1)
+                                                                    'competition', 'season', 'team_id', 'team_name',
+                                                                    'country_id', 'country_name'],dropna=False, as_index=False).max()['time_off']], axis=1)
 
         match_lineups_condensed['time_played'] = match_lineups_condensed['time_off']-match_lineups_condensed['time_on']
 
@@ -386,11 +386,11 @@ def process_lineups(lineups, events, tactics):
         match_lineups.sort_values(['match_id', 'team_name', 'time_on'], inplace=True)
         match_lineups_condensed.sort_values(['match_id', 'team_name', 'time_on'], inplace=True)
         match_lineups = match_lineups[
-            list(match_lineups.columns[0:14]) + ['position_group', 'position_category', 'tactics_formation', 'time_on',
+            list(match_lineups.columns[0:16]) + ['position_group', 'position_category', 'tactics_formation', 'time_on',
                                                  'time_off', 'time_played', 'starting_xi', 'longest_xi',
                                                  'longest_tactic']]
         match_lineups_condensed = match_lineups_condensed[
-            list(match_lineups_condensed.columns[0:13]) + ['position_name', 'position_group', 'position_category',
+            list(match_lineups_condensed.columns[0:15]) + ['position_name', 'position_group', 'position_category',
                                                            'tactics_formation', 'time_on', 'time_off', 'time_played',
                                                            'starting_xi', 'longest_xi']]
 
@@ -433,30 +433,30 @@ def events_while_playing(events, lineups, event_name='Pass', event_team='opposit
         lineup = lineups[lineups['match_id'] == match_id].copy()
 
         # For each team calculate team events, and assign to player
-        for team in set(match_events['team']):
+        for team in set(match_events['team_name']):
             team_lineup = lineup[lineup['team_name'] == team]
 
             # Choose whether to include own team or opposition events, and build column name
             if event_team == 'own':
                 if event_name == 'Touch':
-                    team_events = match_events[(match_events['team'] == team) &
-                                               (match_events['istouch'] == match_events['istouch'])]
+                    team_events = match_events[(match_events['team_name'] == team) &
+                                               (match_events['touch_type'] == match_events['touch_type'])]
                 elif event_name == 'Possession':
-                    team_events = match_events[match_events['possession_team'] == team]
+                    team_events = match_events[match_events['possession_team_name'] == team]
                 else:
-                    team_events = match_events[(match_events['team'] == team) &
-                                               (match_events['type'] == event_name)]
+                    team_events = match_events[(match_events['team_name'] == team) &
+                                               (match_events['type_name'] == event_name)]
                 col_name = 'team_' + event_name.lower()
 
             else:
                 if event_name == 'Touch':
-                    team_events = match_events[(match_events['team'] != team) &
-                                               (match_events['istouch'] == match_events['istouch'])]
+                    team_events = match_events[(match_events['team_name'] != team) &
+                                               (match_events['touch_type'] == match_events['touch_type'])]
                 elif event_name == 'Possession':
-                    team_events = match_events[match_events['possession_team'] != team]
+                    team_events = match_events[match_events['possession_team_name'] != team]
                 else:
-                    team_events = match_events[(match_events['team'] != team) &
-                                               (match_events['type'] == event_name)]
+                    team_events = match_events[(match_events['team_name'] != team) &
+                                               (match_events['type_name'] == event_name)]
 
                 col_name = 'opp_' + event_name.lower()
 
@@ -510,7 +510,8 @@ def add_player_nickname(events, lineups):
     return events_out, lineups_out
 
 
-def create_player_list(lineups, additional_cols=None, pass_extra=None, group_team=False):
+def create_player_list(lineups, additional_cols=None, pass_extra=None, group_position=True, group_team=False,
+                       group_comp=True):
     """ Create a list of players from statsbomb-style lineups dataframe
 
     Function to read a statsbomb-style lineups dataframe (single or multiple matches) and return a dataframe of
@@ -522,84 +523,74 @@ def create_player_list(lineups, additional_cols=None, pass_extra=None, group_tea
         lineups (pandas.DataFrame): statsbomb-style dataframe of lineups, can be from multiple matches.
         additional_cols (list, optional): list of column names to be aggregated and included in output dataframe.
         pass_extra (list, optional): list of extra columns within lineups to include in output dataframe.
-        group_team (bool, optional): decide whether to group player if played for multiple teams (transfer)
+        group_position (bool, optional): decide whether to group player minutes in different positions (transfer). True
+        by default.
+        group_team (bool, optional): decide whether to group player if played for multiple teams (transfer). False by
+        default.
+        group_comp (bool, optional): decide whether to group players over multiple competitions/seasons. True by default
 
     Returns:
         pandas.DataFrame: players that feature in one or more lineup entries, may include total minutes played.
     """
 
-    # Nested function to group and categorise positions
-    def group_positions(position):
-        if position in ['G']:
-            position_group = 'Goalkeeper'
-        elif position in ['CB', 'LCB', 'RCB']:
-            position_group = 'Centre Back'
-        elif position in ['LB', 'RB']:
-            position_group = 'Full-back'
-        elif position in ['LWB', 'RWB']:
-            position_group = 'Wing-back'
-        elif position in ['CDM', 'LDM', 'RDM']:
-            position_group = 'Defensive Midfielder'
-        elif position in ['CM', 'LCM', 'RCM']:
-            position_group = 'Centre Midfielder'
-        elif position in ['CAM', 'LAM', 'RAM']:
-            position_group = 'Attacking Midfielder'
-        elif position in ['LM', 'RM']:
-            position_group = 'Wide Midfielder'
-        elif position in ['LW', 'RW']:
-            position_group = 'Winger'
-        elif position in ['CF', 'LCF', 'RCF']:
-            position_group = 'Centre Forward'
-        elif position in ['Sub']:
-            position_group = 'Substitute'
-        else:
-            position_group = 'Unknown'
-        if position_group in ['Goalkeeper']:
-            position_category = 'Goalkeeper'
-        elif position_group in ['Centre Back', 'Full-back', 'Wing-back']:
-            position_category = 'Defender'
-        elif position_group in ['Defensive Midfielder', 'Centre Midfielder', 'Attacking Midfielder', 'Wide Midfielder']:
-            position_category = 'Midfielder'
-        elif position_group in ['Winger', 'Centre Forward']:
-            position_category = 'Forward'
-        else:
-            position_category = position_group
-
-        return position_group, position_category
-
     # Dataframe of player names and team
     if pass_extra is None:
-        playerinfo_df = lineups[['player_id', 'player_name', 'player_nickname', 'position', 'country',
-                                 'team_name']].drop_duplicates()
+        playerinfo_df = lineups[['player_id', 'player_name', 'player_nickname', 'position_name', 'position_group',
+                                 'position_category', 'country_name', 'team_name', 'competition',
+                                 'season']].drop_duplicates()
     else:
-        playerinfo_df = lineups[['player_id', 'player_name', 'player_nickname', 'position', 'country',
-                                 'team_name'] + pass_extra].drop_duplicates()
+        playerinfo_df = lineups[['player_id', 'player_name', 'player_nickname', 'position_name', 'position_group',
+                                 'position_category', 'country_name', 'team_name', 'competition', 'season']
+                                + pass_extra].drop_duplicates()
 
     # Calculate total playing minutes and other aggregated columns for each player and add to dataframe
     if additional_cols is None:
-        included_cols = lineups.groupby(['player_id', 'position', 'team_name'], axis=0).sum()['mins_played']
+        included_cols = lineups.groupby(['player_id', 'position_name', 'position_group', 'position_category',
+                                         'team_name', 'competition',
+                                         'season'], axis=0).sum(numeric_only=True)['time_played']
     else:
-        included_cols = lineups.groupby(['player_id', 'position', 'team_name'], axis=0).sum()[['mins_played']
-                                                                                              + additional_cols]
+        included_cols = lineups.groupby(['player_id', 'position_name', 'position_group', 'position_category',
+                                         'team_name', 'competition',
+                                         'season'], axis=0).sum(numeric_only=True)[['time_played'] + additional_cols]
 
-    playerinfo_df = playerinfo_df.merge(included_cols, left_on=['player_id', 'position', 'team_name'], right_index=True)
+    playerinfo_df = playerinfo_df.merge(included_cols, left_on=['player_id', 'position_name', 'position_group',
+                                                                'position_category', 'team_name', 'competition',
+                                                                'season'], right_index=True)
 
-    # Group by player and team (to avoid removing transfers) and drop duplicates due to different positions
-    playerinfo_df.sort_values('mins_played', ascending=False, inplace=True)
-    playerinfo_df[['mins_played'] + additional_cols] = (playerinfo_df.groupby(['player_id', 'team_name'])
-                                                        [['mins_played'] + additional_cols].transform('sum'))
-    playerinfo_df.drop_duplicates(subset=['player_id', 'team_name'], keep='first', inplace=True)
+    # Group players minutes in different positions (if group_position is True). Keep most common position per player
+    if group_position:
+        playerinfo_df.sort_values('time_played', ascending=False, inplace=True)
+        if additional_cols is None:
+            playerinfo_df['time_played'] = (playerinfo_df.groupby(['player_id', 'team_name', 'competition', 'season'])
+                                            ['time_played'].transform('sum'))
+        else:
+            playerinfo_df[['time_played'] + additional_cols] = (playerinfo_df.groupby(['player_id', 'team_name',
+                                                                                       'competition', 'season'])
+                                                                [['time_played'] + additional_cols].transform('sum'))
+        playerinfo_df.drop_duplicates(subset=['player_id', 'team_name', 'competition', 'season'], keep='first',
+                                      inplace=True)
 
-    # Remove duplicate teams if required
+    # Group players minutes for different team / remove transfers (if group_team is True). Keep most common team
     if group_team:
-        playerinfo_df.sort_values('mins_played', ascending=False, inplace=True)
-        playerinfo_df[['mins_played'] + additional_cols] = (playerinfo_df.groupby(['player_id'])
-                                                            [['mins_played'] + additional_cols].transform('sum'))
-        playerinfo_df.drop_duplicates(subset=['player_id'], keep='first', inplace=True)
+        playerinfo_df.sort_values('time_played', ascending=False, inplace=True)
+        if additional_cols is None:
+            playerinfo_df['time_played'] = (playerinfo_df.groupby(['player_id', 'competition', 'season'])
+                                            ['time_played'].transform('sum'))
+        else:
+            playerinfo_df[['time_played'] + additional_cols] = (playerinfo_df.groupby(['player_id', 'competition',
+                                                                                       'season'])
+                                                            [['time_played'] + additional_cols].transform('sum'))
+        playerinfo_df.drop_duplicates(subset=['player_id', 'competition', 'season'], keep='first', inplace=True)
 
-    # Add position info
-    playerinfo_df['position_group'], playerinfo_df['position_category'] = zip(*playerinfo_df['position'].
-                                                                              apply(group_positions))
+    # Group players minutes over different competitions (if group_comp is True).
+    if group_comp:
+        if additional_cols is None:
+            playerinfo_df['time_played'] = (playerinfo_df.groupby(['player_id'])['time_played'].transform('sum'))
+        else:
+            playerinfo_df[['time_played'] + additional_cols] = (playerinfo_df.groupby(['player_id'])
+                                                                [['time_played'] + additional_cols].transform('sum'))
+        playerinfo_df.drop_duplicates(subset=['player_id'], keep='first', inplace=True)
+        playerinfo_df = playerinfo_df.drop(columns=['competition', 'season'])
 
     return playerinfo_df.set_index('player_id')
 
@@ -631,22 +622,30 @@ def group_player_events(events, player_data, group_type='count', agg_columns=Non
     # Initialise output dataframe
     player_data_out = player_data.copy()
 
+    # Drop column if one with identical name exists
+    if primary_event_name in player_data_out.columns:
+        player_data_out = player_data_out.drop(primary_event_name, axis=1)
+
     # Perform aggregation based on grouping type input
     if group_type == 'count':
         grouped_events = events.groupby('player_id', axis=0).count()
         selected_events = grouped_events[agg_columns].copy()
         selected_events.loc[:, primary_event_name] = grouped_events['match_id']
     elif group_type == 'sum':
-        grouped_events = events.groupby('player_id', axis=0).sum()
+        grouped_events = events.groupby('player_id', axis=0).sum(numeric_only=True)
         selected_events = grouped_events[agg_columns].copy()
     elif group_type == 'mean':
-        grouped_events = events.groupby('player_id', axis=0).mean()
+        grouped_events = events.groupby('player_id', axis=0).mean(numeric_only=True)
         selected_events = grouped_events[agg_columns].copy()
     else:
         selected_events = pd.DataFrame()
 
     # Merge into player information dataframe
-    player_data_out = player_data_out.merge(selected_events, left_on='player_id', right_index=True, how='outer')
+    player_data_out = player_data_out.merge(selected_events, left_on='player_id', right_index=True, how='left')
+
+    if agg_columns != list() and group_type in ['sum', 'mean']:
+        player_data_out = player_data_out.rename(columns={agg_columns: primary_event_name})
+
     return player_data_out
 
 
