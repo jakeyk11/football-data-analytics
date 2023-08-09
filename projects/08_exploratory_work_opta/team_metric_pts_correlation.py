@@ -28,15 +28,15 @@ import analysis_tools.logos_and_badges as lab
 
 # Data to use
 data_grab = [
-            ['EPL', '2018'],
-            ['EPL', '2019'],
-            ['EPL', '2020'],
-            ['EPL', '2021'],
-            ['EPL', '2022']
+            ['EFLC', '2018'],
+            ['EFLC', '2019'],
+            ['EFLC', '2020'],
+            ['EFLC', '2021'],
+            ['EFLC', '2022']
             ]
 
 # Decide whether to brighten competition logo
-logo_brighten = True
+logo_brighten = False
 
 # %% Import data
 
@@ -102,24 +102,45 @@ events_df['box_entry_successful'] = events_df.apply(wce.box_entry, successful_on
 
 def team_nickname(x):
     
-    nicknames = {'Tottenham Hotspur': 'Tottenham',
+    nicknames = {'Birmingham City': 'Birmingham',
+                 'Birmingham City *': 'Birmingham',
+                 'Blackburn Rovers': 'Blackburn',
+                 'Bolton Wanderers': 'Bolton',
+                 'Brighton and Hove Albion': 'Brighton',
+                 'Cardiff City': 'Cardiff',
+                 'Charlton Athletic': 'Charlton',
+                 'Coventry City': 'Coventry',
+                 'Derby County': 'Derby',
+                 'Derby County **': 'Derby',
+                 'Huddersfield Town': 'Huddersfield',
+                 'Hull City': 'Hull',
+                 'Ipswich Town': 'Ipswich',
+                 'Leeds United': 'Leeds',
+                 'Leicester City': 'Leicester',
+                 'Luton Town': 'Luton',
                  'Manchester City': 'Man City',
                  'Manchester United': 'Man Utd',
-                 'West Bromwich Albion': 'West Brom',
-                 'West Ham United': 'West Ham',
-                 'Leicester City': 'Leicester',
+                 'Newcastle United': 'Newcastle',
+                 'Norwich City': 'Norwich',
+                 'Peterborough United': 'Peterborough',
+                 'Preston North End': 'Preston',
+                 'Queens Park Rangers': 'QPR',
+                 'Reading *': 'Reading',
+                 'Sheffield Wednesday': 'Sheff Wed',
+                 'Sheffield Wednesday *': 'Sheff Wed',
+                 'Sheffield United': 'Sheff Utd',
                  'Stoke City': 'Stoke',
                  'Swansea City': 'Swansea',
-                 'Hull City': 'Hull',
-                 'Newcastle United': 'Newcastle',
-                 'Brighton and Hove Albion': 'Brighton',
-                 'Huddersfield Town': 'Huddersfield',
+                 'Tottenham Hotspur': 'Tottenham',
+                 'Rotherham United': 'Rotherham',
+                 'West Bromwich Albion': 'West Brom',
+                 'West Ham United': 'West Ham',
+                 'Wigan Athletic': 'Wigan',
+                 'Wigan Athletic *': 'Wigan',
+                 'Wigan Athletic **': 'Wigan',
                  'Wolverhampton Wanderers': 'Wolves',
-                 'Cardiff City': 'Cardiff',
-                 'Sheffield United': 'Sheff Utd',
-                 'Norwich City': 'Norwich',
-                 'Leeds United': 'Leeds'}
-
+                 'Wycombe Wanderers': 'Wycombe'}
+                 
     return nicknames[x] if x in nicknames else x
 
 leaguetable_df['team_name_short'] = leaguetable_df['team'].apply(team_nickname)
@@ -139,11 +160,11 @@ for idx, league_entry in leaguetable_analyse_df.iterrows():
     rel_team_events = rel_events[rel_events['teamId']==team_id]
     rel_opp_events = rel_events[rel_events['teamId']!=team_id]
 
-    # Mins players
+    # Mins played (use 96 if a null is retured against mins played)
     mp = 0
     for match in team_match_ids:
         if rel_events[rel_events['match_id']==match]['cumulative_mins'].max() == rel_events[rel_events['match_id']==match]['cumulative_mins'].max():
-            mp += rel_events[rel_events['match_id']==match]['cumulative_mins'].max()
+            mp += np.nanmax(rel_events[rel_events['match_id']==match]['cumulative_mins'])
         else:
             mp+=96
             
@@ -302,7 +323,9 @@ for idx, league_entry in leaguetable_analyse_df.iterrows():
     
 metric_df = pd.DataFrame()
 metric_df['Team'] = leaguetable_analyse_df['team']
-metric_df['Points'] = leaguetable_analyse_df['points']
+
+# Use actual points as opposed to registered points, to discount deductions
+metric_df['Points'] = 3*leaguetable_analyse_df['wins'] + leaguetable_analyse_df['draws']
    
 style_df = metric_df.copy()
 
@@ -432,9 +455,9 @@ ax.imshow(badge)
 # Save image to file 
 fig.savefig(f"team_metric_pts_correlation/{data_grab[-1][0]}-{data_grab[0][1]}-to-{data_grab[-1][1]}-metric-correlation-matrix", dpi=300)
 
-# %% Scatter plot
+# %% Bar plot
 
-points_corr_df = correlations['Points'].sort_values(ascending = False)[1:]
+#points_corr_df = correlations['Points'].sort_values(ascending = False)[1:]
 
 points_corr_pos_df = points_corr_df[points_corr_df>=0]
 points_corr_neg_df = points_corr_df[points_corr_df<0]
@@ -537,4 +560,17 @@ ax.yaxis.label.set_color('w')
 # Save image to file 
 fig.savefig(f"team_metric_pts_correlation/{data_grab[-1][0]}-{data_grab[0][1]}-to-{data_grab[-1][1]}-{y_plot.replace(' / ', ' ').replace(' ','-').lower()}-vs-points", dpi=300)
 
-# %% Draw a grid scatter of the top 12 correlators
+# %% Compare two different leagues
+
+# Run the script for one league and manually save points_corr_df to league_1_corr_df, run the script again and save points_corr_df to league_2_corr_df
+#league_1_corr_df = None
+#league_2_corr_df = None
+
+# %% Plot to compare two leauges
+
+league_1_name = 'EFLC'
+league_2_name = 'EPL'
+
+if league_1_corr_df is not None and league_2_corr_df is not None:
+    delta_corr_df = pd.merge(league_1_corr_df, league_2_corr_df, left_index=True, right_index=True, suffixes=('_'+league_1_name, '_'+league_2_name))
+    delta_corr_df['Corr_Increase'] = abs(delta_corr_df['Points_' + league_1_name]) - abs(delta_corr_df['Points_' + league_2_name])

@@ -16,7 +16,7 @@ import pandas as pd
     'A-League Women', 'WSL', 'D1 Feminine', 'Womens Bundesliga', 'Womens Serie A', 'Liga F',
     'NWSL Challenge Cup', 'NWSL Fall Series'] '''
 
-COMPETITION = 'EPL'
+COMPETITION = 'EFL Championship'
 
 # Select calender year in which the competition finishes
 COMPETITION_END_YEAR = 2023
@@ -26,8 +26,9 @@ COMPETITION_END_YEAR = 2023
 
 STORAGE_MODE = 'all'
 
-# Point at directory to store data (relative to directory of this script)
-DIRECTORY = f"../../data_directory/fbref_data/{str(COMPETITION_END_YEAR-1)}_{str(COMPETITION_END_YEAR).replace('20','',1)}/{COMPETITION}/"
+# Replace with path of directory to store data (path is relative to directory of this script). SAVE_COMP is not needed
+SAVE_COMP = 'Serie_A'
+DIRECTORY = f"../../data_directory/fbref_data/{str(COMPETITION_END_YEAR-1)}_{str(COMPETITION_END_YEAR).replace('20','',1)}/{SAVE_COMP}/"
 
 # %% Scrape data
 
@@ -86,7 +87,7 @@ for idx, statistic_group in enumerate(list(fbref_dict.keys())):
         new_col_names.append((col_name_1 + col_name_2).strip())
     temp_player_stat_df.columns = new_col_names
     if idx != 0:
-        playerinfo_df = playerinfo_df.merge(temp_player_stat_df, left_on=['Player ID', 'Squad'], right_on=['Player ID', 'Squad'], suffixes=('', '_duplicate'), how = "outer") 
+        playerinfo_df = playerinfo_df.merge(temp_player_stat_df, left_on=['Player', 'Player ID', 'Squad'], right_on=['Player', 'Player ID', 'Squad'], suffixes=('', '_duplicate'), how = "outer") 
     else:
         playerinfo_df = temp_player_stat_df
 

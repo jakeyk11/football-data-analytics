@@ -17,7 +17,7 @@ istouch(single_event, inplay=True)
 box_entry(single_event, inplay=True, successful_only=True)
     Identify box entries from statsbomb-style event.
 
-progressive_action(single_event, inplay=True)
+progressive_action(events, inplay=True, successful_only=True)
     Identify successful progressive actions from statsbomb-style event.
 
 pre_shot_evts(events, t=5):
@@ -279,7 +279,7 @@ def box_entry(events, inplay=True, successful_only=True):
         successful_only (bool, optional): selection of whether to only include successful passes. True by default
 
     Returns:
-        pandas.DataFrame: events dataframe with additional box_entry_flag column, identifying box entries
+        pandas.DataFrame: events dataframe with additional box_entry column, identifying box entries
     """
 
     # Initialise output dataframe
@@ -302,72 +302,47 @@ def box_entry(events, inplay=True, successful_only=True):
     return events_out
 
 
-def progressive_action(single_event, inplay=True):
+def progressive_action(events, inplay=True, successful_only=True):
     """ Identify successful progressive actions from statsbomb-style event.
 
     Function to identify successful progressive actions. An action is considered progressive if the distance between the
     starting point and the next touch is: (i) at least 30 meters closer to the opponent’s goal if the starting and
     finishing points are within a team’s own half, (ii) at least 15 meters closer to the opponent’s goal if the
     starting and finishing points are in different halves, (iii) at least 10 meters closer to the opponent’s goal if
-    the starting and finishing points are in the opponent’s half. The function takes in a single event and returns a
-    boolean (True = successful progressive action.) This function is best used with the dataframe apply method.
+    the starting and finishing points are in the opponent’s half.
 
     Args:
-        single_event (pandas.Series): series corresponding to a single event (row) from statsbomb-style event dataframe.
-        inplay (bool): selection of whether to include 'in-play' events only (set to True).
+        events (pandas.DataFrame): dataframe of event data. Events can be from multiple matches.
+        inplay (bool, optional): selection of whether to include 'in-play' events only. True by default.
+        successful_only (bool, optional): selection of whether to only include successful passes. True by default
 
     Returns:
-        bool: True = successful progressive action, nan = non-progressive, unsuccessful or non-qualifying action
+        pandas.DataFrame: events dataframe with additional prog_action column, identifying progressive actions
     """
 
-    # Determine if event is pass and check pass success
-    if single_event['type'] == 'Pass':
-        check_success = single_event['pass_outcome'] != single_event['pass_outcome']
+    # Initialise output dataframe
+    events_out = events.copy()
+    events_out['prog_action'] = np.nan
 
-        # Check pass made in-play (if inplay = True)
-        if inplay:
-            check_inplay = not single_event['pass_type'] in ['Corner', 'Free Kick', 'Throw-in', 'Kick Off']
-        else:
-            check_inplay = True
+    # Get potential progressive actions and their distance to goal    
+    prog_action = events[events['type_name'].isin(['Pass', 'Carry'])]
+    prog_action['delta_goal_dist'] = (np.sqrt((120-prog_action['x'])**2 + (40-prog_action['y'])** 2) -
+                       np.sqrt((120 - prog_action['end_x'])**2 + (40-prog_action['end_y'])**2))
+    
+    # Get progressive passes
+    prog_action = prog_action[((prog_action['x']<60) & (prog_action['end_x']<60) & (prog_action['delta_goal_dist'] >= 32.8)) |
+                              ((prog_action['x']<60) & (prog_action['end_x']>=60) & (prog_action['delta_goal_dist'] >= 16.4)) |
+                              ((prog_action['x']>=60) & (prog_action['end_x']>=60) & (prog_action['delta_goal_dist'] >= 10.94))]
 
-        # Determine pass start and end position
-        x_startpos = single_event['location'][0]
-        y_startpos = single_event['location'][1]
-        x_endpos = single_event['pass_end_location'][0]
-        y_endpos = single_event['pass_end_location'][1]
+    if successful_only:
+        prog_action = prog_action[prog_action['outcome_name'] != prog_action['outcome_name']]
 
-    # Determine if event is carry
-    elif single_event['type'] == 'Carry':
-        check_success = True
-        check_inplay = True
+    if inplay:
+        prog_action = prog_action[prog_action['in_play_event'] == 1]
 
-        # Determine carry start and end position
-        x_startpos = single_event['location'][0]
-        y_startpos = single_event['location'][1]
-        x_endpos = single_event['carry_end_location'][0]
-        y_endpos = single_event['carry_end_location'][1]
-
-    # If not pass or carry
-    else:
-        return float('nan')
-
-    # Change in distance to goal
-    delta_goal_dist = (np.sqrt((120 - x_startpos) ** 2 + (40 - y_startpos) ** 2) -
-                       np.sqrt((120 - x_endpos) ** 2 + (40 - y_endpos) ** 2))
-
-    # At least 30m closer to the opponent’s goal if the starting and finishing points are within a team’s own half
-    if (check_success and check_inplay) and (x_startpos < 60 and x_endpos < 60) and delta_goal_dist >= 32.8:
-        return True
-
-    # At least 15m closer to the opponent’s goal if the starting and finishing points are in different halves
-    elif (check_success and check_inplay) and (x_startpos < 60 and x_endpos >= 60) and delta_goal_dist >= 16.4:
-        return True
-
-    # At least 10m closer to the opponent’s goal if the starting and finishing points are in the opponent’s half
-    elif (check_success and check_inplay) and (x_startpos >= 60 and x_endpos >= 60) and delta_goal_dist >= 10.94:
-        return True
-    else:
-        return float('nan')
+    events_out.loc[prog_action.index, 'prog_action'] = 1
+    
+    return events_out
 
 
 def pre_shot_evts(events, t=5):

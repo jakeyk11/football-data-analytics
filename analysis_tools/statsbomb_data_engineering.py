@@ -642,10 +642,12 @@ def group_player_events(events, player_data, group_type='count', agg_columns=Non
 
     # Merge into player information dataframe
     player_data_out = player_data_out.merge(selected_events, left_on='player_id', right_index=True, how='left')
-
     if agg_columns != list() and group_type in ['sum', 'mean']:
         player_data_out = player_data_out.rename(columns={agg_columns: primary_event_name})
-
+        
+    # Remove nulls and replace with 0
+    player_data_out[primary_event_name] = player_data_out[primary_event_name].fillna(0)
+    
     return player_data_out
 
 

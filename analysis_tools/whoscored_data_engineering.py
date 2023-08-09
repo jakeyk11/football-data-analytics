@@ -23,7 +23,7 @@ events_while_playing(events_df, players_df, event_name='Pass', event_team='oppos
 create_player_list(lineups, additional_cols=None):
     Create a list of players from whoscored-style lineups dataframe. This requires minutes played information.
 
-group_player_events(events, player_data, group_type='count', event_types=None, primary_event_name='Column Name'):
+group_player_events(events, player_data, group_type='count', agg_columns=None, primary_event_name='Column Name'):
     Aggregate event types per player, and add to player info
     
 """
@@ -270,29 +270,38 @@ def events_while_playing(events_df, players_df, event_name='Pass', event_team='o
 
     # Add event count to lineup data, resetting for each individual match
     for match_id in events_df['match_id'].unique():
-        match_events = events_df[events_df['match_id'] == match_id]
-        players = players_df[players_df['match_id'] == match_id]
+        match_events = events_df[events_df['match_id'] == match_id].copy()
+        players = players_df[players_df['match_id'] == match_id].copy()
 
         # For each team calculate team events, and assign to player
         for team in set(match_events['teamId']):
-            team_players = players[players['teamId'] == team]
+            team_players = players[players['teamId'] == team].copy()
 
             # Choose whether to include own team or opposition events, and build column name
             if event_team == 'own':
-                team_events = match_events[(match_events['teamId'] == team) &
-                                           (match_events['eventType'] == event_name)]
+                if event_name == 'Touch':
+                    team_events = match_events[(match_events['teamId'] == team) &
+                                               (match_events['isTouch'] == True)]
+                else:
+                    team_events = match_events[(match_events['teamId'] == team) &
+                                               (match_events['eventType'] == event_name)]
                 col_name = 'team_' + event_name.lower()
 
             else:
-                team_events = match_events[(match_events['teamId'] != team) &
-                                           (match_events['eventType'] == event_name)]
+                if event_name == 'Touch':
+                    team_events = match_events[(match_events['teamId'] != team) &
+                                               (match_events['isTouch'] == True)]
+                else:
+                    team_events = match_events[(match_events['teamId'] != team) &
+                                               (match_events['eventType'] == event_name)]
+
                 col_name = 'opp_' + event_name.lower()
 
             # For each player, count events whilst they were on the pitch
             for idx, player in team_players.iterrows():
                 event_count = len(team_events[(team_events['expandedMinute'] > player['time_on']) &
                                               (team_events['expandedMinute'] < player['time_off'])])
-                team_players.loc[idx,col_name] = event_count
+                team_players.loc[idx, col_name] = event_count
 
             # Rebuild lineups dataframe
             players_df_out = pd.concat([players_df_out, team_players])
@@ -330,9 +339,10 @@ def create_player_list(lineups, additional_cols=None, pass_extra=None):
 
     # Calculate total playing minutes for each player and add to dataframe
     if additional_cols is None:
-        included_cols = lineups.groupby(['name', 'position', 'team'], axis=0).sum()['mins_played']
+        included_cols = lineups.groupby(['name', 'position', 'team'], axis=0).sum(numeric_only=True)['mins_played']
     else:
-        included_cols = lineups.groupby(['name', 'position', 'team'], axis=0).sum()[['mins_played'] + additional_cols]
+        included_cols = lineups.groupby(['name', 'position', 'team'], axis=0).sum(numeric_only=True)[['mins_played']
+                                                                                                     + additional_cols]
 
     playerinfo_df = playerinfo_df.merge(included_cols, left_on=['name', 'position', 'team'], right_index=True)
     
@@ -365,7 +375,7 @@ def create_player_list(lineups, additional_cols=None, pass_extra=None):
     return playerinfo_df
 
 
-def group_player_events(events, player_data, group_type='count', event_types=None, primary_event_name='Column Name'):
+def group_player_events(events, player_data, group_type='count', agg_columns=None, primary_event_name='Column Name'):
     """ Aggregate event types per player, and add to player information dataframe
 
     Function to read a whoscored-style events dataframe (single or multiple matches) and return a dataframe of
@@ -376,7 +386,7 @@ def group_player_events(events, player_data, group_type='count', event_types=Non
         events (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
         player_data (pandas.DataFrame): whoscored-style dataframe of player information. Must include a 'name' column.
         group_type (string, optional): aggregation method, can be set to 'sum' or 'count'. 'count' by default.
-        event_types (list, optional): list of columns in event to aggregate, additional to the main aggregation event.
+        agg_columns (list, optional): list of columns in event to aggregate, additional to the main aggregation event.
         primary_event_name (string, optional): name of main event type being aggregated (e.g. 'pass'). Used to name the
                                            aggregated column within player_data dataframe.
 
@@ -385,8 +395,8 @@ def group_player_events(events, player_data, group_type='count', event_types=Non
     """
 
     # Specify event_types as list if not assigned
-    if event_types is None:
-        event_types = list()
+    if agg_columns is None:
+        agg_columns = list()
 
     # Initialise output dataframe
     player_data_out = player_data.copy()
@@ -394,20 +404,25 @@ def group_player_events(events, player_data, group_type='count', event_types=Non
     # Perform aggregation based on grouping type input
     if group_type == 'count':
         grouped_events = events.groupby('playerId', axis=0).count()
-        selected_events = grouped_events[event_types]
+        selected_events = grouped_events[agg_columns].copy()
         selected_events.loc[:, primary_event_name] = grouped_events['match_id']
     elif group_type == 'sum':
-        grouped_events = events.groupby('playerId', axis=0).sum()
-        selected_events = grouped_events[event_types]
+        grouped_events = events.groupby('playerId', axis=0).sum(numeric_only=True)
+        selected_events = grouped_events[agg_columns].copy()
     elif group_type == 'mean':
-        grouped_events = events.groupby('playerId', axis=0).mean()
-        selected_events = grouped_events[event_types]
+        grouped_events = events.groupby('playerId', axis=0).mean(numeric_only=True)
+        selected_events = grouped_events[agg_columns].copy()
     else:
         selected_events = pd.DataFrame()
 
     # Merge into player information dataframe
-    player_data_out = player_data_out.merge(selected_events, left_on='playerId', right_index=True, how='outer')
-    player_data_out.replace(np.nan, 0, inplace=True)
+    player_data_out = player_data_out.merge(selected_events, left_on='playerId', right_index=True, how='left')
+    if agg_columns != list() and group_type in ['sum', 'mean']:
+        player_data_out = player_data_out.rename(columns={agg_columns: primary_event_name})
+
+    # Remove nulls and replace with 0
+    player_data_out[primary_event_name] = player_data_out[primary_event_name].fillna(0)
+
     return player_data_out
 
 
