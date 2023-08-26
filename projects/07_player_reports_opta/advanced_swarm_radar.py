@@ -59,7 +59,6 @@ leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesl
            'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
            'EFL1': 'EFL League One', 'EFL2': 'EFL League Two'}
 
-
 # %% Get required data
 
 # Combine player data and comparison comp data requirements
@@ -414,3 +413,10 @@ logo_ax = fig.add_axes([0.94, 0.005, 0.04, 0.04])
 logo_ax.axis("off")
 badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
 logo_ax.imshow(badge)
+
+# Save
+if player_2['name'] == '':
+    fig.savefig(f"advanced_radars/{comparison_competition['comp']}-{comparison_competition['year']}-{comparison_competition['position']}-{playerinfo_df.loc[player_1_id, 'name']}", dpi=300)
+else:
+    fig.savefig(f"advanced_radars/{comparison_competition['comp']}-{comparison_competition['year']}-{comparison_competition['position']}-{playerinfo_df.loc[player_1_id, 'name']}-and-{playerinfo_df.loc[player_2_id, 'name']}", dpi=300)
+  

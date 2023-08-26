@@ -16,10 +16,10 @@ import pandas as pd
     'A-League Women', 'WSL', 'D1 Feminine', 'Womens Bundesliga', 'Womens Serie A', 'Liga F',
     'NWSL Challenge Cup', 'NWSL Fall Series'] '''
 
-COMPETITION = 'EFL Championship'
+COMPETITION = 'EPL'
 
 # Select calender year in which the competition finishes
-COMPETITION_END_YEAR = 2023
+COMPETITION_END_YEAR = 2024
 
 # Select whether to store player data, team data or vs team data, using one of the following case-insensitive options
 '''['player_only', 'team_only', 'vs_team_only', 'all'] '''
@@ -27,7 +27,7 @@ COMPETITION_END_YEAR = 2023
 STORAGE_MODE = 'all'
 
 # Replace with path of directory to store data (path is relative to directory of this script). SAVE_COMP is not needed
-SAVE_COMP = 'Serie_A'
+SAVE_COMP = 'EPL'
 DIRECTORY = f"../../data_directory/fbref_data/{str(COMPETITION_END_YEAR-1)}_{str(COMPETITION_END_YEAR).replace('20','',1)}/{SAVE_COMP}/"
 
 # %% Scrape data
