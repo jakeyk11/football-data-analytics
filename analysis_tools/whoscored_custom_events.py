@@ -2,7 +2,7 @@
 
 Functions
 ---------
-pre_assist(events):
+pre_assist(events_df):
     Calculate pre-assists from whoscored-style events dataframe, and returns with pre_assist column
 
 progressive_action(single_event, inplay=True, successful_only=True)
@@ -14,7 +14,7 @@ box_entry(single_event, inplay=True, successful_only=True):
 create_convex_hull(events_df, name='default', min_events=3, include_percent=100, pitch_area = 10000):
     Create a dataframe of convex hull information from statsbomb-style event data.
 
-passes_into_hull(hull_info, events, opp_passes=True, xt_info=False):
+passes_into_hull(hull_info, events_df, opp_passes=True, xt_info=False):
     Add pass into hull information to dataframe of convex hulls for whoscored-style event data.
 
 insert_ball_carries(events_df, min_carry_length=3, max_carry_length=60, min_carry_duration=1, max_carry_duration=10):
@@ -28,6 +28,12 @@ find_offensive_actions(events_df):
 
 find_defensive_actions(events_df):
     Return dataframe of in-play defensive actions from event data.
+
+get_pass_outcome(pass_events, contextual_events, t=5)
+    Determine outcome of pass events
+
+get_possession_chains(events_df, chain_check=5, suc_evts_in_chain=3):
+    Identify possession chains from whoscored event data.
 """
 
 import numpy as np
@@ -38,7 +44,7 @@ from scipy.spatial import Delaunay
 from shapely.geometry.polygon import Polygon
 
 
-def pre_assist(events):
+def pre_assist(events_df):
     """ Calculate pre-assists from whoscored-style events dataframe, and returns with pre_assist column
 
     Function to calculate pre-assists from a whoscored-style event dataframe (from one or multiple matches),
@@ -46,14 +52,14 @@ def pre_assist(events):
     events dataframe is returned with an additional pre_assiss column.
 
     Args:
-        events (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
+        events_df (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
 
     Returns:
         pandas.DataFrame: statsbomb-style event dataframe with additional 'pre_assist' column.
     """
 
     # Initialise dataframe and new column
-    events_out = events.copy()
+    events_out = events_df.copy()
     events_out.reset_index(inplace=True)
     events_out['pre_assist'] = float('nan')
 
@@ -259,7 +265,7 @@ def create_convex_hull(events_df, name='default', min_events=3, include_events='
     return hull_df
 
 
-def passes_into_hull(hull_info, events, opp_passes=True, xt_info=False):
+def passes_into_hull(hull_info, events_df, opp_passes=True, xt_info=False):
     """ Add pass into hull information to dataframe of convex hulls for whoscored-style event data.
 
     Function to determine whether one or more passes (passed in as a whoscored-style event dataframe) end within a
@@ -269,7 +275,7 @@ def passes_into_hull(hull_info, events, opp_passes=True, xt_info=False):
 
     Args:
         hull_info (pandas.Series): series of hull information.
-        events (pandas.DataFrame): whoscored-style events conaining all passes to be checked.
+        events_df (pandas.DataFrame): whoscored-style events conaining all passes to be checked.
         opp_passes (bool, optional): selection of whether the passes to be checked are opposition or own team.
         xt_info (bool, optional): selection of whether to include expected threat information. False by default.
 
@@ -298,7 +304,7 @@ def passes_into_hull(hull_info, events, opp_passes=True, xt_info=False):
     hull_df['unsuc_pass_into_hull'] = []
 
     # Ensure only pass events are checked
-    events_to_check = events[events['eventType'] == 'Pass']
+    events_to_check = events_df[events_df['eventType'] == 'Pass']
 
     # Create polygon object for convex hull that is being assessed
     polygon = Polygon(list(zip(hull_df['hull_reduced_x'], hull_df['hull_reduced_y'])))
@@ -611,7 +617,7 @@ def find_offensive_actions(events_df):
 def find_defensive_actions(events_df):
     """ Return dataframe of in-play defensive actions from event data.
 
-    Function to find all in-play defensive actions within a whscored-style events dataframe (single or multiple
+    Function to find all in-play defensive actions within a whoscored-style events dataframe (single or multiple
     matches), and return as a new dataframe.
 
     Args:
@@ -695,3 +701,109 @@ def get_pass_outcome(pass_events, contextual_events, t=5):
 
     return pass_events_out
 
+
+def get_possession_chains(events_df, chain_check=5, suc_evts_in_chain=3):
+    """ Identify possession chains from whoscored event data.
+
+    Function to tag possession chains within a whoscored-style event dataframe. A possession is defined as any instance
+    when a team successfully completes "suc_evts_in_chain" actions within "chain_check" events. Kick offs are also
+    defined as new possessions. A new dataframe including possession_id and possession_teamId is returned.
+
+    Args:
+        events_df (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
+        chain_check (int, optional): number of events to check when identifying possession chain. Defaults to 5.
+        suc_evts_in_chain (int, optional): required number of successful events completed by team to define possession
+        chain. Defaults to 3.
+
+    Returns:
+        pandas.DataFrame: whoscored-style dataframe of event data with possesson chains tagged.
+    """
+
+    # Initialise output
+    events_out = pd.DataFrame()
+
+    # Iterate through each match
+    for match_id in events_df['match_id'].unique():
+        match_events_df = events_df[events_df['match_id'] == match_id].reset_index()
+
+        # Isolate valid event types that contribute to possession
+        match_pos_events_df = match_events_df[~match_events_df['eventType'].isin(['OffsideGiven', 'CornerAwarded',
+                                                                                  'Start', 'Card', 'SubstitutionOff',
+                                                                                  'SubstitutionOn', 'FormationChange',
+                                                                                  'FormationSet', 'End'])].copy()
+
+        # Add temporary binary outcome and team identifiers
+        match_pos_events_df['outcomeBinary'] = (match_pos_events_df['outcomeType']
+                                                .apply(lambda x: 1 if x == 'Successful' else 0))
+        match_pos_events_df['teamBinary'] = (match_pos_events_df['teamId']
+                                             .apply(lambda x: 1 if x == min(match_pos_events_df['teamId']) else 0))
+        match_pos_events_df['goalBinary'] = ((match_pos_events_df['eventType'] == 'Goal')
+                                             .astype(int).diff(periods=1).apply(lambda x: 1 if x < 0 else 0))
+
+        # Create a dataframe to investigate possessions chains
+        pos_chain_df = pd.DataFrame()
+
+        # Check whether each event is completed by same team as the next (check_evts-1) events
+        for n in np.arange(1, chain_check):
+            pos_chain_df[f'evt_{n}_same_team'] = abs(match_pos_events_df['teamBinary'].diff(periods=-n))
+            pos_chain_df[f'evt_{n}_same_team'] = pos_chain_df[f'evt_{n}_same_team'].apply(lambda x: 1 if x > 1 else x)
+        pos_chain_df['enough_evt_same_team'] = pos_chain_df.sum(axis=1).apply(
+            lambda x: 1 if x < chain_check - suc_evts_in_chain else 0)
+        pos_chain_df['enough_evt_same_team'] = pos_chain_df['enough_evt_same_team'].diff(periods=1)
+        pos_chain_df[pos_chain_df['enough_evt_same_team'] < 0] = 0
+
+        # Check there are no kick-offs in the upcoming (check_evts-1) events
+        pos_chain_df['upcoming_ko'] = 0
+        for ko in match_pos_events_df[(match_pos_events_df['goalBinary'] == 1) |
+                                      (match_pos_events_df['period'].diff(periods=1))].index.values:
+            ko_pos = match_pos_events_df.index.to_list().index(ko)
+            pos_chain_df.iloc[ko_pos - suc_evts_in_chain:ko_pos, 5] = 1
+
+        # Determine valid possession starts based on event team and upcoming kick-offs
+        pos_chain_df['valid_pos_start'] = (pos_chain_df.fillna(0)['enough_evt_same_team'] -
+                                           pos_chain_df.fillna(0)['upcoming_ko'])
+
+        # Add in possession starts due to kick-offs (period changes and goals).
+        pos_chain_df['kick_off_period_change'] = match_pos_events_df['period'].diff(periods=1)
+        pos_chain_df['kick_off_goal'] = ((match_pos_events_df['eventType'] == 'Goal')
+                                         .astype(int).diff(periods=1).apply(lambda x: 1 if x < 0 else 0))
+        pos_chain_df.loc[pos_chain_df['kick_off_period_change'] == 1, 'valid_pos_start'] = 1
+        pos_chain_df.loc[pos_chain_df['kick_off_goal'] == 1, 'valid_pos_start'] = 1
+
+        # Add first possession manually
+        pos_chain_df['teamId'] = match_pos_events_df['teamId']
+        pos_chain_df.loc[pos_chain_df.head(1).index, 'valid_pos_start'] = 1
+        pos_chain_df.loc[pos_chain_df.head(1).index, 'possession_id'] = 1
+        pos_chain_df.loc[pos_chain_df.head(1).index, 'possession_team'] = pos_chain_df.loc[pos_chain_df.head(1).index,
+                                                                                           'teamId']
+
+        # Iterate through valid possession starts and assign them possession ids
+        valid_pos_start_id = pos_chain_df[pos_chain_df['valid_pos_start'] > 0].index
+
+        possession_id = 2
+        for idx in np.arange(1, len(valid_pos_start_id)):
+            current_team = pos_chain_df.loc[valid_pos_start_id[idx], 'teamId']
+            previous_team = pos_chain_df.loc[valid_pos_start_id[idx - 1], 'teamId']
+            if ((previous_team == current_team) & (pos_chain_df.loc[valid_pos_start_id[idx], 'kick_off_goal'] != 1) &
+                    (pos_chain_df.loc[valid_pos_start_id[idx], 'kick_off_period_change'] != 1)):
+                pos_chain_df.loc[valid_pos_start_id[idx], 'possession_id'] = np.nan
+            else:
+                pos_chain_df.loc[valid_pos_start_id[idx], 'possession_id'] = possession_id
+                pos_chain_df.loc[valid_pos_start_id[idx], 'possession_team'] = pos_chain_df.loc[valid_pos_start_id[idx],
+                                                                                                'teamId']
+                possession_id += 1
+
+        # Assign possession id and team back to events dataframe
+        match_events_df = pd.merge(match_events_df, pos_chain_df[['possession_id', 'possession_team']], how='left',
+                                   left_index=True, right_index=True)
+
+        # Fill in possession ids and possession team
+        match_events_df[['possession_id', 'possession_team']] = (match_events_df[['possession_id', 'possession_team']]
+                                                                 .fillna(method='ffill'))
+        match_events_df[['possession_id', 'possession_team']] = (match_events_df[['possession_id', 'possession_team']]
+                                                                 .fillna(method='bfill'))
+
+        # Rebuild events dataframe
+        events_out = pd.concat([events_out, match_events_df])
+
+    return events_out

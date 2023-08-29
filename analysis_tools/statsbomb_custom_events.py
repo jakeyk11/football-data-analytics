@@ -62,7 +62,7 @@ from shapely.geometry.polygon import Polygon
 
 
 def tag_in_play(events):
-    """ Tag in play eventsb within statsbomb-style event data
+    """ Tag in play events within statsbomb-style event data
 
     Function to identify events that occur in-play from statsbomb-style event data. This adds a new column
     'in_play_event' to the event dataframe.
