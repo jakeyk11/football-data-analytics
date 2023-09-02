@@ -30,6 +30,7 @@ import mpl_toolkits.axes_grid1.axes_size as Size
 from matplotlib.projections import polar
 from PIL import Image, ImageEnhance
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from mplsoccer import PyPizza
 
 # %% Add custom tools to path
 
@@ -44,12 +45,12 @@ import analysis_tools.logos_and_badges as lab
 
 # %% User inputs
 
-player_1 = {'name':'Mohamed Salah', 'comp':'EPL', 'year':'2022'}
-player_2 = {'name':'Bukayo Saka', 'comp':'EPL', 'year':'2022'}
+player_1 = {'name':'Riyad Mahrez', 'comp':'EPL', 'year':'2022'}
+player_2 = {'name':'Jérémy Doku', 'comp':'Ligue_1', 'year':'2022'}
 comparison_competition = {'comp':'EPL', 'year':'2022', 'position': 'FWD', 'mins':600}
 comparison_logo_brighten = True
-player_1_colour = 'coral'
-player_2_colour = 'cornflowerblue'
+player_1_colour = 'lightskyblue'
+player_2_colour = 'coral'
 
 # %% League logo and league naming
 
@@ -132,8 +133,9 @@ events_df['prog_action'] = events_df.apply(wce.progressive_action, axis=1)
 # %% Aggregate lineups to construct playerinfo dataframe, and then filter
 
 playerinfo_df = wde.create_player_list(players_df, pass_extra = ['competition', 'year'], additional_cols = ['team_touch', 'opp_touch', 'opp_touch_own_3rd', 'team_pass', 'opp_pass'])
-playerinfo_df = playerinfo_df[(playerinfo_df['pos_type'] == comparison_competition['position']) &
-                              (playerinfo_df['mins_played'] >= comparison_competition['mins'])]
+playerinfo_df = playerinfo_df[(playerinfo_df['name'].isin([player_1['name'],player_2['name']])) |
+                              ((playerinfo_df['pos_type'] == comparison_competition['position']) &
+                                                        (playerinfo_df['mins_played'] >= comparison_competition['mins']))]
 
 # %% Get some metrics
 
@@ -151,6 +153,7 @@ playerinfo_df = wde.group_player_events(suc_box_entries, playerinfo_df, group_ty
 # xThreat generated
 passes = events_df[events_df['eventType'] == 'Pass']
 carries = events_df[events_df['eventType'] == 'Carry']
+assists = passes[passes['satisfiedEventsTypes'].apply(lambda x: True if 92 in x else False)]
 playerinfo_df = wde.group_player_events(passes, playerinfo_df, group_type='count', primary_event_name='passes')
 playerinfo_df = wde.group_player_events(carries, playerinfo_df, group_type='count', primary_event_name='carries')
 playerinfo_df = wde.group_player_events(passes, playerinfo_df, group_type='sum', agg_columns='xThreat', primary_event_name='pass_xt')
@@ -160,12 +163,14 @@ playerinfo_df = wde.group_player_events(carries, playerinfo_df, group_type='sum'
 shots = events_df[(events_df['eventType'].isin(['MissedShots', 'SavedShot', 'ShotOnPost', 'Goal'])) & (~events_df['satisfiedEventsTypes'].apply(lambda x: True if( 5 in x or 6 in x) else False))].copy()
 shots['shot_distance'] = shots[['x','y']].apply(lambda a: np.sqrt((120*((100-a[0])/100))**2 + (80*((50-a[1])/100))**2),axis = 1)        
 goals = shots[shots['eventType'] == 'Goal']
+gc = pd.concat([assists,goals])
 box_shots = shots[(shots['x']>=83) & (shots['y']<=79) & (shots['y']>=21)]
 box_goals = box_shots[box_shots['eventType'] == 'Goal']
 big_chances = events_df[events_df['satisfiedEventsTypes'].apply(lambda x: True if 203 in x and not (31 in x or 34 in x or 212 in x) else False)]
 playerinfo_df = wde.group_player_events(shots, playerinfo_df, group_type='count', primary_event_name='shots')
 playerinfo_df = wde.group_player_events(shots, playerinfo_df, group_type='mean', agg_columns='shot_distance', primary_event_name='mean_shot_dist')
 playerinfo_df = wde.group_player_events(goals, playerinfo_df, group_type='count', primary_event_name='goals')
+playerinfo_df = wde.group_player_events(gc, playerinfo_df, group_type='count', primary_event_name='goal_contributions')
 playerinfo_df = wde.group_player_events(box_shots, playerinfo_df, group_type='count', primary_event_name='box_shots')
 playerinfo_df = wde.group_player_events(box_goals, playerinfo_df, group_type='count', primary_event_name='box_goals')
 playerinfo_df = wde.group_player_events(big_chances, playerinfo_df, group_type='count', primary_event_name='big_chances')
@@ -209,7 +214,8 @@ playerinfo_df = wde.group_player_events(ball_losses, playerinfo_df, group_type='
 
 # %% Normalise metrics
 
-playerinfo_df['box_touches_90'] = 90 * playerinfo_df['box_touches'] / playerinfo_df['mins_played']
+playerinfo_df['goal_contributions_100_team_pass'] = 100 * playerinfo_df['goal_contributions'] / playerinfo_df['team_pass']
+playerinfo_df['box_touches_100_team_pass'] = 100 * playerinfo_df['box_touches'] / playerinfo_df['team_pass']
 playerinfo_df['box_entries_pct'] = 100 * playerinfo_df['suc_box_entries'] / (playerinfo_df['passes'] + playerinfo_df['carries'])
 playerinfo_df['xt_gen_100_team_pass'] = 100 * (playerinfo_df['pass_xt'] + playerinfo_df['carry_xt']) / playerinfo_df['team_pass']
 playerinfo_df['box_shot_conversion'] = 100 * playerinfo_df['box_goals'] / playerinfo_df['box_shots']
@@ -219,31 +225,31 @@ playerinfo_df['takeon_pct'] = 100 * playerinfo_df['suc_take_on'] / playerinfo_df
 playerinfo_df['cross_chance_pct'] = (100 * playerinfo_df['cross_to_chance'] / playerinfo_df['cross']).fillna(0)
 playerinfo_df['high_ball_wins_100_opp_pass_own_3rd'] = 100 * playerinfo_df['high_ball_wins'] / playerinfo_df['opp_touch_own_3rd']
 playerinfo_df['ball_losses_100_touch'] = 100 * playerinfo_df['ball_losses'] / playerinfo_df['touches']
-
+  
 # %% Generate swarm radar
 
 path_eff = [path_effects.Stroke(linewidth=2, foreground='#313332'), path_effects.Normal()]
 
 # Specify metrics to plot
-swarm_radar_metrics = ['box_touches_90',
+swarm_radar_metrics = ['goal_contributions_100_team_pass',
+                       'box_touches_100_team_pass',
                        'box_entries_pct',
                        'xt_gen_100_team_pass',
                        'box_shot_conversion',
                        'big_chances_100_team_pass',
                        'aerial_win_pct',
                        'takeon_pct',
-                       'cross_chance_pct',
                        'high_ball_wins_100_opp_pass_own_3rd',
                        'ball_losses_100_touch']
 
-swarm_radar_titles = ['Box Touches\nper 90',
+swarm_radar_titles = ['Goal Contributions per\n100 team passes',
+                      'Box Touches\nper 100 team passes',
                       '% Actions into\nOpp. Box',
                       'Threat generated per\n100 team passes',
                       '% Box shots\nconverted',
                       'Big chances per\n100 team passes',
                       '% Aerials\nwon',
                       '% Takeons\ncompleted',
-                      '% Crosses resulting\nin chance',
                       'High ball wins per\n100 opp passes',
                       'Ball losses per\n100 touches']
 
@@ -258,7 +264,7 @@ if player_2['name'] != '':
     player_2_id = playerinfo_df[(playerinfo_df['name'] == player_2['name']) & (playerinfo_df['competition'] == player_2['comp']) & (playerinfo_df['year'] == player_2['year'])].index.values[0]
     playerinfo_df.loc[player_2_id, 'Primary Player'] = 'Primary 2'
   
-playerinfo_df['Plot Size'] = playerinfo_df['Primary Player'].apply(lambda x: 8 if x == 'Untagged' else 14)
+playerinfo_df['Plot Size'] = playerinfo_df['Primary Player'].apply(lambda x: 7 if x == 'Untagged' else 7)
 
 # Sort dataframe to highlight tagged players
 playerinfo_df = playerinfo_df.sort_values('Primary Player')
@@ -267,7 +273,8 @@ playerinfo_df = playerinfo_df.sort_values('Primary Player')
 num_metrics = len(swarm_radar_metrics)
 
 # Define the position and size of the child axes (in polar coordinates)
-theta_mid = np.radians(np.linspace(0, 360, num_metrics+1))[:-1]
+theta_mid = np.radians(np.linspace(0, 360, num_metrics+1))[:-1]+np.pi/2
+theta_mid = [x if x <2*np.pi else x-2*np.pi for x in theta_mid]
 theta_base = theta_mid-np.mean(np.diff(theta_mid))/2
 theta_delta = np.mean(np.diff(theta_mid))
 r_base = np.linspace(0.25, 0.25, num_metrics+1)[:-1]
@@ -279,7 +286,7 @@ x_base, y_base = 0.325 + r_base * np.cos(theta_mid), 0.3 + 0.89 * r_base * np.si
 fig = plt.figure(constrained_layout=False, figsize = (9, 11))
 fig.set_facecolor('#313332')
 
-# Add central radar axis
+# Setup radar axis and object
 theta = np.arange(0, 2*np.pi, 0.01)
 radar_ax = fig.add_axes([0.025, 0, 0.95, 0.95],polar=True)
 radar_ax.plot(theta, theta*0 + 0.17, color = 'w', lw = 1)
@@ -287,8 +294,11 @@ radar_ax.plot(theta, theta*0 + 0.3425, color = 'grey', lw = 1, alpha = 0.3)
 radar_ax.plot(theta, theta*0 + 0.5150, color = 'grey', lw = 1, alpha = 0.3)
 radar_ax.plot(theta, theta*0 + 0.6875, color = 'grey', lw = 1, alpha = 0.3)
 radar_ax.plot(theta, theta*0 + 0.86, color = 'grey', lw = 1, alpha = 0.3)
-
 radar_ax.axis('off')
+
+# Store ax limits
+ax_mins = []
+ax_maxs = []
 
 # Iterate through each metric 
 for idx, metric in enumerate(swarm_radar_metrics):
@@ -299,11 +309,7 @@ for idx, metric in enumerate(swarm_radar_metrics):
     fig_save.patch.set_alpha(0)
     
     # Plot on axis    
-    sns.swarmplot(x=playerinfo_df[metric], hue=playerinfo_df["Primary Player"], y=[""]*len(playerinfo_df), palette=[player_1_colour, player_2_colour, 'grey'], edgecolor='w', s=playerinfo_df['Plot Size'], zorder=1)
-    if player_1['name'] != '':
-        ax_save.plot([playerinfo_df.loc[player_1_id, metric], playerinfo_df.loc[player_1_id, metric]],[-0.5,0.5], lw = 3, color = player_1_colour, zorder=1)
-    if player_2['name'] != '':
-        ax_save.plot([playerinfo_df.loc[player_2_id, metric], playerinfo_df.loc[player_2_id, metric]],[-0.5,0.5], lw = 3, color = player_2_colour, zorder=1)    
+    sns.swarmplot(x=playerinfo_df[metric], y=[""]*len(playerinfo_df), color='grey', edgecolor='w', s=playerinfo_df['Plot Size'], zorder=1)
     ax_save.legend([],[], frameon=False)
     ax_save.patch.set_alpha(0)
     ax_save.spines['bottom'].set_position(('axes', 0.5))
@@ -321,8 +327,10 @@ for idx, metric in enumerate(swarm_radar_metrics):
 
     if metric in neg_metrics:
         ax_save.invert_xaxis()
+    ax_mins.append(ax_save.get_xlim()[0])
+    ax_maxs.append(ax_save.get_xlim()[1]*1.05)
 
-    fig_save.savefig('temp.png')
+    fig_save.savefig('temp.png', dpi=300)
     
     # Define axis scale
     scales = (0, 1, 0, 1)
@@ -341,15 +349,15 @@ for idx, metric in enumerate(swarm_radar_metrics):
     aux_ax = ax.get_aux_axes(t)
     
     # Translate axis to desired x,y position
-    horiz_scale = [Size.Scaled(1.0)]  
-    vert_scale = [Size.Scaled(1.045)]
+    horiz_scale = [Size.Scaled(1.04)]  
+    vert_scale = [Size.Scaled(1.0)]
     ax_div = Divider(fig, [x_base[idx], y_base[idx], 0.35, 0.35], horiz_scale, vert_scale, aspect=True)
     ax_loc = ax_div.new_locator(nx=0,ny=0)
     ax.set_axes_locator(ax_loc)
     
     # Add image to axis
     img = Image.open('temp.png')
-    aux_ax.imshow(img, extent=[-0.15, 1.1, -0.15, 1.15])
+    aux_ax.imshow(img, extent=[-0.18, 1.12, -0.15, 1.15])
     ax.axis('off')
     ax.axis['right'].set_visible(False)
     ax.axis['top'].set_visible(False)
@@ -368,7 +376,6 @@ for idx, metric in enumerate(swarm_radar_metrics):
     plt.close(fig_save)
 
 radar_ax.set_rmax(1)
-
 
 # Add player logos and details
 if player_1['name'] != '':
@@ -395,6 +402,46 @@ if player_2['name'] != '':
     fig.text(0.48, 0.931, title_text_2, fontweight="bold", fontsize=12, color='w')
     fig.text(0.48, 0.909, title_text_3, fontweight="bold", fontsize=12, color='w')
 
+# Add mplsoccer radar
+
+# Setup radar axis and object
+pizza_ax = fig.add_axes([0.09, 0.065, 0.82, 0.82],polar=True)
+pizza_ax.set_theta_offset(17)
+pizza_ax.axis('off')
+pizza_metrics = [swarm_radar_metrics[0]] + list(reversed(swarm_radar_metrics[1:]))
+ax_mins = [ax_mins[0]] + list(reversed(ax_mins[1:]))
+ax_maxs = [ax_maxs[0]] + list(reversed(ax_maxs[1:]))
+
+radar_values_p1 = playerinfo_df[playerinfo_df['Primary Player']=='Primary 1'][pizza_metrics].values[0].tolist()
+radar_values_p2 = playerinfo_df[playerinfo_df['Primary Player']=='Primary 2'][pizza_metrics].values[0].tolist()
+
+radar_object = PyPizza(params=pizza_metrics,
+                       background_color="w",
+                       straight_line_color="w",
+                       min_range = ax_mins,
+                       max_range = ax_maxs,
+                       straight_line_lw=1,
+                       straight_line_limit = 100,
+                       last_circle_lw=0.1,
+                       other_circle_lw=0.1,
+                       inner_circle_size=18)
+
+# Plot radar
+radar_object.make_pizza(values = radar_values_p1,
+                        compare_values= radar_values_p2,
+                        color_blank_space='same',
+                        blank_alpha = 0,
+                        bottom = 5,
+                        kwargs_params=dict(fontsize=0, color='None'),
+                        kwargs_values=dict(fontsize=0, color='None'),
+                        kwargs_compare_values=dict(fontsize=0, color='None'),
+                        kwargs_slices=dict(
+                            facecolor=player_1_colour, alpha=0.3, edgecolor='#313332', linewidth=1,
+                            zorder=1),
+                        kwargs_compare=dict(
+                            facecolor=player_2_colour, alpha=0.3, edgecolor='#313332', linewidth=1,
+                            zorder=3),
+                        ax = pizza_ax)
 
 # Add radar type and description
 title_text = "Forward Template"
@@ -414,9 +461,5 @@ logo_ax.axis("off")
 badge = Image.open('..\..\data_directory\misc_data\images\JK Twitter Logo.png')
 logo_ax.imshow(badge)
 
-# Save
-if player_2['name'] == '':
-    fig.savefig(f"advanced_radars/{comparison_competition['comp']}-{comparison_competition['year']}-{comparison_competition['position']}-{playerinfo_df.loc[player_1_id, 'name']}", dpi=300)
-else:
-    fig.savefig(f"advanced_radars/{comparison_competition['comp']}-{comparison_competition['year']}-{comparison_competition['position']}-{playerinfo_df.loc[player_1_id, 'name']}-and-{playerinfo_df.loc[player_2_id, 'name']}", dpi=300)
-  
+# Save fig
+plt.savefig(f"advanced_radars/{comparison_competition['comp'].lower()}-{comparison_competition['year']}-{player_1['name'].replace(' ','-').lower()}-{player_2['name'].replace(' ','-').lower()}", dpi=300)
