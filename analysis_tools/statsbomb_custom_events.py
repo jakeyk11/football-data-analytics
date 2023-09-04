@@ -1242,7 +1242,7 @@ def get_counterattack_events(events_in, t=10):
     events, also identifying the location, end location, type and success of the counterattack event.
 
     Args:
-        events (pandas.DataFrame): dataframe of event data. Events can be from multiple matches.
+        events_in (pandas.DataFrame): dataframe of event data. Events can be from multiple matches.
         t (float, optional): seconds after a ball win to search for counterattack events. Defaults to 5s.
 
     Returns:

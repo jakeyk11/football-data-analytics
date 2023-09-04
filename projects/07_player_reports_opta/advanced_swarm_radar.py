@@ -45,16 +45,14 @@ import analysis_tools.logos_and_badges as lab
 
 # %% User inputs
 
-player_1 = {'name':'Riyad Mahrez', 'comp':'EPL', 'year':'2022'}
-player_2 = {'name':'Jérémy Doku', 'comp':'Ligue_1', 'year':'2022'}
-comparison_competition = {'comp':'EPL', 'year':'2022', 'position': 'FWD', 'mins':600}
+player_1 = {'name':'Liam Gibbs', 'comp':'EFLC', 'year':'2022'}
+player_2 = {'name':'Oliver Norwood', 'comp':'EFLC', 'year':'2022'}
+comparison_competition = {'comp':'EPL', 'year':'2022', 'position': 'MID', 'mins':600}
 comparison_logo_brighten = True
 player_1_colour = 'lightskyblue'
 player_2_colour = 'coral'
 
 # %% League logo and league naming
-
-comp_logo = lab.get_competition_logo(comparison_competition['comp'], comparison_competition['year'], comparison_logo_brighten)
     
 leagues = {'EPL': 'Premier League', 'La_Liga': 'La Liga', 'Bundesliga': 'Bundesliga', 'Serie_A': 'Serie A',
            'Ligue_1': 'Ligue 1', 'RFPL': 'Russian Premier Leauge', 'EFLC': 'EFL Championship', 'World_Cup': 'World Cup',
@@ -135,7 +133,8 @@ events_df['prog_action'] = events_df.apply(wce.progressive_action, axis=1)
 playerinfo_df = wde.create_player_list(players_df, pass_extra = ['competition', 'year'], additional_cols = ['team_touch', 'opp_touch', 'opp_touch_own_3rd', 'team_pass', 'opp_pass'])
 playerinfo_df = playerinfo_df[(playerinfo_df['name'].isin([player_1['name'],player_2['name']])) |
                               ((playerinfo_df['pos_type'] == comparison_competition['position']) &
-                                                        (playerinfo_df['mins_played'] >= comparison_competition['mins']))]
+                               (playerinfo_df['mins_played'] >= comparison_competition['mins']) & 
+                               (playerinfo_df['competition'] == comparison_competition['comp']))]
 
 # %% Get some metrics
 
@@ -150,14 +149,21 @@ suc_box_entries = events_df[events_df['box_entry']==True]
 playerinfo_df = wde.group_player_events(box_touches, playerinfo_df, group_type='count', primary_event_name='box_touches')
 playerinfo_df = wde.group_player_events(suc_box_entries, playerinfo_df, group_type='count', primary_event_name='suc_box_entries')
 
-# xThreat generated
+# xThreat and passing
 passes = events_df[events_df['eventType'] == 'Pass']
+suc_passes = passes[passes['outcomeType'] == 'Successful']
 carries = events_df[events_df['eventType'] == 'Carry']
+pass_carry = pd.concat([suc_passes, carries])
+prog_pass_carry = pass_carry[pass_carry['prog_action']==True]
+pass_carry_f3rd = pass_carry[(pass_carry['x']<100/3) & (pass_carry['endX']>=200/3)]
 assists = passes[passes['satisfiedEventsTypes'].apply(lambda x: True if 92 in x else False)]
 playerinfo_df = wde.group_player_events(passes, playerinfo_df, group_type='count', primary_event_name='passes')
+playerinfo_df = wde.group_player_events(suc_passes, playerinfo_df, group_type='count', primary_event_name='suc_passes')
 playerinfo_df = wde.group_player_events(carries, playerinfo_df, group_type='count', primary_event_name='carries')
 playerinfo_df = wde.group_player_events(passes, playerinfo_df, group_type='sum', agg_columns='xThreat', primary_event_name='pass_xt')
 playerinfo_df = wde.group_player_events(carries, playerinfo_df, group_type='sum', agg_columns='xThreat', primary_event_name='carry_xt')
+playerinfo_df = wde.group_player_events(pass_carry_f3rd, playerinfo_df, group_type='count', primary_event_name='final_3rd_entries')
+playerinfo_df = wde.group_player_events(prog_pass_carry, playerinfo_df, group_type='count', primary_event_name='prog_actions')
 
 # Shots and big chances
 shots = events_df[(events_df['eventType'].isin(['MissedShots', 'SavedShot', 'ShotOnPost', 'Goal'])) & (~events_df['satisfiedEventsTypes'].apply(lambda x: True if( 5 in x or 6 in x) else False))].copy()
@@ -197,10 +203,13 @@ playerinfo_df = wde.group_player_events(cross_to_chance, playerinfo_df, group_ty
 # High ball wins
 recoveries = events_df[(events_df['eventType']=='BallRecovery') & (events_df['outcomeType']=='Successful')]
 interceptions = events_df[(events_df['eventType']=='Interception') & (events_df['outcomeType']=='Successful')]
+bad_tackles = tackles = events_df[(events_df['eventType']=='Tackle') & (events_df['outcomeType']=='Unsuccessful')]
 tackles = events_df[(events_df['eventType']=='Tackle') & (events_df['outcomeType']=='Successful')]
 pass_blocks = events_df[(events_df['eventType']=='BlockedPass') & (events_df['outcomeType']=='Successful') ]
 ball_wins = pd.concat([recoveries, interceptions, tackles, pass_blocks], axis=0)
 ball_wins_high_33 = ball_wins[ball_wins['x']>=200/3]
+playerinfo_df = wde.group_player_events(tackles, playerinfo_df, group_type='count', primary_event_name='tackles')
+playerinfo_df = wde.group_player_events(bad_tackles, playerinfo_df, group_type='count', primary_event_name='bad_tackles')
 playerinfo_df = wde.group_player_events(ball_wins, playerinfo_df, group_type='count', primary_event_name='ball_wins')
 playerinfo_df = wde.group_player_events(ball_wins_high_33, playerinfo_df, group_type='count', primary_event_name='high_ball_wins')
 
@@ -214,24 +223,32 @@ playerinfo_df = wde.group_player_events(ball_losses, playerinfo_df, group_type='
 
 # %% Normalise metrics
 
+playerinfo_df['pass_xt_100_team_touch'] = 100 * playerinfo_df['pass_xt'] / playerinfo_df['team_touch']
+playerinfo_df['carry_xt_100_team_touch'] = 100 * playerinfo_df['carry_xt'] / playerinfo_df['team_touch']
+playerinfo_df['final_3rd_entries_100_team_touch'] = 100 * playerinfo_df['final_3rd_entries'] / playerinfo_df['team_touch']
+playerinfo_df['prog_actions_100_team_touch'] = 100 * playerinfo_df['prog_actions'] / playerinfo_df['team_touch']
+playerinfo_df['pass_success_pct'] = 100 * playerinfo_df['suc_passes'] / playerinfo_df['passes']
 playerinfo_df['goal_contributions_100_team_pass'] = 100 * playerinfo_df['goal_contributions'] / playerinfo_df['team_pass']
+playerinfo_df['goal_contributions_90'] = 90 * playerinfo_df['goal_contributions'] / playerinfo_df['mins_played']
 playerinfo_df['box_touches_100_team_pass'] = 100 * playerinfo_df['box_touches'] / playerinfo_df['team_pass']
 playerinfo_df['box_entries_pct'] = 100 * playerinfo_df['suc_box_entries'] / (playerinfo_df['passes'] + playerinfo_df['carries'])
 playerinfo_df['xt_gen_100_team_pass'] = 100 * (playerinfo_df['pass_xt'] + playerinfo_df['carry_xt']) / playerinfo_df['team_pass']
+playerinfo_df['xt_gen_100_team_touch'] = 100 * (playerinfo_df['pass_xt'] + playerinfo_df['carry_xt']) / playerinfo_df['team_touch']
 playerinfo_df['box_shot_conversion'] = 100 * playerinfo_df['box_goals'] / playerinfo_df['box_shots']
 playerinfo_df['big_chances_100_team_pass'] = 100 * playerinfo_df['big_chances'] / playerinfo_df['team_pass']
 playerinfo_df['aerial_win_pct'] = 100 * playerinfo_df['aerials_won'] / playerinfo_df['aerials']
+playerinfo_df['tackles_success_pct'] = 100 * playerinfo_df['tackles'] / (playerinfo_df['tackles'] + playerinfo_df['bad_tackles'])
 playerinfo_df['takeon_pct'] = 100 * playerinfo_df['suc_take_on'] / playerinfo_df['take_on']
 playerinfo_df['cross_chance_pct'] = (100 * playerinfo_df['cross_to_chance'] / playerinfo_df['cross']).fillna(0)
+playerinfo_df['ball_wins_100_opp_touch'] = 100 * playerinfo_df['ball_wins'] / playerinfo_df['opp_touch']
 playerinfo_df['high_ball_wins_100_opp_pass_own_3rd'] = 100 * playerinfo_df['high_ball_wins'] / playerinfo_df['opp_touch_own_3rd']
 playerinfo_df['ball_losses_100_touch'] = 100 * playerinfo_df['ball_losses'] / playerinfo_df['touches']
   
-# %% Generate swarm radar
+# %% Templates 
 
-path_eff = [path_effects.Stroke(linewidth=2, foreground='#313332'), path_effects.Normal()]
-
-# Specify metrics to plot
-swarm_radar_metrics = ['goal_contributions_100_team_pass',
+# FORWARDS/WINGERS
+template = 'Forward'
+swarm_radar_metrics = ['goal_contributions_100_team_passes',
                        'box_touches_100_team_pass',
                        'box_entries_pct',
                        'xt_gen_100_team_pass',
@@ -241,7 +258,6 @@ swarm_radar_metrics = ['goal_contributions_100_team_pass',
                        'takeon_pct',
                        'high_ball_wins_100_opp_pass_own_3rd',
                        'ball_losses_100_touch']
-
 swarm_radar_titles = ['Goal Contributions per\n100 team passes',
                       'Box Touches\nper 100 team passes',
                       '% Actions into\nOpp. Box',
@@ -252,8 +268,35 @@ swarm_radar_titles = ['Goal Contributions per\n100 team passes',
                       '% Takeons\ncompleted',
                       'High ball wins per\n100 opp passes',
                       'Ball losses per\n100 touches']
-
 neg_metrics = 'ball_losses_100_touch'
+
+# CENTRAL MIDFIELDERS
+template = 'Centre Mid'
+swarm_radar_metrics = ['goal_contributions_90',
+                       'pass_xt_100_team_touch',
+                       'carry_xt_100_team_touch',
+                       'prog_actions_100_team_touch',
+                       'final_3rd_entries_100_team_touch',
+                       'pass_success_pct',
+                       'aerial_win_pct',
+                       'tackles_success_pct',
+                       'ball_wins_100_opp_touch',
+                       'ball_losses_100_touch']
+swarm_radar_titles = ['Goal Contribution\nper 90',
+                      'Threat from Passes per\n100 team touches',
+                      'Threat from Carries per\n100 team touches',
+                      'Final 3rd Entries per\n100 team touches',
+                      'Progressive Actions per\n100 team touches',
+                      'Pass Accuracy (%)',
+                      'Aerial Win\nRate (%)',
+                      'Ground Duel\nWin Rate (%)',
+                      'Ball Wins per\n100 opposition touches',
+                      'Ball losses per\n100 touches']
+neg_metrics = 'ball_losses_100_touch'
+
+# %% Generate swarm radar
+
+path_eff = [path_effects.Stroke(linewidth=2, foreground='#313332'), path_effects.Normal()]
 
 # Tag primary players
 playerinfo_df['Primary Player'] = 'Untagged'
@@ -385,7 +428,7 @@ if player_1['name'] != '':
     team_logo_ax_1.imshow(team_logo_1)
     title_text_1 = playerinfo_df.loc[player_1_id, 'name']
     title_text_2 = playerinfo_df.loc[player_1_id, 'team']
-    title_text_3 = leagues[playerinfo_df.loc[player_1_id, 'competition']] + ' ' +playerinfo_df.loc[player_1_id, 'year'] + '/' + str(int(playerinfo_df.loc[player_1_id, 'year']) + 1).replace('20','',1)
+    title_text_3 = playerinfo_df.loc[player_1_id, 'competition'] + ' ' +playerinfo_df.loc[player_1_id, 'year'] + '/' + str(int(playerinfo_df.loc[player_1_id, 'year']) + 1).replace('20','',1)
     fig.text(0.11, 0.953, title_text_1, fontweight="bold", fontsize=14, color=player_1_colour)
     fig.text(0.11, 0.931, title_text_2, fontweight="bold", fontsize=12, color='w')
     fig.text(0.11, 0.909, title_text_3, fontweight="bold", fontsize=12, color='w')
@@ -397,7 +440,7 @@ if player_2['name'] != '':
     team_logo_ax_2.imshow(team_logo_2)
     title_text_1 = playerinfo_df.loc[player_2_id, 'name']
     title_text_2 = playerinfo_df.loc[player_2_id, 'team']
-    title_text_3 = leagues[playerinfo_df.loc[player_2_id, 'competition']] + ' ' +playerinfo_df.loc[player_2_id, 'year'] + '/' + str(int(playerinfo_df.loc[player_2_id, 'year']) + 1).replace('20','',1)
+    title_text_3 = playerinfo_df.loc[player_2_id, 'competition'] + ' ' +playerinfo_df.loc[player_2_id, 'year'] + '/' + str(int(playerinfo_df.loc[player_2_id, 'year']) + 1).replace('20','',1)
     fig.text(0.48, 0.953, title_text_1, fontweight="bold", fontsize=14, color=player_2_colour)
     fig.text(0.48, 0.931, title_text_2, fontweight="bold", fontsize=12, color='w')
     fig.text(0.48, 0.909, title_text_3, fontweight="bold", fontsize=12, color='w')
@@ -444,7 +487,7 @@ radar_object.make_pizza(values = radar_values_p1,
                         ax = pizza_ax)
 
 # Add radar type and description
-title_text = "Forward Template"
+title_text = f"{template} Template"
 description = f"Players compared to {comparison_competition['position']}s having played over {comparison_competition['mins']} mins within {leagues[comparison_competition['comp']]} {comparison_competition['year']}/{str(int(playerinfo_df.loc[player_1_id, 'year']) + 1).replace('20','',1)}" 
 description_text = "\n ".join(tw.wrap(description, 30, break_long_words=False, drop_whitespace=True))
 

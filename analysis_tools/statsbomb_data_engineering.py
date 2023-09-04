@@ -666,12 +666,12 @@ def create_team_list(lineups):
 
     teaminfo_df = lineups[['team_name', 'match_id']].drop_duplicates()
 
-    included_cols_max = lineups.groupby(['team_name', 'match_id'], axis=0).max()['mins_played']
+    included_cols_max = lineups.groupby(['team_name', 'match_id'], axis=0).max()['time_played']
 
     teaminfo_df = teaminfo_df.merge(included_cols_max, left_on=['team_name', 'match_id'], right_index=True)
     teaminfo_df['matches_played'] = 1
 
-    teaminfo_df = teaminfo_df.groupby(['team_name']).sum()[['mins_played', 'matches_played']]
+    teaminfo_df = teaminfo_df.groupby(['team_name']).sum()[['time_played', 'matches_played']]
 
     return teaminfo_df
 
@@ -704,18 +704,24 @@ def group_team_events(events, team_info, group_type='count', agg_columns=None, p
 
     # Perform aggregation based on grouping type input
     if group_type == 'count':
-        grouped_events = events.groupby('team', axis=0).count()
+        grouped_events = events.groupby('team_name', axis=0).count()
         selected_events = grouped_events[agg_columns].copy()
         selected_events.loc[:, primary_event_name] = grouped_events['match_id']
     elif group_type == 'sum':
-        grouped_events = events.groupby('team', axis=0).sum()
+        grouped_events = events.groupby('team_name', axis=0).sum(numeric_only=True)
         selected_events = grouped_events[agg_columns].copy()
     elif group_type == 'mean':
-        grouped_events = events.groupby('team', axis=0).mean()
+        grouped_events = events.groupby('team_name', axis=0).mean(numeric_only=True)
         selected_events = grouped_events[agg_columns].copy()
     else:
         selected_events = pd.DataFrame()
 
     # Merge into player information dataframe
-    team_info_out = team_info_out.merge(selected_events, left_on='team_name', right_index=True, how='outer')
+    team_info_out = team_info_out.merge(selected_events, left_on='team_name', right_index=True, how='left')
+    if agg_columns != list() and group_type in ['sum', 'mean']:
+        team_info_out = team_info_out.rename(columns={agg_columns: primary_event_name})
+
+    # Remove nulls and replace with 0
+    team_info_out[primary_event_name] = team_info_out[primary_event_name].fillna(0)
+
     return team_info_out
