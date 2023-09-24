@@ -37,13 +37,13 @@ import analysis_tools.logos_and_badges as lab
 # %% User Inputs
 
 # Select year
-year = '2022'
+year = '2023'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'Bundesliga'
+league = 'EPL'
 
 # Input run-date
-run_date = '28/05/2023'
+run_date = '04/09/2023'
 
 # Select whether to label %
 label_pct = False
@@ -118,10 +118,7 @@ for team in teams:
 
 # Sort dictionary by xT/90
 team_xt_90 = sorted(team_xt_90.items(), key=lambda x: x[1], reverse=True)
-a = pd.DataFrame(team_xt_90)
 
-aa = wde.create_player_list(players_df)
-aa = wde.group_player_events(threat_creating_events_df, aa, group_type='sum', event_types = ['xThreat', 'xThreat_gen'])
 # %% Custom colormap
 
 CustomCmap = mpl.colors.LinearSegmentedColormap.from_list("", ["#313332","#47516B", "#848178", "#B2A66F", "#FDE636"])

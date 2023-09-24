@@ -20,6 +20,9 @@ box_entry(single_event, inplay=True, successful_only=True)
 progressive_action(events, inplay=True, successful_only=True)
     Identify successful progressive actions from statsbomb-style event.
 
+half_space_actions(events, inplay=True, successful_only=True):
+    Identify successful half space actions from statsbomb-style event data.
+
 pre_shot_evts(events, t=5):
     Identify passes or carries that occur before a shot is taken
 
@@ -342,6 +345,50 @@ def progressive_action(events, inplay=True, successful_only=True):
 
     events_out.loc[prog_action.index, 'prog_action'] = 1
     
+    return events_out
+
+
+def half_space_actions(events, inplay=True, successful_only=True):
+    """ Identify successful half space actions from statsbomb-style event data.
+
+    Function to identify successful half space actions. A half space action is considered to be any event that either
+    starts from or ends in the half space. The function returns a dataframe with two additional columns that identify
+    events that either start in or finish in the half spaces.
+
+    Args:
+        events (pandas.DataFrame): dataframe of event data. Events can be from multiple matches.
+        inplay (bool, optional): selection of whether to include 'in-play' events only. True by default.
+        successful_only (bool, optional): selection of whether to only include successful passes. True by default
+
+    Returns:
+        pandas.DataFrame: events dataframe with additional half_space columns, identifying half space actions
+    """
+
+    # Initialise output dataframe
+    events_out = events.copy()
+    events_out['start_half_space'] = np.nan
+    events_out['end_half_space'] = np.nan
+
+    # Get potential progressive actions and their distance to goal
+    hs_action = events[events['type_name'].isin(['Pass', 'Carry', 'Shot', 'Dribble'])]
+
+    # Get half space start passes
+    hs_s_action = hs_action[(hs_action['x'] >= 60) & (hs_action['x'] <= 102) &
+                            (((hs_action['y'] >= 18) & (hs_action['y'] <= 29.4)) |
+                             ((hs_action['y'] >= 50.6) & (hs_action['y'] <= 62)))]
+    hs_e_action = hs_action[(hs_action['end_x'] >= 60) & (hs_action['end_x'] <= 102) &
+                            (((hs_action['end_y'] >= 18) & (hs_action['end_y'] <= 29.4)) |
+                             ((hs_action['end_y'] >= 50.6) & (hs_action['end_y'] <= 62)))]
+    if successful_only:
+        hs_s_action = hs_s_action[hs_s_action['outcome_name'] != hs_s_action['outcome_name']]
+        hs_e_action = hs_e_action[hs_e_action['outcome_name'] != hs_e_action['outcome_name']]
+    if inplay:
+        hs_s_action = hs_s_action[hs_s_action['in_play_event'] == 1]
+        hs_e_action = hs_e_action[hs_e_action['in_play_event'] == 1]
+
+    events_out.loc[hs_s_action.index, 'start_half_space'] = 1
+    events_out.loc[hs_e_action.index, 'end_half_space'] = 1
+
     return events_out
 
 
@@ -881,7 +928,7 @@ def long_ball_retention(events, player_name, player_team):
     return long_ball_received
 
 
-def analyse_ball_receipts(analysis_events, contextual_events, player_id):
+def analyse_ball_receipts(analysis_events, contextual_events, player_id=np.nan):
     """ Analyse player next actions after a ball is played to them.
 
     Function to analyse player next actions after a ball is played to them. A dataframe is created containing all
@@ -893,7 +940,7 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_id):
     Args:
         analysis_events (pandas.DataFrame): statsbomb-style events dataframe containing ball receipts to analyse, can be
         from multiple matches.
-        contextual_events (pandas.DataFrame): statsbomb-style events dataframe containing analysis_events and follow on
+        contextual_events (pandas.DataFrame): statsbomb-style events dataframe containing analysissofevents and follow on
         events.
         player_id (int): id of player receiving passes
 
@@ -902,7 +949,10 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_id):
     """
 
     # Filter out balls played to chosen player
-    ball_to_player = analysis_events[analysis_events['pass_recipient_id'] == player_id]
+    if player_id == player_id:
+        ball_to_player = analysis_events[analysis_events['pass_recipient_id'] == player_id].copy()
+    else:
+        ball_to_player = analysis_events.copy()
 
     contextual_events = contextual_events[(contextual_events['match_id'].isin(ball_to_player['match_id']
                                                                               .unique().tolist()))]
@@ -913,8 +963,8 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_id):
     for idx, ball_evt in ball_to_player.iterrows():
 
         # Get match, period, time and event index
-        evt_match, evt_period, evt_time, evt_index, evt_team = ball_evt[
-            ['match_id', 'period', 'cumulative_mins', 'index', 'team_id']]
+        evt_match, evt_period, evt_time, evt_index, evt_team, evt_player = ball_evt[
+            ['match_id', 'period', 'cumulative_mins', 'index', 'team_id', 'player_id']]
 
         # Obtain the following 20s worth of events
         following_evts = contextual_events[(contextual_events['match_id'] == evt_match) &
@@ -925,7 +975,7 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_id):
 
         # Get player ball receipt (first instance)
         ball_receipt = following_evts[(following_evts['type_name'] == 'Ball Receipt') &
-                                      (following_evts['player_id'] == player_id)].head(1)
+                                      (following_evts['player_id'] == evt_player)].head(1)
 
         # Initialise flags
         player_initial_carry = pd.DataFrame()
@@ -949,10 +999,10 @@ def analyse_ball_receipts(analysis_events, contextual_events, player_id):
 
                 # Check for an event that takes place at the same time as the ball receipt, and an event that takes
                 # place after the ball receipt
-                player_immed_evt = following_evts[(following_evts['player_id'] == player_id) &
+                player_immed_evt = following_evts[(following_evts['player_id'] == evt_player) &
                                                   (following_evts['cumulative_mins'] == receipt_time) &
                                                   (following_evts['type_name'] != "Ball Receipt")].head(1)
-                player_next_evt = following_evts[(following_evts['player_id'] == player_id) &
+                player_next_evt = following_evts[(following_evts['player_id'] == evt_player) &
                                                  (following_evts['cumulative_mins'] > receipt_time)].head(1)
 
                 # If there is an immediate event, flag headers from high balls

@@ -34,7 +34,8 @@ def get_competition_logo(competition, year=None, logo_brighten=False):
     url = None
 
     if competition in ['EPL', 'Premier League', 'GB1']:
-        url = "https://www.fifplay.com/img/public/premier-league-2-logo.png"
+        url = ("https://static.sport.optus.com.au/images/competition/PL.png" if logo_brighten else
+               "https://www.fifplay.com/img/public/premier-league-2-logo.png")
 
     if competition in ['EFLC', 'EFL Championship', 'Championship', 'GB2']:
         url = "https://brandlogos.net/wp-content/uploads/2022/07/efl_championship-logo_brandlogos.net_e58ej.png"
@@ -258,6 +259,9 @@ def get_team_badge_and_colour(team, hoa='home'):
     if team in ['Cardiff City', 'Cardiff', 'Cardiff FC', 'Cardiff City FC']:
         url = "https://cdn.cardiffcityfc.co.uk/icons/team/dark/1x/id/594.png"
         cmap = cm.get_cmap('Blues') if hoa == 'home' else cm.get_cmap('RdPu')
+
+    if team in ['Carlisle', 'Carlisle United', 'Carlisle FC']:
+        url = "https://carlisleunitedfootballclub-static.myshopblocks.com/images/2023/03/original/e982c0d05e9ddd85ef3c392aa5c424b4.png"
 
     if team in ['RC Celta de Vigo', 'RC Celta Vigo', 'Celta Vigo', 'RC Celta']:
         url = "https://img.uefa.com/imgml/TP/teams/logos/100x100/53043.png"
@@ -522,6 +526,9 @@ def get_team_badge_and_colour(team, hoa='home'):
         url = "https://logos-world.net/wp-content/uploads/2020/06/Newcastle-Logo-700x394.png"
         cmap = cm.get_cmap('Greys') if hoa == 'home' else cm.get_cmap('gray')
 
+    if team in ['Northampton', 'Northampton Town', 'Northapton FC', 'Northampton Town FC']:
+        url = "https://ntfcdirect.co.uk/NorthamptonTown/Photos/%7B8287A318-71C1-434C-B492-2F169D8DDDBD%7D/northampton.png"
+
     if team in ['Norwich', 'Norwich FC', 'Norwich City', 'Norwich City FC']:
         url = "https://assets.stickpng.com/images/580b57fcd9996e24bc43c4e9.png"
         cmap = cm.get_cmap('YlOrBr') if hoa == 'home' else cm.get_cmap('Reds')
@@ -672,6 +679,9 @@ def get_team_badge_and_colour(team, hoa='home'):
 
     if team in ['Stade Reims FC', 'Stade Reims', 'Reims']:
         url = "https://www.ligue1.com/-/media/Project/LFP/shared/Images/Clubs/2022-2023/41.png"
+
+    if team in ['Stevenage', 'Stevenage FC']:
+        url = "https://b.fssta.com/uploads/application/soccer/team-logos/stevenage.vresize.350.350.medium.0.png"
 
     if team in ['Stoke City', 'Stoke City FC', 'Stoke', 'Stoke FC']:
         url = "https://upload.wikimedia.org/wikipedia/en/thumb/2/29/Stoke_City_FC.svg/415px-Stoke_City_FC.svg.png"

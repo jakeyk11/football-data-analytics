@@ -51,10 +51,10 @@ import analysis_tools.logos_and_badges as lab
 # %% User inputs
 
 # Select year
-year = '2022'
+year = '2023'
 
 # Select league (EPL, La_Liga, Bundesliga, Serie_A, Ligue_1, RFPL)
-league = 'UCL'
+league = 'EFLC'
 
 # Select position to exclude
 pos_exclude=['GK']
@@ -63,19 +63,19 @@ pos_exclude=['GK']
 pos_input = 'outfield players'
 
 # Input run-date
-run_date = '11/06/2023'
+run_date = '09/09/2023'
 
 # Normalisation mode
 norm_mode = '_90'
 
 # Min minutes played (only used if normalising)
-min_mins = 360
+min_mins = 270
 
 # Brighten logo
-logo_brighten = True
+logo_brighten = False
 
 # Threat pitch grid mode (3 = top 3, else = top 1. dense = dense grid, else = sparse grid)
-pitch_mode = '3'
+pitch_mode = '1'
 grid_density = 'sparse'
 
 # %% League logo and league naming
@@ -125,7 +125,7 @@ events_df['box_entry'] = events_df.apply(wce.box_entry, axis=1, inplay = True, s
 playerinfo_df = wde.create_player_list(players_df)
 
 # Sum mins played for each player, into new dataframe
-playerinfo_mp = playerinfo_df.groupby(by='playerId', axis=0).sum()
+playerinfo_mp = playerinfo_df.groupby(by='playerId', axis=0).sum(numeric_only=True)
 
 # Retain the player entry against the club he's played the most minutes for
 playerinfo_df = playerinfo_df.sort_values('mins_played', ascending = False)
@@ -138,21 +138,19 @@ playerinfo_df = playerinfo_df.drop('mins_played', axis=1).join(playerinfo_mp)
 
 # Carries and total xT
 all_carries = events_df[events_df['eventType']=='Carry']
-playerinfo_df = wde.group_player_events(all_carries, playerinfo_df, primary_event_name='carries')
-playerinfo_df = wde.group_player_events(all_carries, playerinfo_df, group_type='sum', event_types = ['xThreat', 'xThreat_gen'])
-playerinfo_df.rename(columns = {'xThreat':'xThreat_carry','xThreat_gen':'xThreat_gen_carry'}, inplace=True)
+playerinfo_df = wde.group_player_events(all_carries, playerinfo_df, col_names='carries')
+playerinfo_df = wde.group_player_events(all_carries, playerinfo_df, group_type='sum', agg_columns = ['xThreat', 'xThreat_gen'], col_names=['xThreat_carry', 'xThreat_gen_carry'])
 
 # Passes and total xT
 all_passes = events_df[(events_df['eventType']=='Pass') & (~events_df['satisfiedEventsTypes'].apply(lambda x: 31 in x or 32 in x or 33 in x or 34 in x or 212 in x))]
-playerinfo_df = wde.group_player_events(all_passes, playerinfo_df, primary_event_name='passes')
-playerinfo_df = wde.group_player_events(all_passes, playerinfo_df, group_type='sum', event_types = ['xThreat', 'xThreat_gen'])
-playerinfo_df.rename(columns = {'xThreat':'xThreat_pass','xThreat_gen':'xThreat_gen_pass'}, inplace=True)
+playerinfo_df = wde.group_player_events(all_passes, playerinfo_df, col_names='passes')
+playerinfo_df = wde.group_player_events(all_passes, playerinfo_df, group_type='sum', agg_columns = ['xThreat', 'xThreat_gen'], col_names=['xThreat_pass', 'xThreat_gen_pass'])
 
 # Box entries and progresive actions
-playerinfo_df = wde.group_player_events(all_passes[all_passes['box_entry']==True], playerinfo_df, primary_event_name='pass_into_box')
-playerinfo_df = wde.group_player_events(all_carries[all_carries['box_entry']==True], playerinfo_df, primary_event_name='carry_into_box')
-playerinfo_df = wde.group_player_events(all_passes[all_passes['progressive']==True], playerinfo_df, primary_event_name='progressive_pass')
-playerinfo_df = wde.group_player_events(all_carries[all_carries['progressive']==True], playerinfo_df, primary_event_name='progressive_carry')
+playerinfo_df = wde.group_player_events(all_passes[all_passes['box_entry']==True], playerinfo_df, col_names='pass_into_box')
+playerinfo_df = wde.group_player_events(all_carries[all_carries['box_entry']==True], playerinfo_df, col_names='carry_into_box')
+playerinfo_df = wde.group_player_events(all_passes[all_passes['progressive']==True], playerinfo_df, col_names='progressive_pass')
+playerinfo_df = wde.group_player_events(all_carries[all_carries['progressive']==True], playerinfo_df, col_names='progressive_carry')
 
 # Aggregate carries
 playerinfo_df['carries_90'] = round(90*playerinfo_df['carries']/playerinfo_df['mins_played'],2)
@@ -184,8 +182,10 @@ for player_id, player_details in playerinfo_df.iterrows():
     player_events = all_threat_events[all_threat_events['playerId']==player_id]
     bin_statistic = pitch.bin_statistic(player_events['x'], player_events['y'],
                                         statistic='sum', bins=(12, 10) if grid_density == 'dense' else (6, 5) , normalize=False, values = player_events['xThreat_gen'])
-    bin_statistic['statistic'] = 90*(bin_statistic['statistic']/player_details['mins_played'])
-    
+    if player_details['mins_played'] != 0:
+        bin_statistic['statistic'] = 90*bin_statistic['statistic'] / player_details['mins_played']
+    else:
+        bin_statistic['statistic'] = np.zeros(bin_statistic['statistic'].shape)
     for idx, zone_threat in enumerate(bin_statistic['statistic'].reshape(-1, order = 'F')):
         playerinfo_df.loc[player_id, f'zone_{idx}_xT' ] = zone_threat
 
@@ -218,8 +218,8 @@ right_ax_norm_plot = 0.99 * right_ax_plot / max(right_ax_plot)
 left_ax_quantile = left_ax_norm_plot.quantile([0.2,0.5,0.8]).tolist()
 right_ax_quantile = right_ax_norm_plot.quantile([0.2,0.5,0.8]).tolist()
 
-plot_quantile_left = left_ax_norm_plot.quantile([0,0.5,0.95]).tolist()
-plot_quantile_right = right_ax_norm_plot.quantile([0,0.5,0.95]).tolist()
+plot_quantile_left = left_ax_norm_plot.quantile([0,0.5,0.9]).tolist()
+plot_quantile_right = right_ax_norm_plot.quantile([0,0.5,0.9]).tolist()
 plot_player = playerinfo_df[(left_ax_norm_plot>plot_quantile_left[2]) | (right_ax_norm_plot>plot_quantile_right[2])]
 
 #plot_player = playerinfo_df[playerinfo_df['team']=='Man Utd']
@@ -420,7 +420,7 @@ for idx in np.arange(0, len(bin_statistic['statistic'].reshape(-1))):
     else:
         player_name = playerinfo_df.head(1)['name'].values[0]
         format_name = player_name.split(' ')[0][0] + ". " + player_name.split(' ')[len(player_name.split(' '))-1] if len(player_name.split(' '))>1 else player_name
-        format_name = format_name if len(format_name) <= 13 else format_name[0:13] + '\n' + format_name[13:]
+        format_name = format_name if len(format_name) <= 14 else format_name[0:14] + '\n' + format_name[14:]
         format_text = format_name + '\n' + 'xT: ' +str(round(playerinfo_df.head(1)[f'zone_{idx}_xT'].values[0],3))
         team_logo, _ = lab.get_team_badge_and_colour(playerinfo_df.head(1)['team'].values[0])
         title_plural = ''

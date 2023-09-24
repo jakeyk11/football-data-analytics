@@ -16,14 +16,14 @@ import analysis_tools.get_football_data as gfd
 # %% User inputs
 
 # Input first and last match id to obtain data from
-match_id_start = 1731631
-match_id_end = 1731632
+match_id_start = 1729275
+match_id_end = 1729293
 
 # Input year folder
 year = '2023'
 
 # Input league folder
-league = 'EFLC'
+league = 'EPL'
 
 # %% Set-up file path and match ids
 match_ids = np.arange(match_id_start, match_id_end+1)

@@ -375,7 +375,7 @@ def create_player_list(lineups, additional_cols=None, pass_extra=None):
     return playerinfo_df
 
 
-def group_player_events(events, player_data, group_type='count', agg_columns=None, primary_event_name='Column Name'):
+def group_player_events(events, player_data, group_type='count', agg_columns=None, col_names='Column Name'):
     """ Aggregate event types per player, and add to player information dataframe
 
     Function to read a whoscored-style events dataframe (single or multiple matches) and return a dataframe of
@@ -386,17 +386,20 @@ def group_player_events(events, player_data, group_type='count', agg_columns=Non
         events (pandas.DataFrame): whoscored-style dataframe of event data. Events can be from multiple matches.
         player_data (pandas.DataFrame): whoscored-style dataframe of player information. Must include a 'name' column.
         group_type (string, optional): aggregation method, can be set to 'sum' or 'count'. 'count' by default.
-        agg_columns (list, optional): list of columns in event to aggregate, additional to the main aggregation event.
-        primary_event_name (string, optional): name of main event type being aggregated (e.g. 'pass'). Used to name the
-                                           aggregated column within player_data dataframe.
+        agg_columns (list or string, optional): list of columns in event to aggregate, additional to the main
+                                                aggregation event.
+        col_names (list or string, optional): name of main event type being aggregated (e.g. 'pass'). Used to
+                                                        name the aggregated column within player_data dataframe.
 
     Returns:
         pandas.DataFrame: statsbomb-style dataframe of player information, including aggregated data.
     """
 
-    # Specify event_types as list if not assigned
+    # Specify agg_columns as list if not assigned
     if agg_columns is None:
         agg_columns = list()
+    elif type(agg_columns) == str:
+        agg_columns = [agg_columns]
 
     # Initialise output dataframe
     player_data_out = player_data.copy()
@@ -405,7 +408,7 @@ def group_player_events(events, player_data, group_type='count', agg_columns=Non
     if group_type == 'count':
         grouped_events = events.groupby('playerId', axis=0).count()
         selected_events = grouped_events[agg_columns].copy()
-        selected_events.loc[:, primary_event_name] = grouped_events['match_id']
+        selected_events.loc[:, col_names] = grouped_events['match_id']
     elif group_type == 'sum':
         grouped_events = events.groupby('playerId', axis=0).sum(numeric_only=True)
         selected_events = grouped_events[agg_columns].copy()
@@ -417,11 +420,14 @@ def group_player_events(events, player_data, group_type='count', agg_columns=Non
 
     # Merge into player information dataframe
     player_data_out = player_data_out.merge(selected_events, left_on='playerId', right_index=True, how='left')
+    if type(col_names) == str:
+        col_names = [col_names]
     if agg_columns != list() and group_type in ['sum', 'mean']:
-        player_data_out = player_data_out.rename(columns={agg_columns: primary_event_name})
+        for idx in np.arange(len(agg_columns)):
+            player_data_out = player_data_out.rename(columns={agg_columns[idx]: col_names[idx]})
 
     # Remove nulls and replace with 0
-    player_data_out[primary_event_name] = player_data_out[primary_event_name].fillna(0)
+    player_data_out[col_names] = player_data_out[col_names].fillna(0)
 
     return player_data_out
 
