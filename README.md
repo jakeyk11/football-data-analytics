@@ -52,19 +52,21 @@ The tree below (click drop-down to expand) presents the folder structure of this
     ├── projects
     │   ├── 00_data_import_and_misc_work
     │   │   ├── download_yt_video.py 
+    │   │   ├── import_data_fbref.py
+    │   │   ├── import_data_leaguetable.py
     │   │   ├── import_data_whoscored.py
-    │   │   ├── saudi_arabia_argentina_world_cup_def_actions.py 
     │   │   ├── scrape_data_transfermarkt.py
+    │   │   ├── misc_work
     │   ├── 01_wc2018_box2box_mids_statsbomb
     │   │   ├── worldcup_b2b_mids.py
     │   ├── 02_player_team_valuation_transfermarkt
-    │   │   ├── championship_forward_value_analysis.py
-    │   │   ├── premierleague_forward_value_analysis.py
+    │   │   ├── team_player_value_analysis.py
     │   ├── 03_xg_modelling_wyscout
     │   │   ├── shot_xg_plot.py
     │   │   ├── xg_log_regression_model.py
     │   │   ├── xg_neural_network.py  
     │   ├── 04_match_reports_opta
+    │   │   ├── off_def_shape_report_ws.py
     │   │   ├── pass_report_ws.py
     │   │   ├── shot_report_understat.py     
     │   ├── 05_competition_reports_top_players_opta
@@ -74,16 +76,27 @@ The tree below (click drop-down to expand) presents the folder structure of this
     │   │   ├── player_high_defensive_actions.py    
     │   │   ├── player_penalty_takers.py
     │   │   ├── player_threat_creators.py
+    │   │   ├── player_threat_creators_zonal_comparison.py
     │   ├── 06_competition_reports_top_teams_opta
     │   │   ├── team_ball_winning.py
+    │   │   ├── team_common_zonal_actions.py
     │   │   ├── team_cross_success.py   
     │   │   ├── team_delta_threat_creation.py
     │   │   ├── team_fullback_combinations.py
     │   │   ├── team_setpiece_shot_concession.py
     │   │   ├── team_threat_creation.py
     │   ├── 07_player_reports_opta
+    │   │   ├── advanced_swarm_radar.py
     │   │   ├── player_report_fullback.py
-    │ 
+    │   ├── 08_evolution_of_shooting_opta
+    │   │   ├── shot_characteristic_trending.py
+    │   ├── 09_league_position_metric_correlation_opta
+    │   │   ├── team_metric_pts_correlation.py
+    │   ├── 10_team_buildup_passes
+    │   │   ├── pass_cluster_data_collection.py
+    │   │   ├── team_pass_tendencies.py
+    │   ├── 99_private_work
+
     ├── .gitignore
     |
     ├── Getting Started with Football Analytics.md
