@@ -34,6 +34,7 @@ The tree below (click drop-down to expand) presents the folder structure of this
     │   ├── __init__.py
     │   ├── get_football_data.py [not included in git repo]
     │   ├── logos_and_badges.py
+    │   ├── models.py    
     │   ├── pitch_zones.py
     │   ├── statsbomb_custom_events.py
     │   ├── statsbomb_data_engineering.py
@@ -42,12 +43,20 @@ The tree below (click drop-down to expand) presents the folder structure of this
     │   ├── wyscout_data_engineering.py   
     │ 
     ├── data_directory
+    │   ├── leaguetable_data
     │   ├── misc_data
+    │   │   ├── articles
     │   │   ├── images
     │   ├── statsbomb_data [contents not included in git repo]
     │   ├── transfermarkt_data
     │   ├── whoscored_data [contents not included in git repo]
     │   ├── wyscout_data
+    │ 
+    ├── model_directory
+    │   ├── pass_cluster_model
+    │   │   ├── PassClusterModel65.joblib
+    │   ├── xg_model
+    │   │   ├── log_regression_xg_model.joblib
     │
     ├── projects
     │   ├── 00_data_import_and_misc_work
@@ -57,27 +66,29 @@ The tree below (click drop-down to expand) presents the folder structure of this
     │   │   ├── import_data_whoscored.py
     │   │   ├── scrape_data_transfermarkt.py
     │   │   ├── misc_work
-    │   ├── 01_wc2018_box2box_mids_statsbomb
+    │   ├── 01_wc2018_box2box_mids
     │   │   ├── worldcup_b2b_mids.py
-    │   ├── 02_player_team_valuation_transfermarkt
+    │   ├── 02_player_team_valuation
     │   │   ├── team_player_value_analysis.py
-    │   ├── 03_xg_modelling_wyscout
+    │   ├── 03_model_development_and_implementation
+    │   │   ├── pass_cluster_data_collection.py
     │   │   ├── shot_xg_plot.py
     │   │   ├── xg_log_regression_model.py
     │   │   ├── xg_neural_network.py  
-    │   ├── 04_match_reports_opta
+    │   ├── 04_match_reports
     │   │   ├── off_def_shape_report_ws.py
     │   │   ├── pass_report_ws.py
     │   │   ├── shot_report_understat.py     
-    │   ├── 05_competition_reports_top_players_opta
+    │   ├── 05_competition_reports_top_players
     │   │   ├── player_defensive_contribution.py
     │   │   ├── player_effective_carriers.py
     │   │   ├── player_effective_passers.py
     │   │   ├── player_high_defensive_actions.py    
+    │   │   ├── player_impact_on_team.py    
     │   │   ├── player_penalty_takers.py
     │   │   ├── player_threat_creators.py
     │   │   ├── player_threat_creators_zonal_comparison.py
-    │   ├── 06_competition_reports_top_teams_opta
+    │   ├── 06_competition_reports_top_teams
     │   │   ├── team_ball_winning.py
     │   │   ├── team_common_zonal_actions.py
     │   │   ├── team_cross_success.py   
@@ -85,20 +96,22 @@ The tree below (click drop-down to expand) presents the folder structure of this
     │   │   ├── team_fullback_combinations.py
     │   │   ├── team_setpiece_shot_concession.py
     │   │   ├── team_threat_creation.py
-    │   ├── 07_player_reports_opta
+    │   │   ├── xg_league_table_sb.py    
+    │   ├── 07_player_reports
     │   │   ├── advanced_swarm_radar.py
     │   │   ├── player_report_fullback.py
-    │   ├── 08_evolution_of_shooting_opta
-    │   │   ├── shot_characteristic_trending.py
-    │   ├── 09_league_position_metric_correlation_opta
+    │   ├── 08_evolution_of_shooting
+    │   │   ├── shot_characteristics_trending.py
+    │   ├── 09_league_position_metric_correlation
     │   │   ├── team_metric_pts_correlation.py
     │   ├── 10_team_buildup_passes
-    │   │   ├── pass_cluster_data_collection.py
     │   │   ├── team_pass_tendencies.py
+    │   ├── 11_justice_league
+    │   │   ├── justice_league.py
     │   ├── 99_private_work
-
+    │
     ├── .gitignore
-    |
+    │
     ├── Getting Started with Football Analytics.md
     │     
     ├── LICENSE 
@@ -135,9 +148,9 @@ Projects are numbered based on the numerical identifier of the project folder ar
 \
 **Data Source:** Statsbomb & FIFA Match Reports
 
-**Project Area:** [01_wc2018_box2box_mids_statsbomb](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/01_wc2018_box2box_mids_statsbomb)
+**Project Area:** [01_wc2018_box2box_mids](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/01_wc2018_box2box_mids)
 
-**Code:** [worldcup_b2b_mids.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/01_wc2018_box2box_mids_statsbomb/worldcup_b2b_mids.py)
+**Code:** [worldcup_b2b_mids.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/01_wc2018_box2box_mids/worldcup_b2b_mids.py)
 
 **Summary and Output:** An investigation of the most effective box to box midfielders at the 2018 World Cup. A number of custom metrics are used to score central midfielders in ball winning, ball retention & creativity, and mobility. A good box to box midfielder is defined as a central midfielder that excels in each of these areas.
 
@@ -159,9 +172,9 @@ Projects are numbered based on the numerical identifier of the project folder ar
 \
 **Data Source:** Transfermarkt
 
-**Project Area:** [00_data_import_and_misc_work](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/00_data_import_and_misc_work) & [02_player_team_valuation_transfermarkt](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/02_player_team_valuation_transfermarkt)
+**Project Area:** [00_data_import_and_misc_work](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/00_data_import_and_misc_work) & [02_player_team_valuation](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/02_player_team_valuation)
 
-**Code:** [scrape_data_transfermarkt.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/00_data_import_and_misc_work/scrape_data_transfermarkt.py) & [team_player_value_analysis.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation_transfermarkt/team_player_value_analysis.py)
+**Code:** [scrape_data_transfermarkt.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/00_data_import_and_misc_work/scrape_data_transfermarkt.py) & [team_player_value_analysis.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation/team_player_value_analysis.py)
 
 **Summary and Output:** 
 Development of a tool to scrape team and player market value information from transfermarkt.co.uk. Generation of a "scouting visual" that highlights players from a given league with a favourable combination of Age and Goal Contribution per £m market value. The work also explores the use of statistical models to predict market value based on player performance.
@@ -183,9 +196,9 @@ Development of a tool to scrape team and player market value information from tr
 \
 **Data Source:** Transfermarkt
 
-**Project Area:** [00_data_import_and_misc_work](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/00_data_import_and_misc_work) & [02_player_team_valuation_transfermarkt](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/02_player_team_valuation_transfermarkt)
+**Project Area:** [00_data_import_and_misc_work](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/00_data_import_and_misc_work) & [02_player_team_valuation](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/02_player_team_valuation)
 
-**Code:** [scrape_data_transfermarkt.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/00_data_import_and_misc_work/scrape_data_transfermarkt.py) & [team_player_value_analysis.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation_transfermarkt/team_player_value_analysis.py)
+**Code:** [scrape_data_transfermarkt.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/00_data_import_and_misc_work/scrape_data_transfermarkt.py) & [team_player_value_analysis.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/02_player_team_valuation/team_player_value_analysis.py)
 
 **Summary and Output:** 
 Development of a tool to scrape team and player market value information from transfermarkt.co.uk. Investigation of team under/over-performance based on league ranking and total squad value ranking.
@@ -197,7 +210,7 @@ Development of a tool to scrape team and player market value information from tr
 
 </details>
 
-### 3 - Model Development
+### 3 - Model Development and Implementation
 
 <details>
 <summary>3.1 - Expected Goals Modelling</summary>
@@ -205,9 +218,9 @@ Development of a tool to scrape team and player market value information from tr
 \
 **Data Source:** Wyscout
 
-**Project Area:** [03_xg_modelling_wyscout](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/03_xg_modelling_wyscout)
+**Project Area:** [model_directory](https://github.com/jakeyk11/football-data-analytics/tree/main/model_directory/xg_model) & [03_model_development_and_implementation](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/03_model_development_and_implementation)
 
-**Code:** [xg_log_regression_model.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/03_xg_modelling_wyscout/xg_log_regression_model.py), [xg_neural_network.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/03_xg_modelling_wyscout/xg_neural_network.py) & [shot_xg_plot.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/03_xg_modelling_wyscout/shot_xg_plot.py)
+**Code:** [xg_log_regression_model.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/03_model_development_and_implementation/xg_log_regression_model.py), [xg_neural_network.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/03_model_development_and_implementation/xg_neural_network.py) & [shot_xg_plot.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/03_model_development_and_implementation/shot_xg_plot.py)
 
 **Summary and Output:** 
 Implementation and testing of basic expected goals probabilistic models. This work includes development and comparison of a logistic regression expected goals model and a neural network expected goals model, each trained off over 40000 shots taken across Europe's 'big five' leagues during the 2017/2018 season. The models are used to calculate expected goals for specific players, clubs and leagues over a defined time period.
@@ -232,9 +245,9 @@ Implementation and testing of basic expected goals probabilistic models. This wo
 \
 **Data Source:** Understat
 
-**Project Area:** [04_match_reports_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/04_match_reports_opta)
+**Project Area:** [04_match_reports](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/04_match_reports)
 
-**Code:** [shot_report_understat.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/04_match_reports_opta/shot_report_understat.py)
+**Code:** [shot_report_understat.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/04_match_reports/shot_report_understat.py)
 
 **Summary and Output:** 
 Development of a script to extract shot data from understat and generate shot reports for a any selected match.
@@ -252,9 +265,9 @@ Development of a script to extract shot data from understat and generate shot re
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [04_match_reports_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/04_match_reports_opta)
+**Project Area:** [04_match_reports](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/04_match_reports)
 
-**Code:** [pass_report_ws.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/04_match_reports_opta/pass_report_ws.py)
+**Code:** [pass_report_ws.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/04_match_reports/pass_report_ws.py)
 
 **Summary and Output:** 
 Design and development of an algorithm that identifies and counts similar passes based on the area of the pitch in which they start and finish. Generation of inter-zone pass flow reports for any selected match. 
@@ -272,9 +285,9 @@ Design and development of an algorithm that identifies and counts similar passes
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [04_match_reports_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/04_match_reports_opta)
+**Project Area:** [04_match_reports](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/04_match_reports)
 
-**Code:** [pass_report_ws.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/04_match_reports_opta/pass_report_ws.py)
+**Code:** [pass_report_ws.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/04_match_reports/pass_report_ws.py)
 
 **Summary and Output:** 
 Design and development of an algorithm to calculate player territories based on the positions of all in-play actions throughout a match, including removal of outliers. Generation of territory reports for any selected match, including calculation of territory area as a proxy for pitch area covered.
@@ -294,9 +307,9 @@ Design and development of an algorithm to calculate player territories based on 
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [05_competition_reports_top_players_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players_opta)
+**Project Area:** [05_competition_reports_top_players](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players)
 
-**Code:** [player_defensive_contribution.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_defensive_contribution.py)
+**Code:** [player_defensive_contribution.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players/player_defensive_contribution.py)
 
 **Summary and Output:** 
 Assessment of all players' defensive contribution over the duration of a competition, with identification of top players by metrics such as Recoveries and Ball Wins per 100 opposition touches. Work includes implentation of a diamond scatter diagram that can be re-used for any 2D scatter plot.
@@ -314,9 +327,9 @@ Assessment of all players' defensive contribution over the duration of a competi
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [05_competition_reports_top_players_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players_opta)
+**Project Area:** [05_competition_reports_top_players](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players)
 
-**Code:** [player_defensive_contribution.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_defensive_contribution.py)
+**Code:** [player_defensive_contribution.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players/player_defensive_contribution.py)
 
 **Summary and Output:** 
 Assessment of the number of defensive actions completed in the opposition third by all players' over the duration of a competition, giving an indication at who has a tendency to defend from the front.
@@ -334,9 +347,9 @@ Assessment of the number of defensive actions completed in the opposition third 
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [05_competition_reports_top_players_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players_opta)
+**Project Area:** [05_competition_reports_top_players](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players)
 
-**Code:** [player_effective_passers.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_effective_passers.py)
+**Code:** [player_effective_passers.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players/player_effective_passers.py)
 
 **Summary and Output:** 
 Identification of effective passers through assessment of all in-play passes completed over the duration of a competition. Metrics such as progressive passes, cumulative expected threat and passes into opposition box per 90 are used to identify top players. This work involves the implementation of an [expected threat model](https://karun.in/blog/data/open_xt_12x8_v1.json) developed by Karun Singh.
@@ -357,9 +370,9 @@ Identification of effective passers through assessment of all in-play passes com
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [05_competition_reports_top_players_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players_opta)
+**Project Area:** [05_competition_reports_top_players](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players)
 
-**Code:** [player_effective_carriers.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_effective_carriers.py)
+**Code:** [player_effective_carriers.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players/player_effective_carriers.py)
 
 **Summary and Output:** 
 Identification of effective carriers through assessment of carries completed over the duration of a competition. This work involves the development of a module to infer carry events from opta event data (as carries are not recorded).
@@ -377,9 +390,9 @@ Identification of effective carriers through assessment of carries completed ove
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [05_competition_reports_top_players_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players_opta)
+**Project Area:** [05_competition_reports_top_players](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players)
 
-**Code:** [player_effective_carriers.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_threat_creators.py)
+**Code:** [player_effective_carriers.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players/player_threat_creators.py)
 
 **Summary and Output:** 
 Identification of top threat creators through assessment of various events/actions completed over the duration of a competition within different areas of the pitch. This work involves the implementation of an [expected threat model](https://karun.in/blog/data/open_xt_12x8_v1.json) developed by Karun Singh.
@@ -401,9 +414,9 @@ Identification of top threat creators through assessment of various events/actio
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [05_competition_reports_top_players_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players_opta)
+**Project Area:** [05_competition_reports_top_players](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players)
 
-**Code:** [player_threat_creators.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players_opta/player_penalty_takers.py)
+**Code:** [player_threat_creators.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players/player_penalty_takers.py)
 
 **Summary and Output:** 
 Identification of top penalty takers across multiple competitions. Penalty quality is assessed my mean distance of on-target penalty from goalkeeper midriff, with off-target penalties assigned a distance of zero. This work includes implementation of "3D projections" within 2D subplots.
@@ -423,9 +436,9 @@ Identification of top penalty takers across multiple competitions. Penalty quali
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [06_competition_reports_top_teams_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams_opta)
+**Project Area:** [06_competition_reports_top_teams](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams)
 
-**Code:** [team_threat_creation.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams_opta/team_threat_creation.py)
+**Code:** [team_threat_creation.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams/team_threat_creation.py)
 
 **Summary and Output:** 
 Ranking of teams by total threat created through in-play passes and carries per 90, including identification of the zones in which each team generates threat.
@@ -443,9 +456,9 @@ Ranking of teams by total threat created through in-play passes and carries per 
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [06_competition_reports_top_teams_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams_opta)
+**Project Area:** [06_competition_reports_top_teams](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams)
 
-**Code:** [team_ball_winning.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams_opta/team_ball_winning.py)
+**Code:** [team_ball_winning.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams/team_ball_winning.py)
 
 **Summary and Output:** 
 Ranking of teams by the mean height up the pitch that they win the ball back, including identification of the zones in which they gain possession of the ball from the opposition.
@@ -463,9 +476,9 @@ Ranking of teams by the mean height up the pitch that they win the ball back, in
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [06_competition_reports_top_teams_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams_opta)
+**Project Area:** [06_competition_reports_top_teams](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams)
 
-**Code:** [team_cross_success.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams_opta/team_cross_success.py)
+**Code:** [team_cross_success.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams/team_cross_success.py)
 
 **Summary and Output:** 
 Ranking of teams by in-play cross success rate. This work includes a custom definition of an effective (or successful) cross, where an effective cross is one that is followed by either a shot or key pass within 5 seconds of play (irrespective of the inital cross outcome).
@@ -482,9 +495,9 @@ Ranking of teams by in-play cross success rate. This work includes a custom defi
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [06_competition_reports_top_teams_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams_opta)
+**Project Area:** [06_competition_reports_top_teams](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams)
 
-**Code:** [team_fullback_combinations.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams_opta/team_fullback_combinations.py)
+**Code:** [team_fullback_combinations.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams/team_fullback_combinations.py)
 
 **Summary and Output:** 
 Ranking of teams by the frequency in which their full backs combine. Passes between full-backs of each team are identified and highlighted based on whether the pass leads to a shot on goal.
@@ -501,9 +514,9 @@ Ranking of teams by the frequency in which their full backs combine. Passes betw
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [06_competition_reports_top_teams_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams_opta)
+**Project Area:** [06_competition_reports_top_teams](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams)
 
-**Code:** [team_delta_threat_creation.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams_opta/team_delta_threat_creation.py)
+**Code:** [team_delta_threat_creation.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams/team_delta_threat_creation.py)
 
 **Summary and Output:** 
 Ranking of teams by improvement in total threat created through in-play passes and carries per 90 - current season vs. last season. Includes accounting for teams that were in division above or below in previous year. Change in threat creation is also broken down by pitch zone
@@ -521,9 +534,9 @@ Ranking of teams by improvement in total threat created through in-play passes a
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [06_competition_reports_top_teams_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams_opta)
+**Project Area:** [06_competition_reports_top_teams](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams)
 
-**Code:** [team_setpiece_shot_concession.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams_opta/team_setpiece_shot_concession.py)
+**Code:** [team_setpiece_shot_concession.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams/team_setpiece_shot_concession.py)
 
 **Summary and Output:** 
 Investigation of team's ability to defend set-pieces through aggregating chances conceded within 5 seconds of an opposition "indirect" set-piece. "Indirect" set-pieces refer to corner and free-kicks where the ball remains in play after the set-piece is taken, therefore off-target free-kicks and direct goals from set-pieces are excluded from the analysis.
@@ -543,9 +556,9 @@ Investigation of team's ability to defend set-pieces through aggregating chances
 \
 **Data Source:** Opta/Whoscored
 
-**Project Area:** [07_player_reports_opta](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/07_player_reports_opta)
+**Project Area:** [07_player_reports](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/07_player_reports)
 
-**Code:** [player_report_fullback.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/07_player_reports_opta/player_report_fullback.py)
+**Code:** [player_report_fullback.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/07_player_reports/player_report_fullback.py)
 
 **Summary and Output:** 
 Player report specific to full-backs, including development of a flexible/robust mechanism to compare the report subject to similar players, and then rank the set of players against all full-backs within a chosen league.
