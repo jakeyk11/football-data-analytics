@@ -25,6 +25,9 @@ create_team_list(lineups):
 
 group_team_events(events, team_info, group_type='count', agg_columns=None, primary_event_name='Column Name'):
     Aggregate event types per team, and add to team information dataframe.
+
+create_league_table(matches, xmetrics=False):
+    Create a league table from statsbomb-style matches dataframe
 """
 
 import numpy as np
@@ -725,3 +728,64 @@ def group_team_events(events, team_info, group_type='count', agg_columns=None, p
     team_info_out[primary_event_name] = team_info_out[primary_event_name].fillna(0)
 
     return team_info_out
+
+
+def create_league_table(matches, xmetrics=False):
+    """ Create a league table from statsbomb-style matches dataframe
+
+    Function to read a statsbomb-style matches dataframe and return a dataframe that represents the league table. An
+    expected league table can be returned provided expected points modelling has been undertaken and the user specifies
+    type = 'expected'.
+
+    Args:
+        matches (pandas.DataFrame): statsbomb-style dataframe of matches
+        xmetrics (bool, optional): include expected metrics in league table. Defaults to False.
+    Returns:
+        pandas.DataFrame: league table
+    """
+
+    # Initialise output dataframe
+    leaguetable = pd.DataFrame()
+    matches_out = matches.copy()
+
+    # Add teams to league table
+    leaguetable['team'] = sorted(list(set(matches_out['home_team'].values.tolist() +
+                                          matches_out['away_team'].values.tolist())))
+
+    # Calculate home and away points based on matches dataframe
+    matches_out['home_points'] = (matches_out[['home_score', 'away_score']]
+                                  .apply(lambda x: 3 if x[0] > x[1] else 1 if x[0] == x[1] else 0, axis=1))
+    matches_out['away_points'] = (matches_out[['home_score', 'away_score']]
+                                  .apply(lambda x: 3 if x[0] < x[1] else 1 if x[0] == x[1] else 0, axis=1))
+
+    # Add information to league table dataframe
+    leaguetable['matches_played'] = (matches_out.groupby('home_team').count()['match_id'] +
+                                     matches_out.groupby('away_team').count()['match_id']).values
+    leaguetable['points'] = (matches_out.groupby('home_team').sum(numeric_only=True)['home_points'] +
+                             matches_out.groupby('away_team').sum(numeric_only=True)['away_points']).values
+    leaguetable['goals_for'] = (matches_out.groupby('home_team').sum(numeric_only=True)['home_score'] +
+                                matches_out.groupby('away_team').sum(numeric_only=True)['away_score']).values
+    leaguetable['goals_against'] = (matches_out.groupby('home_team').sum(numeric_only=True)['away_score'] +
+                                    matches_out.groupby('away_team').sum(numeric_only=True)['home_score']).values
+    leaguetable['goal_difference'] = leaguetable['goals_for'] - leaguetable['goals_against']
+    leaguetable['position'] = (leaguetable[['points', 'goal_difference', 'goals_for']].apply(tuple, axis=1)
+                               .rank(method='min', ascending=False).astype(int))
+
+    # Add expected information to league table dataframe if parameter is passed
+    if xmetrics:
+
+        leaguetable['xg_for'] = (matches_out.groupby('home_team').sum(numeric_only=True)['home_xg'] +
+                                 matches_out.groupby('away_team').sum(numeric_only=True)['away_xg']).values
+        leaguetable['xg_against'] = (matches_out.groupby('home_team').sum(numeric_only=True)['away_xg'] +
+                                     matches_out.groupby('away_team').sum(numeric_only=True)['home_xg']).values
+        leaguetable['xg_difference'] = leaguetable['xg_for'] - leaguetable['xg_against']
+        leaguetable['expected_points'] = (matches_out.groupby('home_team').sum(numeric_only=True)['home_xpoints'] +
+                                          matches_out.groupby('away_team').sum(numeric_only=True)['away_xpoints']).values
+        leaguetable['expected_position'] = (leaguetable[['expected_points', 'xg_difference', 'xg_for']]
+                                            .apply(tuple, axis=1).rank(method='min', ascending=False).astype(int))
+        leaguetable = leaguetable.sort_values('expected_position')
+
+    else:
+        leaguetable = leaguetable.sort_values('position')
+
+    return leaguetable

@@ -5,11 +5,17 @@ Functions
 get_pass_clusters(events):
     Assign statsbomb or whoscored pass events to a pass cluster
 
+simulate_match_outcome(events, matches, match_id, sim_count=10000):
+    Simulate the outcome of a match based on teams xG
+
+
 """
 
 import joblib
 from sklearn.base import BaseEstimator, TransformerMixin
 import os
+import numpy as np
+import pandas as pd
 
 
 # Load custom classes that are required for model pipeline (done manually here for ease)
@@ -98,3 +104,98 @@ def get_pass_clusters(events, data_mode='whoscored'):
         passes_out = passes_out.drop(columns=['endX', 'endY'])
 
     return passes_out
+
+
+def simulate_match_outcome(events, matches, match_id, sim_count=10000):
+    """ Simulate the outcome of a match based on teams xG
+
+    Function to simulate the outcome of a match by assigning goals to each team based on their chances and xG. Assumes
+    that xG represents scoring probability and that all xG events are independent. Matches are simulated a number of
+    times, with outcomes used to determine home win, draw and away win probabilites and expected points. Function
+    requires statsbomb-style events and matches dataframe, id of match to simulate and number of iterations. Individual
+    simulation outcomes are returned. Win probabilities and expected points are added to the matches dataframe
+
+    Args:
+        events (pandas.DataFrame): dataframe of statsbomb-style event data.
+        matches (pandas.DataFrame): dataframe of statsbomb-style match data.
+        match_id (int): numeric identifier of match to simulate
+        sim_count (int): number of simulations to run
+
+    Returns:
+        pandas.DataFrame: statsbomb-style match dataframe with additional 'home_xg', 'away_xg', 'home_win_probability',
+        'away_win_probability', 'draw_probability', 'home_xpoints' and 'away_xpoints' columns
+        pandas.DataFrame: dataframe of match simulation results. One row per simulation
+    """
+
+    # Initialise lists to store simulated goal scored and outcome
+    home_goal_list = []
+    away_goal_list = []
+    outcome_list = []
+
+    # Retrieve xG events for match to simulate
+    match_simulate = matches[matches['match_id'] == match_id]
+    match_xg_events = events[(events['match_id'] == match_id) &
+                             (events['shot_statsbomb_xg'] == events['shot_statsbomb_xg'])]
+    home_xg_list = match_xg_events[match_xg_events['team_name'] == match_simulate['home_team'].values[0]][
+        'shot_statsbomb_xg'].values
+    away_xg_list = match_xg_events[match_xg_events['team_name'] == match_simulate['away_team'].values[0]][
+        'shot_statsbomb_xg'].values
+
+    # Simulate multiple times
+    for i in range(sim_count):
+
+        # Initialise simulated goal scored
+        home_goals = 0
+        away_goals = 0
+
+        # Iterate through home xG events
+        if len(home_xg_list) > 0:
+
+            for xg_shot in home_xg_list:
+                rand_prob = np.random.random()
+                home_goals = home_goals + 1 if rand_prob < xg_shot else home_goals
+
+        # Iterate through away xG events
+        if len(away_xg_list) > 0:
+
+            for xg_shot in away_xg_list:
+                rand_prob = np.random.random()
+                away_goals = away_goals + 1 if rand_prob < xg_shot else away_goals
+
+        # Append goal outcomes to lists
+        home_goal_list.append(home_goals)
+        away_goal_list.append(away_goals)
+
+        # Define match outcome based on home and away goals
+        outcome = 'home' if home_goals > away_goals else 'away' if away_goals > home_goals else 'draw'
+        outcome_list.append(outcome)
+
+    # Store all simulated matches within dataframe
+    match_simulation_results = pd.DataFrame(zip(home_goal_list, away_goal_list, outcome_list),
+                                            columns=['home_goals', 'away_goals', 'outcome'])
+    match_simulation_results['home_team'] = match_simulate['home_team'].values[0]
+    match_simulation_results['away_team'] = match_simulate['away_team'].values[0]
+
+    # Initialise dictionary to store results
+    result_dict = dict()
+
+    # Store win probabilities and xpoints in dictionary
+    result_dict['match_id'] = match_id
+    result_dict['home_xg'] = home_xg_list.sum()
+    result_dict['away_xg'] = away_xg_list.sum()
+    result_dict['home_win_probability'] = outcome_list.count('home') / sim_count
+    result_dict['away_win_probability'] = outcome_list.count('away') / sim_count
+    result_dict['draw_probability'] = outcome_list.count('draw') / sim_count
+    result_dict['home_xpoints'] = result_dict['home_win_probability'] * 3 + result_dict['draw_probability'] * 1
+    result_dict['away_xpoints'] = result_dict['away_win_probability'] * 3 + result_dict['draw_probability'] * 1
+
+    # Insert win probabilities and xpoints information to dataframe
+    if 'home_xpoints' in matches.columns:
+        matches_out = matches.copy()
+        matches_out.loc[matches['match_id'] == match_id, list(result_dict.keys())[1:]] = list(result_dict.values())[
+                                                                                            1:]
+    else:
+        join_df = pd.DataFrame(result_dict, index=[0])
+        matches_out = pd.merge(matches, join_df, left_on='match_id', right_on='match_id', how='left')
+
+    return matches_out, match_simulation_results

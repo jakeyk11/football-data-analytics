@@ -42,6 +42,7 @@
 /projects/06_competition_reports_top_teams_opta/team_threat_creation/
 /projects/06_competition_reports_top_teams_opta/team_setpiece_chance_concession/
 /projects/06_competition_reports_top_teams_opta/team_common_actions/
+/projects/06_competition_reports_top_teams_opta/team_xg_metrics/
 /projects/06_competition_reports_top_teams_opta/xg_league_table_sb.py
 /projects/07_player_reports_opta/player_reports/
 /projects/07_player_reports_opta/advanced_radars/
@@ -51,4 +52,5 @@
 /projects/08_evolution_of_shooting_opta/shot_characteristics_trending/
 /projects/09_league_position_metric_correlation_opta/team_metric_pts_correlation/
 /projects/10_team_buildup_passes/team_pass_tendencies/
+/projects/11_justice_league_statsbomb/justice_league/
 /projects/99_private_work/

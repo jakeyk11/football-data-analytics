@@ -20,6 +20,7 @@ from mplsoccer.pitch import VerticalPitch
 import pickle
 import bz2
 from PIL import Image
+from joblib import dump, load
 
 # %% Add custom tools to path
 
@@ -96,6 +97,9 @@ y = shots_model_df['goal']
 # Fit
 log_model = LogisticRegression()
 log_model.fit(X,y)
+
+# Save model
+dump(log_model, '../../model_directory/xg_model/log_regression_xg_model.joblib') 
 
 # Coefficients
 a = log_model.intercept_[0]

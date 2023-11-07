@@ -140,14 +140,14 @@ playerinfo_df = playerinfo_df[(playerinfo_df['name'].isin([player_1['name'],play
 
 # Touches
 touches = events_df[events_df['isTouch'] == True]
-playerinfo_df = wde.group_player_events(touches, playerinfo_df, group_type='count', primary_event_name='touches')
+playerinfo_df = wde.group_player_events(touches, playerinfo_df, group_type='count', col_names='touches')
 
 # IP Box touches and entries
 inplay_touches = touches[touches['satisfiedEventsTypes'].apply(lambda x: False if (5 in x or 31 in x or 34 in x or 212 in x) else True)]
 box_touches = inplay_touches[(inplay_touches['x']>=83) & (inplay_touches['y']<=79) & (inplay_touches['y']>=21)]
 suc_box_entries = events_df[events_df['box_entry']==True]
-playerinfo_df = wde.group_player_events(box_touches, playerinfo_df, group_type='count', primary_event_name='box_touches')
-playerinfo_df = wde.group_player_events(suc_box_entries, playerinfo_df, group_type='count', primary_event_name='suc_box_entries')
+playerinfo_df = wde.group_player_events(box_touches, playerinfo_df, group_type='count', col_names='box_touches')
+playerinfo_df = wde.group_player_events(suc_box_entries, playerinfo_df, group_type='count', col_names='suc_box_entries')
 
 # xThreat and passing
 passes = events_df[events_df['eventType'] == 'Pass']
@@ -157,13 +157,13 @@ pass_carry = pd.concat([suc_passes, carries])
 prog_pass_carry = pass_carry[pass_carry['prog_action']==True]
 pass_carry_f3rd = pass_carry[(pass_carry['x']<100/3) & (pass_carry['endX']>=200/3)]
 assists = passes[passes['satisfiedEventsTypes'].apply(lambda x: True if 92 in x else False)]
-playerinfo_df = wde.group_player_events(passes, playerinfo_df, group_type='count', primary_event_name='passes')
-playerinfo_df = wde.group_player_events(suc_passes, playerinfo_df, group_type='count', primary_event_name='suc_passes')
-playerinfo_df = wde.group_player_events(carries, playerinfo_df, group_type='count', primary_event_name='carries')
-playerinfo_df = wde.group_player_events(passes, playerinfo_df, group_type='sum', agg_columns='xThreat', primary_event_name='pass_xt')
-playerinfo_df = wde.group_player_events(carries, playerinfo_df, group_type='sum', agg_columns='xThreat', primary_event_name='carry_xt')
-playerinfo_df = wde.group_player_events(pass_carry_f3rd, playerinfo_df, group_type='count', primary_event_name='final_3rd_entries')
-playerinfo_df = wde.group_player_events(prog_pass_carry, playerinfo_df, group_type='count', primary_event_name='prog_actions')
+playerinfo_df = wde.group_player_events(passes, playerinfo_df, group_type='count', col_names='passes')
+playerinfo_df = wde.group_player_events(suc_passes, playerinfo_df, group_type='count', col_names='suc_passes')
+playerinfo_df = wde.group_player_events(carries, playerinfo_df, group_type='count', col_names='carries')
+playerinfo_df = wde.group_player_events(passes, playerinfo_df, group_type='sum', agg_columns='xThreat', col_names='pass_xt')
+playerinfo_df = wde.group_player_events(carries, playerinfo_df, group_type='sum', agg_columns='xThreat', col_names='carry_xt')
+playerinfo_df = wde.group_player_events(pass_carry_f3rd, playerinfo_df, group_type='count', col_names='final_3rd_entries')
+playerinfo_df = wde.group_player_events(prog_pass_carry, playerinfo_df, group_type='count', col_names='prog_actions')
 
 # Shots and big chances
 shots = events_df[(events_df['eventType'].isin(['MissedShots', 'SavedShot', 'ShotOnPost', 'Goal'])) & (~events_df['satisfiedEventsTypes'].apply(lambda x: True if( 5 in x or 6 in x) else False))].copy()
@@ -173,32 +173,32 @@ gc = pd.concat([assists,goals])
 box_shots = shots[(shots['x']>=83) & (shots['y']<=79) & (shots['y']>=21)]
 box_goals = box_shots[box_shots['eventType'] == 'Goal']
 big_chances = events_df[events_df['satisfiedEventsTypes'].apply(lambda x: True if 203 in x and not (31 in x or 34 in x or 212 in x) else False)]
-playerinfo_df = wde.group_player_events(shots, playerinfo_df, group_type='count', primary_event_name='shots')
-playerinfo_df = wde.group_player_events(shots, playerinfo_df, group_type='mean', agg_columns='shot_distance', primary_event_name='mean_shot_dist')
-playerinfo_df = wde.group_player_events(goals, playerinfo_df, group_type='count', primary_event_name='goals')
-playerinfo_df = wde.group_player_events(gc, playerinfo_df, group_type='count', primary_event_name='goal_contributions')
-playerinfo_df = wde.group_player_events(box_shots, playerinfo_df, group_type='count', primary_event_name='box_shots')
-playerinfo_df = wde.group_player_events(box_goals, playerinfo_df, group_type='count', primary_event_name='box_goals')
-playerinfo_df = wde.group_player_events(big_chances, playerinfo_df, group_type='count', primary_event_name='big_chances')
+playerinfo_df = wde.group_player_events(shots, playerinfo_df, group_type='count', col_names='shots')
+playerinfo_df = wde.group_player_events(shots, playerinfo_df, group_type='mean', agg_columns='shot_distance', col_names='mean_shot_dist')
+playerinfo_df = wde.group_player_events(goals, playerinfo_df, group_type='count', col_names='goals')
+playerinfo_df = wde.group_player_events(gc, playerinfo_df, group_type='count', col_names='goal_contributions')
+playerinfo_df = wde.group_player_events(box_shots, playerinfo_df, group_type='count', col_names='box_shots')
+playerinfo_df = wde.group_player_events(box_goals, playerinfo_df, group_type='count', col_names='box_goals')
+playerinfo_df = wde.group_player_events(big_chances, playerinfo_df, group_type='count', col_names='big_chances')
 
 # Aerials
 aerials = events_df[events_df['eventType'] == 'Aerial']
 aerials_won = aerials[aerials['outcomeType'] == 'Successful']
-playerinfo_df = wde.group_player_events(aerials, playerinfo_df, group_type='count', primary_event_name='aerials')
-playerinfo_df = wde.group_player_events(aerials_won, playerinfo_df, group_type='count', primary_event_name='aerials_won')
+playerinfo_df = wde.group_player_events(aerials, playerinfo_df, group_type='count', col_names='aerials')
+playerinfo_df = wde.group_player_events(aerials_won, playerinfo_df, group_type='count', col_names='aerials_won')
 
 # Take ons
 take_on = events_df[events_df['eventType'] == 'TakeOn']
 suc_take_on = take_on[take_on['outcomeType'] == 'Successful']
-playerinfo_df = wde.group_player_events(take_on, playerinfo_df, group_type='count', primary_event_name='take_on')
-playerinfo_df = wde.group_player_events(suc_take_on, playerinfo_df, group_type='count', primary_event_name='suc_take_on')
+playerinfo_df = wde.group_player_events(take_on, playerinfo_df, group_type='count', col_names='take_on')
+playerinfo_df = wde.group_player_events(suc_take_on, playerinfo_df, group_type='count', col_names='suc_take_on')
 
 # Crosses
 crosses = passes[passes['satisfiedEventsTypes'].apply(lambda x: True if (125 in x or 126 in x or 59 in x) and not(31 in x or 34 in x or 212 in x) else False)]   
 crosses = wce.get_pass_outcome(crosses, events_df, t=5)
 cross_to_chance = crosses[crosses['pass_outcome'].isin(['Goal', 'Shot', 'Key Pass'])]
-playerinfo_df = wde.group_player_events(crosses, playerinfo_df, group_type='count', primary_event_name='cross')
-playerinfo_df = wde.group_player_events(cross_to_chance, playerinfo_df, group_type='count', primary_event_name='cross_to_chance')
+playerinfo_df = wde.group_player_events(crosses, playerinfo_df, group_type='count', col_names='cross')
+playerinfo_df = wde.group_player_events(cross_to_chance, playerinfo_df, group_type='count', col_names='cross_to_chance')
 
 # High ball wins
 recoveries = events_df[(events_df['eventType']=='BallRecovery') & (events_df['outcomeType']=='Successful')]
@@ -208,10 +208,10 @@ tackles = events_df[(events_df['eventType']=='Tackle') & (events_df['outcomeType
 pass_blocks = events_df[(events_df['eventType']=='BlockedPass') & (events_df['outcomeType']=='Successful') ]
 ball_wins = pd.concat([recoveries, interceptions, tackles, pass_blocks], axis=0)
 ball_wins_high_33 = ball_wins[ball_wins['x']>=200/3]
-playerinfo_df = wde.group_player_events(tackles, playerinfo_df, group_type='count', primary_event_name='tackles')
-playerinfo_df = wde.group_player_events(bad_tackles, playerinfo_df, group_type='count', primary_event_name='bad_tackles')
-playerinfo_df = wde.group_player_events(ball_wins, playerinfo_df, group_type='count', primary_event_name='ball_wins')
-playerinfo_df = wde.group_player_events(ball_wins_high_33, playerinfo_df, group_type='count', primary_event_name='high_ball_wins')
+playerinfo_df = wde.group_player_events(tackles, playerinfo_df, group_type='count', col_names='tackles')
+playerinfo_df = wde.group_player_events(bad_tackles, playerinfo_df, group_type='count', col_names='bad_tackles')
+playerinfo_df = wde.group_player_events(ball_wins, playerinfo_df, group_type='count', col_names='ball_wins')
+playerinfo_df = wde.group_player_events(ball_wins_high_33, playerinfo_df, group_type='count', col_names='high_ball_wins')
 
 # Ball losses
 bad_touches = events_df[(events_df['eventType']=='BallTouch') & (events_df['outcomeType']=='Unsuccessful')]
@@ -219,7 +219,7 @@ bad_pass = events_df[(events_df['eventType']=='Pass') & (events_df['outcomeType'
 bad_takeon = events_df[(events_df['eventType']=='TakeOn') & (events_df['outcomeType']=='Unsuccessful')]
 disspossessed = events_df[events_df['eventType']=='Disspossessed']
 ball_losses = pd.concat([bad_touches, bad_pass, bad_takeon, disspossessed], axis=0)
-playerinfo_df = wde.group_player_events(ball_losses, playerinfo_df, group_type='count', primary_event_name='ball_losses')
+playerinfo_df = wde.group_player_events(ball_losses, playerinfo_df, group_type='count', col_names='ball_losses')
 
 # %% Normalise metrics
 
