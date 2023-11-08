@@ -466,7 +466,7 @@ Identification of top penalty takers across multiple competitions. Penalty quali
 
 **Project Area:** [05_competition_reports_top_players](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players)
 
-**Code:** [player_threat_creators.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players/player_impact_on_team.py)
+**Code:** [player_impact_on_team.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players/player_impact_on_team.py)
 
 **Summary and Output:** 
 Determination of how a team's aggregrated metrics (team expected threat, team expected threat conceded, team expected threat difference, etc) vary when a specific player is on the pitch vs. when they are not playing
@@ -606,7 +606,7 @@ Investigation of team's ability to defend set-pieces through aggregating chances
 
 **Project Area:** [06_competition_reports_top_teams](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams)
 
-**Code:** [team_setpiece_shot_concession.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams/xg_league_table_sb.py)
+**Code:** [xg_league_table_sb.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams/xg_league_table_sb.py)
 
 **Summary and Output:** 
 Generation of various league table rankings based on team's xG, xG performance, xG/xT ration and various other metrics.
@@ -639,3 +639,113 @@ Player report specific to full-backs, including development of a flexible/robust
   
 </details>
 
+<details>
+  
+<summary>7.2 - Swarm Radars</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [07_player_reports](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/07_player_reports)
+
+**Code:** [advanced_swarm_radar.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/07_player_reports/advanced_swarm_radar.py)
+
+**Summary and Output:** 
+Development of a novel and innovative means of visualising player performance. The "swarm" radar can quickly profile, assess and compare players but also gives a deeper context through displauomg the distributions of metric scores amongst a pool of comparison players.
+
+<p align="center">
+  <img width="30%" src="./data_directory/misc_data/images/example-7-2-1.png"> &nbsp &nbsp
+  <img width="30%" src="./data_directory/misc_data/images/example-7-2-2.png">
+</p>
+  
+</details>
+
+### 8 - Evolution of Shooting
+
+<details>
+
+<summary>8.1 - Evolution of Shooting in the Premier League</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [08_evolution_of_shooting](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/08_evolution_of_shooting)
+
+**Code:** [shot_characteristics_trending.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/08_evolution_of_shooting/shot_characteristics_trending.py)
+
+**Summary and Output:** 
+A piece of work contracted by the Association of Professional Football Analysis (APFA), exploring how the art of shooting is changing in football and providing an insight into the evolution of shooting in the Premier League. 
+
+[APFA - The Evolution of Shooting in the Premier League Web Article](https://apfa.io/the-evolution-of-shooting-in-the-premier-league/)
+
+[APFA - The Evolution of Shooting in the Premier League.pdf](https://github.com/jakeyk11/football-data-analytics/blob/main/data_directory/misc_data/articles/The%20Evolution%20of%20Shooting%20in%20the%20Premier%20League.pdf)
+
+</details>
+
+### 9 - League Position and Metrics Correlation
+
+<details>
+
+<summary>9.1 - Team Metrics vs. Points</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [09_league_position_metric_correlation](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/09_league_position_metric_correlation)
+
+**Code:** [team_metrics_pts_correlation.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/09_league_position_metric_correlation/team_metrics_pts_correlation.py)
+
+**Summary and Output:** 
+Exploratory work to identify the characteristics of successful teams in specific leagues. Investigation of how strongly a range of team metrics correlate with points accumulated in a season, using data from 5+ seasons. Output from this project was included in a [Tifo Video - Why Everton are better than you think](https://www.youtube.com/watch?v=Zcn5HyoBafw&ab_channel=TifoIRL).
+
+<p align="center">
+  <img width="38%" src="./data_directory/misc_data/images/example-9-1-2.png"> &nbsp &nbsp
+  <img width="46%" src="./data_directory/misc_data/images/example-9-1-1.png">
+</p>
+
+</details>
+
+### 10 - Team Build-up Passes
+
+<details>
+
+<summary>10.1 - Team Passing Tendencies at start of Build-up</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [10_team_buildup_passes](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/10_team_buildup_passes)
+
+**Code:** [team_pass_tendencies.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/10_team_buildup_passes/team_pass_tendencies.py)
+
+**Summary and Output:** 
+Exploitation of previous work on pass clustering to identify passing tendencies of teams in build-up. This inolves looking at common pass clusters for the first 6 passes that a team makes in various areas of the pitch.
+
+<p align="center">
+  <img width="40%" src="./data_directory/misc_data/images/example-10-1-1.png"> &nbsp &nbsp
+  <img width="40%" src="./data_directory/misc_data/images/example-10-1-2.png">
+</p>
+
+</details>
+
+### 11 - The Justice League
+
+<details>
+
+<summary>11.1 - Justice League Table</summary>
+
+\
+**Data Source:** Statsbomb
+
+**Project Area:** [11_justice_league](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/11_justice_league)
+
+**Code:** [justice_league.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/11_justice_league/justice_league.py)
+
+**Summary and Output:** 
+Exploitation of previous work on points modelling to simulate a full season of matches and re-produce league table standings based on probablistic match outcomes (or expected points).
+
+<p align="center">
+  <img width="50%" src="./data_directory/misc_data/images/example-11-1-1.png"> &nbsp &nbsp
+</p>
+
+</details>
