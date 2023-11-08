@@ -263,7 +263,7 @@ Using 5,000,000+ passes withn Europe's "Big 5" leagues (Opta data, 2019/20 - 202
 **Code:** [models.py](https://github.com/jakeyk11/football-data-analytics/blob/main/analysis_tools/models.py)
 
 **Summary and Output:** 
-Implementation of a Monte-Carlo method to model the probability of individual match outcomes based on shot events and their associated expected goals (xG). A large number (10000+) of simulations are run on a given match to approximate win probability for each team, and draw probability. Expected points in a given match is then simply calculated as 3*win_probability + 1*draw_proability. The method adopted is reliant on the assumption that xG represents scoring probability, and that individual shot events are independent.
+Implementation of a Monte-Carlo method to model the probability of individual match outcomes based on shot events and their associated expected goals (xG). A large number (10000+) of simulations are run on a given match to approximate win probability for each team, and draw probability. Expected points in a given match is then simply calculated as 3 × win_probability + 1 × draw_proability. The method adopted is reliant on the assumption that xG represents scoring probability, and that individual shot events are independent.
 
 </details>
 
