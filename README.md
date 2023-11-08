@@ -237,6 +237,36 @@ Implementation and testing of basic expected goals probabilistic models. This wo
 
 </details>
 
+<details>
+<summary>3.2 - Pass Cluster Modelling</summary>
+
+\
+**Data Source:** Opta
+
+**Project Area:** [model_directory](https://github.com/jakeyk11/football-data-analytics/tree/main/model_directory/pass_cluster_model), [03_model_development_and_implementation](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/03_model_development_and_implementation) & [External Repo: ml_models_collection](https://github.com/jakeyk11/ml-models-collection)
+
+**Code:** [pass_cluster_data_collection.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/03_model_development_and_implementation/pass_cluster_data_collection.py), [models.py](https://github.com/jakeyk11/football-data-analytics/blob/main/analysis_tools/models.py), [External Repo: ml_model.ipynb](https://github.com/jakeyk11/ml-models-collection/blob/main/Football%20Pass%20Clustering/ml_model.ipynb)
+
+**Summary and Output:** 
+Using 5,000,000+ passes withn Europe's "Big 5" leagues (Opta data, 2019/20 - 2022/23), I have constructed a clustering model that is able to assign successful passes to one of 65 clusters. This work involves the construction of a machine learning pipeline and testing of a variety of classification algorithms. The chosen model uses a k Means clustering algorithm to assign passes, which I have then packaged up within a clustering function to support many of my football analytics projects.
+
+</details>
+
+<details>
+<summary>3.3 - Expected Points Modelling</summary>
+
+\
+**Data Source:** Statsbomb
+
+**Project Area:** [analysis_tools](https://github.com/jakeyk11/football-data-analytics/tree/main/analysis_tools/)
+
+**Code:** [models.py](https://github.com/jakeyk11/football-data-analytics/blob/main/analysis_tools/models.py)
+
+**Summary and Output:** 
+Implementation of a Monte-Carlo method to model the probability of individual match outcomes based on shot events and their associated expected goals (xG). A large number (10000+) of simulations are run on a given match to approximate win probability for each team, and draw probability. Expected points in a given match is then simply calculated as 3*win_probability + 1*draw_proability. The method adopted is reliant on the assumption that xG represents scoring probability, and that individual shot events are independent.
+
+</details>
+
 ### 4 - Automated Match Reporting
 
 <details>
@@ -280,17 +310,17 @@ Design and development of an algorithm that identifies and counts similar passes
 </details>
 
 <details>
-<summary>4.3 - Offensive Territory Report</summary>
+<summary>4.3 - Offensive and Defensive Shape Report</summary>
 
 \
 **Data Source:** Opta/Whoscored
 
 **Project Area:** [04_match_reports](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/04_match_reports)
 
-**Code:** [pass_report_ws.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/04_match_reports/pass_report_ws.py)
+**Code:** [pass_report_ws.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/04_match_reports/off_def_shape_report_ws.py)
 
 **Summary and Output:** 
-Design and development of an algorithm to calculate player territories based on the positions of all in-play actions throughout a match, including removal of outliers. Generation of territory reports for any selected match, including calculation of territory area as a proxy for pitch area covered.
+Design and development of an algorithm to calculate player territories based on the positions of all in-play actions throughout a match, including removal of outliers. Generation of shape reports for any selected match, including calculation of territory area as a proxy for pitch area covered.
 
 <p align="center">
   <img width="30%" src="./data_directory/misc_data/images/example-4-3-1.png"> &nbsp &nbsp
@@ -428,6 +458,26 @@ Identification of top penalty takers across multiple competitions. Penalty quali
 
 </details>
 
+<details>
+<summary>5.7 - Player Impact on their Team</summary>
+
+\
+**Data Source:** Opta/Whoscored
+
+**Project Area:** [05_competition_reports_top_players](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/05_competition_reports_top_players)
+
+**Code:** [player_threat_creators.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/05_competition_reports_top_players/player_impact_on_team.py)
+
+**Summary and Output:** 
+Determination of how a team's aggregrated metrics (team expected threat, team expected threat conceded, team expected threat difference, etc) vary when a specific player is on the pitch vs. when they are not playing
+
+<p align="center">
+  <img width="45%" src="./data_directory/misc_data/images/example-5-7-1.png"> &nbsp &nbsp
+  <img width="45%" src="./data_directory/misc_data/images/example-5-7-2.png">
+</p>
+
+</details>
+
 ### 6 - Team Ranking over a Competition
 
 <details>
@@ -544,6 +594,25 @@ Investigation of team's ability to defend set-pieces through aggregating chances
 <p align="center">
   <img width="30%" src="./data_directory/misc_data/images/example-6-6-1.png"> &nbsp &nbsp
   <img width="30%" src="./data_directory/misc_data/images/example-6-6-2.png">
+</p>
+  
+</details>
+
+<details>
+<summary>6.7 - Expected Goals League Table</summary>
+
+\
+**Data Source:** Statsbomb
+
+**Project Area:** [06_competition_reports_top_teams](https://github.com/jakeyk11/football-data-analytics/tree/main/projects/06_competition_reports_top_teams)
+
+**Code:** [team_setpiece_shot_concession.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams/xg_league_table_sb.py)
+
+**Summary and Output:** 
+Generation of various league table rankings based on team's xG, xG performance, xG/xT ration and various other metrics.
+  
+<p align="center">
+  <img width="50%" src="./data_directory/misc_data/images/example-6-7-1.png">
 </p>
   
 </details>
