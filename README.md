@@ -609,7 +609,7 @@ Investigation of team's ability to defend set-pieces through aggregating chances
 **Code:** [xg_league_table_sb.py](https://github.com/jakeyk11/football-data-analytics/blob/main/projects/06_competition_reports_top_teams/xg_league_table_sb.py)
 
 **Summary and Output:** 
-Generation of various league table rankings based on team's xG, xG performance, xG/xT ration and various other metrics.
+Generation of various league table rankings based on team's xG, xG performance, xG/xT ratio and various other metrics.
   
 <p align="center">
   <img width="50%" src="./data_directory/misc_data/images/example-6-7-1.png">
